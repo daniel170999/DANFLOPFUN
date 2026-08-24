@@ -1,908 +1,274 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A practical, source-led guide to FLOP, Technocore, and useful public contribution.">
-  <meta name="theme-color" content="#11120f">
-  <title>FLOP Field Notes — a practical route</title>
-  <style>
-    :root {
-      --ink: #11120f;
-      --ink-soft: #1b1d18;
-      --paper: #f4f2eb;
-      --paper-warm: #e9e5d9;
-      --line: #b8b3a7;
-      --line-dark: #35372f;
-      --muted: #66675f;
-      --signal: #c8ff3d;
-      --signal-deep: #8fad1e;
-      --orange: #ff7147;
-      --white: #fffefa;
-      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      min-width: 320px;
-      color: var(--ink);
-      background: var(--paper);
-      font-family: var(--sans);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    button, a { -webkit-tap-highlight-color: transparent; }
-
-    a {
-      color: inherit;
-      text-decoration-color: currentColor;
-      text-underline-offset: 0.18em;
-    }
-
-    a:hover { text-decoration-thickness: 2px; }
-
-    :focus-visible {
-      outline: 3px solid var(--orange);
-      outline-offset: 3px;
-    }
-
-    .page-shell { overflow: hidden; }
-
-    .top-strip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      min-height: 2.5rem;
-      padding: 0.55rem max(1.25rem, calc((100vw - 80rem) / 2));
-      color: var(--paper);
-      background: var(--ink);
-      font: 700 0.68rem/1.2 var(--mono);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .top-strip__status {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-      color: #e7e6df;
-    }
-
-    .pulse-dot {
-      width: 0.58rem;
-      height: 0.58rem;
-      flex: 0 0 auto;
-      border-radius: 50%;
-      background: var(--signal);
-      box-shadow: 0 0 0 0.28rem rgb(200 255 61 / 14%);
-    }
-
-    .top-strip a { color: var(--signal); }
-
-    .masthead {
-      position: relative;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 2rem;
-      align-items: end;
-      max-width: 80rem;
-      margin: 0 auto;
-      padding: 1.2rem 1.25rem 0;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.7rem;
-      width: max-content;
-      color: var(--ink);
-      font: 800 clamp(1.05rem, 2vw, 1.3rem)/1 var(--mono);
-      letter-spacing: -0.075em;
-      text-decoration: none;
-    }
-
-    .brand-mark {
-      display: grid;
-      width: 1.9rem;
-      height: 1.9rem;
-      place-items: center;
-      color: var(--ink);
-      background: var(--signal);
-      border: 2px solid var(--ink);
-      box-shadow: 0.25rem 0.25rem 0 var(--ink);
-      font-size: 1.1rem;
-      letter-spacing: -0.18em;
-    }
-
-    .masthead__links {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 1.1rem;
-      padding-bottom: 0.15rem;
-      font: 700 0.72rem/1.25 var(--mono);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .masthead__links a { text-decoration: none; }
-    .masthead__links a:hover { text-decoration: underline; }
-
-    .tab-rail-wrap {
-      max-width: 80rem;
-      margin: 1.45rem auto 0;
-      padding: 0 1.25rem;
-    }
-
-    .tab-rail {
-      display: flex;
-      overflow-x: auto;
-      border-top: 1px solid var(--line-dark);
-      border-bottom: 1px solid var(--line-dark);
-      scrollbar-width: thin;
-    }
-
-    .tab {
-      position: relative;
-      flex: 0 0 auto;
-      min-height: 3.15rem;
-      padding: 0.8rem 1rem;
-      color: var(--muted);
-      background: transparent;
-      border: 0;
-      border-right: 1px solid var(--line);
-      cursor: pointer;
-      font: 800 0.68rem/1 var(--mono);
-      letter-spacing: 0.045em;
-      text-transform: uppercase;
-    }
-
-    .tab:first-child { border-left: 1px solid var(--line); }
-    .tab:hover { color: var(--ink); background: var(--paper-warm); }
-    .tab[aria-selected="true"] { color: var(--ink); background: var(--signal); }
-    .tab[aria-selected="true"]::after {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      height: 3px;
-      content: "";
-      background: var(--ink);
-    }
-
-    main {
-      max-width: 80rem;
-      margin: 0 auto;
-      padding: 0 1.25rem 3rem;
-    }
-
-    .tab-panel { display: none; }
-    .tab-panel.is-active { display: block; animation: settle 220ms ease-out; }
-
-    @keyframes settle {
-      from { opacity: 0; transform: translateY(0.35rem); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
-      gap: clamp(2rem, 6vw, 6rem);
-      padding: clamp(3rem, 8vw, 6.5rem) 0 3.7rem;
-      border-bottom: 1px solid var(--line-dark);
-    }
-
-    .eyebrow,
-    .section-kicker,
-    .meta-label,
-    .fact-label {
-      font: 800 0.68rem/1.25 var(--mono);
-      letter-spacing: 0.075em;
-      text-transform: uppercase;
-    }
-
-    .eyebrow { color: var(--signal-deep); }
-
-    h1,
-    h2,
-    h3,
-    p { margin-top: 0; }
-
-    h1 {
-      max-width: 12ch;
-      margin: 1rem 0 1.4rem;
-      font-size: clamp(3rem, 8vw, 6.8rem);
-      font-weight: 750;
-      letter-spacing: -0.085em;
-      line-height: 0.88;
-    }
-
-    .hero-copy {
-      max-width: 43rem;
-      margin-bottom: 1.6rem;
-      color: #363831;
-      font-size: clamp(1rem, 1.5vw, 1.15rem);
-      line-height: 1.55;
-    }
-
-    .action-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.7rem;
-      align-items: center;
-    }
-
-    .action-row--spaced { margin-top: 1.6rem; }
-
-    .button-link,
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 2.7rem;
-      padding: 0.7rem 0.9rem;
-      color: var(--ink);
-      background: var(--signal);
-      border: 1px solid var(--ink);
-      box-shadow: 0.2rem 0.2rem 0 var(--ink);
-      cursor: pointer;
-      font: 800 0.7rem/1 var(--mono);
-      letter-spacing: 0.04em;
-      text-align: center;
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: transform 120ms ease, box-shadow 120ms ease;
-    }
-
-    .button-link:hover,
-    .button:hover { transform: translate(0.1rem, 0.1rem); box-shadow: 0.1rem 0.1rem 0 var(--ink); text-decoration: none; }
-    .button-link--quiet,
-    .button--quiet { color: var(--ink); background: transparent; box-shadow: none; }
-
-    .status-sheet {
-      align-self: end;
-      background: var(--ink);
-      color: var(--paper);
-      border: 1px solid var(--ink);
-      box-shadow: 0.42rem 0.42rem 0 var(--signal);
-    }
-
-    .status-sheet__head {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.95rem 1rem;
-      color: var(--signal);
-      border-bottom: 1px solid #595c51;
-      font: 800 0.67rem/1 var(--mono);
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-
-    .status-sheet__body { padding: 1.1rem 1rem 1.2rem; }
-
-    .status-sheet__big {
-      margin: 0 0 1rem;
-      font-size: clamp(1.42rem, 2.8vw, 2rem);
-      font-weight: 700;
-      letter-spacing: -0.05em;
-      line-height: 1;
-    }
-
-    .status-sheet ul {
-      display: grid;
-      gap: 0.75rem;
-      padding: 0;
-      margin: 0;
-      list-style: none;
-    }
-
-    .status-sheet li {
-      display: grid;
-      grid-template-columns: 0.45rem 1fr;
-      gap: 0.65rem;
-      color: #d7d9d0;
-      font-size: 0.82rem;
-      line-height: 1.42;
-    }
-
-    .status-sheet li::before {
-      width: 0.4rem;
-      height: 0.4rem;
-      margin-top: 0.34rem;
-      content: "";
-      background: var(--signal);
-    }
-
-    .route-wrap { padding: clamp(2.4rem, 5vw, 4.5rem) 0 0; }
-
-    .section-heading {
-      display: grid;
-      grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
-      gap: 2rem;
-      align-items: start;
-      margin-bottom: 1.6rem;
-    }
-
-    .section-heading h2,
-    .pane-title h2 {
-      margin: 0;
-      font-size: clamp(1.75rem, 4vw, 3.2rem);
-      letter-spacing: -0.065em;
-      line-height: 0.95;
-    }
-
-    .section-heading p {
-      max-width: 42rem;
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.97rem;
-      line-height: 1.55;
-    }
-
-    .route {
-      counter-reset: steps;
-      margin: 0;
-      padding: 0;
-      border-top: 1px solid var(--line-dark);
-      list-style: none;
-    }
-
-    .route li {
-      position: relative;
-      display: grid;
-      grid-template-columns: 4.8rem minmax(0, 1fr) minmax(13rem, 0.7fr);
-      gap: 1.25rem;
-      padding: 1.3rem 0;
-      border-bottom: 1px solid var(--line);
-      counter-increment: steps;
-    }
-
-    .route li::before {
-      color: var(--signal-deep);
-      content: "0" counter(steps);
-      font: 800 0.8rem/1 var(--mono);
-      letter-spacing: -0.06em;
-    }
-
-    .route h3 { margin: 0 0 0.35rem; font-size: 1.12rem; letter-spacing: -0.035em; }
-    .route p { margin: 0; color: #4b4d46; font-size: 0.91rem; line-height: 1.5; }
-    .route .route-proof { color: var(--muted); font: 0.74rem/1.45 var(--mono); }
-
-    .notice {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 1rem;
-      margin-top: 2.1rem;
-      padding: 1rem 1.1rem;
-      border: 1px solid var(--line-dark);
-      background: #ebe8dc;
-    }
-
-    .notice__symbol {
-      display: grid;
-      width: 1.7rem;
-      height: 1.7rem;
-      place-items: center;
-      color: var(--paper);
-      background: var(--orange);
-      border-radius: 50%;
-      font: 800 1rem/1 var(--mono);
-    }
-
-    .notice p { margin: 0; color: #3f413a; font-size: 0.88rem; line-height: 1.52; }
-    .notice strong { color: var(--ink); }
-
-    .pane {
-      padding: clamp(3rem, 8vw, 6rem) 0 0;
-    }
-
-    .pane-title {
-      display: grid;
-      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-      gap: 2rem;
-      padding-bottom: 2.1rem;
-      border-bottom: 1px solid var(--line-dark);
-    }
-
-    .pane-title .section-kicker { color: var(--signal-deep); }
-    .pane-title h2 { margin-top: 0.7rem; }
-    .pane-title p { max-width: 43rem; margin: 0.2rem 0 0; color: #4c4e47; font-size: 1.02rem; line-height: 1.55; }
-
-    .split-stage {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(17rem, 0.8fr);
-      gap: clamp(1.25rem, 4vw, 4rem);
-      padding: 2.4rem 0 0;
-    }
-
-    .principles { margin: 0; padding: 0; list-style: none; }
-
-    .principles li {
-      display: grid;
-      grid-template-columns: 2.5rem 1fr;
-      gap: 0.75rem;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .principles li:first-child { border-top: 1px solid var(--line); }
-    .principles__number { color: var(--signal-deep); font: 800 0.73rem/1.4 var(--mono); }
-    .principles h3 { margin: 0 0 0.22rem; font-size: 1rem; letter-spacing: -0.025em; }
-    .principles p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
-
-    .side-note {
-      align-self: start;
-      padding: 1.1rem;
-      color: var(--paper);
-      background: var(--ink);
-      border: 1px solid var(--ink);
-    }
-
-    .side-note .meta-label { color: var(--signal); }
-    .side-note h3 { margin: 0.55rem 0 0.75rem; font-size: 1.27rem; letter-spacing: -0.045em; }
-    .side-note p { margin: 0; color: #d9dbd1; font-size: 0.86rem; line-height: 1.55; }
-    .side-note a { color: var(--signal); }
-
-    .proof-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1px;
-      margin-top: 2.4rem;
-      border: 1px solid var(--line-dark);
-      background: var(--line-dark);
-    }
-
-    .proof-card { min-height: 11.5rem; padding: 1.1rem; background: var(--paper); }
-    .proof-card h3 { margin: 0.7rem 0 0.45rem; font-size: 1.02rem; letter-spacing: -0.03em; }
-    .proof-card p { margin: 0; color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
-    .proof-card p.proof-card__action { margin-top: 1rem; }
-    .proof-card .fact-label { color: var(--signal-deep); }
-
-    .role-board {
-      display: grid;
-      grid-template-columns: 0.72fr 1.28fr;
-      gap: 0;
-      margin-top: 2.4rem;
-      border: 1px solid var(--line-dark);
-    }
-
-    .role-board__intro {
-      padding: 1.3rem;
-      color: var(--paper);
-      background: var(--ink);
-    }
-
-    .role-board__intro h3 { margin: 0.55rem 0 0.7rem; font-size: 1.55rem; letter-spacing: -0.055em; }
-    .role-board__intro p { margin: 0; color: #d5d8cf; font-size: 0.88rem; line-height: 1.55; }
-    .role-board__steps { margin: 0; padding: 0; list-style: none; }
-    .role-board__steps li { padding: 1.15rem 1.25rem; border-bottom: 1px solid var(--line); }
-    .role-board__steps li:last-child { border-bottom: 0; }
-    .role-board__steps strong { display: block; margin-bottom: 0.25rem; font-size: 0.94rem; }
-    .role-board__steps span { display: block; color: var(--muted); font-size: 0.82rem; line-height: 1.46; }
-
-    .source-ledger {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: 2rem;
-      margin-top: 3.6rem;
-      padding-top: 1.3rem;
-      border-top: 1px solid var(--line-dark);
-    }
-
-    .source-ledger h2 { margin: 0.45rem 0 0; font-size: 1.6rem; letter-spacing: -0.05em; }
-    .source-list { display: grid; gap: 0; border-top: 1px solid var(--line); }
-    .source-list a {
-      display: grid;
-      grid-template-columns: 7.5rem 1fr auto;
-      gap: 0.8rem;
-      align-items: center;
-      padding: 0.84rem 0;
-      border-bottom: 1px solid var(--line);
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .source-list a:hover { color: var(--signal-deep); }
-    .source-list span { color: var(--muted); font: 700 0.64rem/1.2 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
-    .source-list i { color: var(--signal-deep); font-style: normal; font-size: 1rem; }
-
-    footer {
-      max-width: 80rem;
-      margin: 0 auto;
-      padding: 2.7rem 1.25rem 1.5rem;
-    }
-
-    .footer-rule { height: 5px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 6px); }
-
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      gap: 2rem;
-      align-items: end;
-      padding-top: 1.1rem;
-    }
-
-    .creator { margin: 0; font-size: 0.82rem; line-height: 1.5; }
-    .creator strong { display: block; font: 800 0.72rem/1.2 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
-    .creator a { font-weight: 700; }
-    .footer-note { max-width: 34rem; margin: 0; color: var(--muted); font-size: 0.73rem; line-height: 1.48; text-align: right; }
-
-    .copy-status { min-height: 1.2em; margin: 0.55rem 0 0; color: var(--signal-deep); font: 700 0.68rem/1.3 var(--mono); }
-
-    @media (max-width: 760px) {
-      .top-strip { align-items: flex-start; padding-top: 0.7rem; padding-bottom: 0.7rem; }
-      .top-strip__status { max-width: 13rem; }
-      .masthead { grid-template-columns: 1fr; gap: 1rem; }
-      .masthead__links { justify-content: flex-start; }
-      .hero,
-      .section-heading,
-      .pane-title,
-      .split-stage,
-      .source-ledger { grid-template-columns: 1fr; }
-      h1 { max-width: 10ch; }
-      .status-sheet { max-width: 31rem; }
-      .route li { grid-template-columns: 2.7rem 1fr; gap: 0.75rem; }
-      .route .route-proof { grid-column: 2; }
-      .proof-grid { grid-template-columns: 1fr; }
-      .role-board { grid-template-columns: 1fr; }
-      .source-list a { grid-template-columns: 6.5rem 1fr auto; }
-      .footer-inner { align-items: flex-start; flex-direction: column; }
-      .footer-note { text-align: left; }
-    }
-
-    @media (max-width: 430px) {
-      .top-strip { font-size: 0.59rem; }
-      .masthead, .tab-rail-wrap, main, footer { padding-right: 1rem; padding-left: 1rem; }
-      .tab { padding-inline: 0.85rem; }
-      .route li { grid-template-columns: 2.2rem 1fr; }
-      .source-list a { grid-template-columns: 1fr auto; }
-      .source-list span { grid-column: 1 / -1; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .tab-panel.is-active { animation: none; }
-      .button-link, .button { transition: none; }
-    }
-  </style>
-</head>
-<body>
-  <div class="page-shell">
-    <div class="top-strip">
-      <div class="top-strip__status"><span class="pulse-dot" aria-hidden="true"></span>Independent field guide / verified links first</div>
-      <a href="https://flop.finance/" target="_blank" rel="noreferrer">Official FLOP ↗</a>
-    </div>
-
-    <header class="masthead">
-      <a class="brand" href="#start" aria-label="FLOP Field Notes home">
-        <span class="brand-mark" aria-hidden="true">F.</span>
-        <span>FLOP FIELD NOTES</span>
-      </a>
-      <nav class="masthead__links" aria-label="Site links">
-        <a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a>
-        <a href="#sources">Sources</a>
-      </nav>
-    </header>
-
-    <div class="tab-rail-wrap">
-      <div class="tab-rail" role="tablist" aria-label="FLOP guide sections">
-        <button class="tab" id="tab-start" type="button" role="tab" aria-selected="true" aria-controls="panel-start" data-tab="start">01 / Start here</button>
-        <button class="tab" id="tab-build" type="button" role="tab" aria-selected="false" aria-controls="panel-build" data-tab="build" tabindex="-1">02 / Build useful</button>
-        <button class="tab" id="tab-integrate" type="button" role="tab" aria-selected="false" aria-controls="panel-integrate" data-tab="integrate" tabindex="-1">03 / Integrate</button>
-        <button class="tab" id="tab-improve" type="button" role="tab" aria-selected="false" aria-controls="panel-improve" data-tab="improve" tabindex="-1">04 / Improve</button>
-        <button class="tab" id="tab-creator" type="button" role="tab" aria-selected="false" aria-controls="panel-creator" data-tab="creator" tabindex="-1">05 / Creator</button>
-        <button class="tab" id="tab-network" type="button" role="tab" aria-selected="false" aria-controls="panel-network" data-tab="network" tabindex="-1">06 / Network roles</button>
-      </div>
-    </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A practical FLOP and Technocore field kit by @daniel_sats." />
+    <meta name="theme-color" content="#0A1128" />
+    <title>FLOP Field Kit — by @daniel_sats</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230A1128'/%3E%3Cpath d='M16 14h20c9 0 14 7 14 18S45 50 36 50H16V14Zm10 9v18h9c3 0 5-3 5-9s-2-9-5-9h-9Z' fill='%2300B4D8'/%3E%3C/svg%3E" />
+    <style>
+      :root { --base:#0A1128; --deep:#060b1a; --panel:#0e1834; --line:#293a5d; --ice:#F5F7FA; --muted:#9aa9c4; --faint:#71809c; --cyan:#00B4D8; --cyan-soft:#8bdfef; --danger:#ff9b8d; --ok:#8fe6bb; --mono:"Space Mono","SFMono-Regular",Consolas,monospace; --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; color-scheme:dark; }
+      * { box-sizing:border-box; }
+      html { scroll-behavior:smooth; }
+      body { min-width:320px; margin:0; background:var(--base); color:var(--ice); font:15px/1.5 var(--sans); }
+      a { color:var(--cyan); text-underline-offset:3px; }
+      a:hover { color:var(--cyan-soft); }
+      button,input,textarea { font:inherit; }
+      button { cursor:pointer; }
+      button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
+      .wrap { width:min(1180px,calc(100% - 40px)); margin:auto; }
+      .header { border-bottom:1px solid var(--line); background:rgba(10,17,40,.96); }
+      .header > .wrap { min-height:76px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+      .brand { display:flex; align-items:center; gap:12px; color:var(--ice); text-decoration:none; min-width:max-content; }
+      .mark { width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--cyan); border-radius:8px; color:var(--cyan); font:700 17px/1 var(--mono); letter-spacing:-.1em; }
+      .brand-title { display:block; font:700 14px var(--mono); letter-spacing:.08em; }
+      .brand-note { display:block; margin-top:2px; color:var(--muted); font:10px var(--mono); }
+      .links { display:flex; gap:17px; font:12px var(--mono); }
+      .links a { text-decoration:none; }
+      .hero { padding:74px 0 42px; border-bottom:1px solid var(--line); }
+      .eyebrow { margin:0 0 13px; color:var(--cyan); font:700 12px var(--mono); letter-spacing:.1em; }
+      h1,h2,h3,p { margin-top:0; }
+      h1 { max-width:760px; margin-bottom:17px; font:700 clamp(32px,5vw,58px)/1.05 var(--mono); letter-spacing:-.065em; }
+      .lede { max-width:650px; margin-bottom:26px; color:var(--muted); font-size:17px; }
+      .actions { display:flex; flex-wrap:wrap; gap:10px; }
+      .btn { min-height:42px; display:inline-flex; align-items:center; justify-content:center; padding:0 15px; border:1px solid var(--cyan); border-radius:7px; background:var(--cyan); color:var(--base); font:700 12px var(--mono); text-decoration:none; transition:.14s ease; }
+      .btn:hover { border-color:var(--cyan-soft); background:var(--cyan-soft); color:var(--base); }
+      .btn.alt { border-color:var(--line); background:transparent; color:var(--ice); }
+      .btn.alt:hover { border-color:var(--cyan); color:var(--cyan); }
+      .btn:disabled { cursor:wait; opacity:.55; }
+      .steps { display:grid; grid-template-columns:repeat(4,1fr); margin:43px 0 0; overflow:hidden; border:1px solid var(--line); border-radius:10px; }
+      .step { min-height:143px; padding:21px; border-right:1px solid var(--line); background:var(--panel); }
+      .step:last-child { border:0; }
+      .n { display:block; margin-bottom:11px; color:var(--cyan); font:700 12px var(--mono); }
+      .step strong { display:block; margin-bottom:5px; font-size:14px; }
+      .step span:last-child { color:var(--muted); font-size:13px; }
+      .work { padding:42px 0 24px; }
+      .tabs { display:flex; gap:4px; overflow-x:auto; padding-bottom:10px; border-bottom:1px solid var(--line); }
+      .tab { flex:0 0 auto; min-height:40px; padding:0 13px; border:1px solid transparent; border-radius:6px; background:transparent; color:var(--muted); font:700 12px var(--mono); }
+      .tab:hover { color:var(--ice); }
+      .tab[aria-selected="true"] { border-color:var(--line); background:var(--panel); color:var(--cyan); }
+      .panel { padding:33px 0 20px; }
+      .panel[hidden] { display:none; }
+      .panel-head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:25px; }
+      h2 { margin-bottom:7px; font:700 clamp(23px,3vw,31px)/1.15 var(--mono); letter-spacing:-.055em; }
+      .intro { max-width:670px; margin:0; color:var(--muted); font-size:14px; }
+      .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      .card,.data { border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+      .card { padding:23px; }
+      .card h3 { margin:0 0 8px; font:700 15px var(--mono); letter-spacing:-.04em; }
+      .card p { margin:0; color:var(--muted); font-size:14px; }
+      .data { margin-top:15px; padding:17px; background:var(--deep); }
+      .row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; padding:0 0 10px; margin:0 0 10px; border-bottom:1px solid rgba(41,58,93,.76); }
+      .row:last-child { padding:0; margin:0; border:0; }
+      .label { display:block; margin-bottom:3px; color:var(--cyan-soft); font:700 11px var(--mono); }
+      .value { display:block; overflow-wrap:anywhere; color:var(--ice); font:12px/1.55 var(--mono); }
+      .meta { color:var(--faint); font:10px var(--mono); text-align:right; }
+      .empty,.notice { margin:0; color:var(--muted); font:12px/1.6 var(--mono); }
+      .notice { min-height:19px; margin-top:11px; }
+      .notice.ok { color:var(--ok); }
+      .notice.bad { color:var(--danger); }
+      .field-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; }
+      label { display:grid; gap:6px; color:var(--muted); font:700 11px var(--mono); }
+      input,textarea { width:100%; border:1px solid var(--line); border-radius:6px; background:var(--deep); color:var(--ice); padding:11px 12px; font:12px var(--mono); }
+      input::placeholder,textarea::placeholder { color:var(--faint); }
+      textarea { min-height:180px; resize:vertical; line-height:1.55; }
+      .room { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid rgba(41,58,93,.76); }
+      .room:last-child { border:0; }
+      .room-name { overflow-wrap:anywhere; font:12px var(--mono); }
+      .room-count { flex:0 0 auto; color:var(--faint); font:11px var(--mono); }
+      .note { margin:11px 0 0; color:var(--faint); font-size:12px; }
+      .stack { display:grid; gap:11px; }
+      .footer { margin-top:36px; border-top:1px solid var(--line); }
+      .footer > .wrap { display:flex; justify-content:space-between; gap:20px; padding:23px 0 31px; color:var(--faint); font:10px/1.6 var(--mono); }
+      .footer p { margin:0; }
+      @media (max-width:760px) { .wrap{width:min(100% - 28px,1180px)} .header>.wrap{min-height:68px}.links{gap:11px;font-size:11px}.links a:last-child{display:none}.brand-note{display:none}.hero{padding:52px 0 34px}.lede{font-size:16px}.steps,.grid{grid-template-columns:1fr}.step{min-height:auto;border-right:0;border-bottom:1px solid var(--line)}.panel-head{align-items:flex-start;flex-direction:column}.footer>.wrap{flex-direction:column} }
+      @media (max-width:480px) { .links a:nth-child(2){display:none}.actions .btn{width:100%}.field-row{grid-template-columns:1fr}.field-row .btn{width:100%}.row{grid-template-columns:1fr;gap:4px}.meta{text-align:left} }
+    </style>
+  </head>
+  <body>
+    <header class="header"><div class="wrap">
+      <a class="brand" href="#start" aria-label="FLOP Field Kit home"><span class="mark" aria-hidden="true">D</span><span><span class="brand-title">FLOP FIELD KIT</span><span class="brand-note">a public utility by @daniel_sats</span></span></a>
+      <nav class="links" aria-label="External links"><a href="https://flop.finance/" target="_blank" rel="noreferrer">FLOP ↗</a><a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">@flop_labs ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
+    </div></header>
 
     <main id="start">
-      <section class="tab-panel is-active" id="panel-start" role="tabpanel" aria-labelledby="tab-start">
-        <div class="hero">
-          <div>
-            <div class="eyebrow">A sensible FLOP route</div>
-            <h1>Start with the work.<br>Keep the receipts.</h1>
-            <p class="hero-copy">This is a practical route for people who want to explore FLOP and Technocore without pretending there is a published points table. Make a real contribution, document it clearly, and follow the official channel for anything eligibility-related.</p>
-            <div class="action-row">
-              <a class="button-link" href="https://flop.finance/" target="_blank" rel="noreferrer">Open official FLOP ↗</a>
-              <button class="button button--quiet" type="button" data-open-tab="build">See useful work →</button>
-            </div>
-            <p class="copy-status" id="copy-status" aria-live="polite"></p>
-          </div>
+      <section class="hero"><div class="wrap">
+        <p class="eyebrow">FLOP × TECHNOCORE</p>
+        <h1>Start clean.<br />Leave useful proof.</h1>
+        <p class="lede">A straightforward route for joining Technocore, checking public activity, and shipping something people can actually use.</p>
+        <div class="actions"><a class="btn" href="#guide">Start the route</a><a class="btn alt" href="https://technocore.chat/" target="_blank" rel="noreferrer">Open Technocore ↗</a></div>
+        <div class="steps" aria-label="Four-step airdrop route">
+          <article class="step"><span class="n">01</span><strong>Create a DID</strong><span>Make one Ed25519 identity locally and keep its backup private.</span></article>
+          <article class="step"><span class="n">02</span><strong>Confirm it is public</strong><span>Keep the DID and registry fingerprint so you can verify the record later.</span></article>
+          <article class="step"><span class="n">03</span><strong>Check in once</strong><span>Use the same DID to make one signed, useful public contribution.</span></article>
+          <article class="step"><span class="n">04</span><strong>Ship a real thing</strong><span>Publish a tool, research note, integration, or other work people can inspect.</span></article>
+        </div>
+      </div></section>
 
-          <aside class="status-sheet" aria-label="Current public facts">
-            <div class="status-sheet__head"><span>Public status</span><span>Read first</span></div>
-            <div class="status-sheet__body">
-              <p class="status-sheet__big">No claim link. No public scorecard.</p>
-              <ul>
-                <li>FLOP’s official site directs people to follow <strong>@flop_labs</strong> for airdrop eligibility.</li>
-                <li>Technocore is useful agent infrastructure, not a wallet or an airdrop portal.</li>
-                <li>Anything promising a guaranteed allocation deserves extra scrutiny.</li>
-              </ul>
-            </div>
-          </aside>
+      <section class="work wrap" aria-label="FLOP Field Kit workspace">
+        <div class="tabs" role="tablist" aria-label="FLOP Field Kit sections">
+          <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="guide" id="tab-guide" data-tab="guide">01 Route</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="radar" id="tab-radar" data-tab="radar">02 Live radar</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="rooms" id="tab-rooms" data-tab="rooms">03 Rooms atlas</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="did" id="tab-did" data-tab="did">04 DID lookup</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="url" id="tab-url" data-tab="url">05 URL check</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="proof" id="tab-proof" data-tab="proof">06 Proof pack</button>
         </div>
 
-        <div class="route-wrap">
-          <div class="section-heading">
-            <div>
-              <div class="section-kicker">The route</div>
-              <h2>Four steps.<br>Zero theatre.</h2>
-            </div>
-            <p>Use this as a personal checklist, not as an official requirement list. The only thing an airdrop team can fairly evaluate is work that is legible, useful, and tied to a consistent identity.</p>
+        <section class="panel" id="guide" role="tabpanel" aria-labelledby="tab-guide">
+          <div class="panel-head"><div><h2>The route, without the noise.</h2><p class="intro">Do these in order. Keep the same public DID across your contribution trail.</p></div></div>
+          <div class="grid">
+            <article class="card"><span class="n">STEP 1</span><h3>Create your Ed25519 DID locally</h3><p>Generate one identity on your own device. Save the public DID and private backup somewhere you control.</p></article>
+            <article class="card"><span class="n">STEP 2</span><h3>Publish, then record the fingerprint</h3><p>Once the DID is registered, keep its 16-character fingerprint. Use the DID Lookup tab to check the public record.</p></article>
+            <article class="card"><span class="n">STEP 3</span><h3>Make one signed check-in</h3><p>Post one clear, useful message with that DID. A signed URL is single-use, so make a fresh nonce for each new write.</p></article>
+            <article class="card"><span class="n">STEP 4</span><h3>Make the contribution inspectable</h3><p>Put useful work somewhere public: a GitHub repo, short tool, research note, or integration. Then make a simple proof pack.</p></article>
           </div>
+          <div class="actions" style="margin-top:18px"><a class="btn alt" href="https://technocore.chat/" target="_blank" rel="noreferrer">Technocore docs ↗</a><button class="btn alt" type="button" data-open="did">Check a DID</button><button class="btn alt" type="button" data-open="proof">Build proof pack</button></div>
+        </section>
 
-          <ol class="route">
-            <li>
-              <div>
-                <h3>Watch the official source.</h3>
-                <p>Follow <a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">@flop_labs</a> and use <a href="https://flop.finance/" target="_blank" rel="noreferrer">flop.finance</a> as the source of truth for any new eligibility or application notice.</p>
-              </div>
-              <p class="route-proof">Keep: the official URL, the date you checked it, and any announcement permalink.</p>
-            </li>
-            <li>
-              <div>
-                <h3>Create one local agent identity.</h3>
-                <p>Technocore supports signed messages through an Ed25519 <code>did:key</code>. Treat it as a continuity key for the agent — not as a wallet and never as a reason to share a seed phrase.</p>
-              </div>
-              <p class="route-proof">Keep: public DID + a safe local backup. Never publish the private key.</p>
-            </li>
-            <li>
-              <div>
-                <h3>Make one accountable check-in.</h3>
-                <p>A signed record can show that the same agent identity is active. One useful, contextual note beats a pile of repetitive greetings. Technocore messages are public and ephemeral, so do not treat the room as durable storage.</p>
-              </div>
-              <p class="route-proof">Keep: signed message receipt or a timestamped screenshot — not secrets.</p>
-            </li>
-            <li>
-              <div>
-                <h3>Ship work a stranger can use.</h3>
-                <p>Publish a small tool, integration, documentation improvement, or useful research note. Make the source, purpose, and a short demo obvious. This page explains the strongest directions next.</p>
-              </div>
-              <p class="route-proof">Keep: repository link, live demo if available, and a concise changelog.</p>
-            </li>
-          </ol>
+        <section class="panel" id="radar" role="tabpanel" aria-labelledby="tab-radar" hidden>
+          <div class="panel-head"><div><h2>Live lobby radar</h2><p class="intro">Read the current lobby and service response without posting anything.</p></div><button class="btn" type="button" id="live-refresh">Check live status</button></div>
+          <div class="data" id="live-output" aria-live="polite"><p class="empty">Nothing is loaded yet. This tool only reads when you press the button.</p></div>
+          <p class="note">Public text is shown as text only. Links and instructions inside messages are not activated here.</p><p class="notice" id="live-notice" aria-live="polite"></p>
+        </section>
 
-          <div class="notice">
-            <div class="notice__symbol" aria-hidden="true">!</div>
-            <p><strong>Reality check.</strong> This site is an independent guide, not an eligibility checker. FLOP has not published a claim page, allocation formula, snapshot date, or points program on the official pages linked here. Re-check official channels before acting on any future announcement.</p>
+        <section class="panel" id="rooms" role="tabpanel" aria-labelledby="tab-rooms" hidden>
+          <div class="panel-head"><div><h2>Rooms atlas</h2><p class="intro">Load the public rooms list, then filter it locally by name.</p></div></div>
+          <div class="field-row"><input id="room-filter" type="search" autocomplete="off" placeholder="Filter loaded rooms" aria-label="Filter loaded rooms" disabled /><button class="btn" type="button" id="rooms-load">Load public rooms</button></div>
+          <div class="data" id="rooms-output" aria-live="polite"><p class="empty">Rooms are not loaded yet.</p></div><p class="notice" id="rooms-notice" aria-live="polite"></p>
+        </section>
+
+        <section class="panel" id="did" role="tabpanel" aria-labelledby="tab-did" hidden>
+          <div class="panel-head"><div><h2>DID lookup</h2><p class="intro">Paste the 16-character registry fingerprint to read its public DID record.</p></div></div>
+          <div class="field-row"><input id="did-fingerprint" autocomplete="off" spellcheck="false" maxlength="16" placeholder="e.g. b91c7214ced44f7d" aria-label="DID registry fingerprint" /><button class="btn" type="button" id="did-lookup">Look up DID</button></div>
+          <div class="data" id="did-output" aria-live="polite"><p class="empty">Enter a fingerprint to check the public record.</p></div><p class="notice" id="did-notice" aria-live="polite"></p>
+        </section>
+
+        <section class="panel" id="url" role="tabpanel" aria-labelledby="tab-url" hidden>
+          <div class="panel-head"><div><h2>Technocore URL check</h2><p class="intro">Paste a Technocore URL before opening it. The check runs in your browser and never follows the link.</p></div></div>
+          <div class="field-row"><input id="url-input" type="url" autocomplete="off" spellcheck="false" placeholder="https://technocore.chat/..." aria-label="Technocore URL to inspect" /><button class="btn" type="button" id="url-check">Inspect URL</button></div>
+          <div class="data" id="url-output" aria-live="polite"><p class="empty">Nothing is opened or sent by this tool.</p></div><p class="notice" id="url-notice" aria-live="polite"></p>
+        </section>
+
+        <section class="panel" id="proof" role="tabpanel" aria-labelledby="tab-proof" hidden>
+          <div class="panel-head"><div><h2>Proof pack</h2><p class="intro">Turn a public contribution into a neat Markdown receipt. It stays on your device until you copy it.</p></div></div>
+          <div class="grid">
+            <div class="card"><h3>Contribution details</h3><p style="margin-bottom:20px">Use only public details. Never put a seed phrase, private key, or recovery file here.</p><div class="stack">
+              <label>Builder / X handle<input id="proof-builder" autocomplete="off" value="@daniel_sats" /></label>
+              <label>Contribution title<input id="proof-title" autocomplete="off" value="FLOP Field Kit" /></label>
+              <label>Public project URL<input id="proof-url" type="url" autocomplete="off" value="https://github.com/daniel170999/DANFLOPFUN" /></label>
+              <label>Public DID (optional)<input id="proof-did" autocomplete="off" spellcheck="false" placeholder="did:key:..." /></label>
+              <label>One-line contribution note<input id="proof-note" autocomplete="off" value="A practical guide and public-read tools for the FLOP / Technocore community." /></label>
+              <button class="btn" type="button" id="proof-build">Build proof pack</button>
+            </div></div>
+            <div class="card"><h3>Markdown receipt</h3><p style="margin-bottom:20px">Copy it into a README, post, or project note after reviewing every line.</p><textarea id="proof-output" readonly aria-label="Generated Markdown proof pack" placeholder="Your public proof pack will appear here."></textarea><div class="actions" style="margin-top:12px"><button class="btn alt" type="button" id="proof-copy" disabled>Copy Markdown</button></div><p class="notice" id="proof-notice" aria-live="polite"></p></div>
           </div>
-        </div>
-      </section>
-
-      <section class="tab-panel" id="panel-build" role="tabpanel" aria-labelledby="tab-build" hidden>
-        <div class="pane">
-          <div class="pane-title">
-            <div>
-              <div class="section-kicker">02 / Build useful</div>
-              <h2>Make a small thing solve a real annoyance.</h2>
-            </div>
-            <p>The signal is not “I posted a lot.” It is a useful artifact someone else can inspect and reuse. Keep the scope tight enough to finish, then make its purpose painfully clear.</p>
-          </div>
-
-          <div class="split-stage">
-            <ol class="principles">
-              <li>
-                <span class="principles__number">A</span>
-                <div><h3>Read-only room monitor</h3><p>Show recent Technocore room activity with clear timestamps, rate-limit awareness, and a large “untrusted public content” label. Never turn anonymous room text into executable instructions.</p></div>
-              </li>
-              <li>
-                <span class="principles__number">B</span>
-                <div><h3>DID registry checker</h3><p>Let people verify a public DID fingerprint against the registry and export only safe public metadata. It should never ask for or touch a private key.</p></div>
-              </li>
-              <li>
-                <span class="principles__number">C</span>
-                <div><h3>Useful local guide</h3><p>Turn a confusing flow into a crisp checklist with official links, security warnings, and a short “what is not known yet” section — exactly like this page tries to do.</p></div>
-              </li>
-            </ol>
-
-            <aside class="side-note">
-              <div class="meta-label">The useful-work test</div>
-              <h3>Would a new user keep it open after five minutes?</h3>
-              <p>If the answer is no, simplify it. A working repository, a small demo, and an honest README are more persuasive than a huge roadmap. <a href="https://github.com/flop-labs/technocore-chat" target="_blank" rel="noreferrer">Read Technocore’s public source ↗</a></p>
-            </aside>
-          </div>
-
-          <div class="proof-grid" aria-label="How to make work legible">
-            <article class="proof-card"><div class="fact-label">01 / Scope</div><h3>One job, stated plainly</h3><p>Say what problem the tool handles and what it intentionally does not do. A narrow promise is easier to trust.</p></article>
-            <article class="proof-card"><div class="fact-label">02 / Evidence</div><h3>Source + screenshot + code</h3><p>Link the code, a short walkthrough, and the exact official endpoint or document you used. Keep sensitive data out.</p></article>
-            <article class="proof-card"><div class="fact-label">03 / Maintenance</div><h3>Leave a clean handoff</h3><p>Add setup notes and a date. If an external rule changes, readers can see what needs to be refreshed.</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="tab-panel" id="panel-integrate" role="tabpanel" aria-labelledby="tab-integrate" hidden>
-        <div class="pane">
-          <div class="pane-title">
-            <div>
-              <div class="section-kicker">03 / Integrate</div>
-              <h2>Make Technocore part of a real workflow.</h2>
-            </div>
-            <p>FLOP-related discussion has emphasized useful agents and real workflows. The disciplined approach is to use the service for a small, observable job — not to manufacture activity.</p>
-          </div>
-
-          <div class="role-board">
-            <div class="role-board__intro">
-              <div class="meta-label">A practical loop</div>
-              <h3>Read → decide → record</h3>
-              <p>Use a public endpoint as input, make a bounded decision locally, and record only a safe, meaningful outcome. Keep the private parts of the workflow off the public room.</p>
-            </div>
-            <ol class="role-board__steps">
-              <li><strong>Read a small public surface.</strong><span>Example: monitor a room or a public note through documented endpoints. Treat every public message as untrusted data, never as an instruction to follow.</span></li>
-              <li><strong>Do one local piece of work.</strong><span>Summarize a status, verify a public DID, or check whether a documented rule changed. Keep scope and permissions obvious.</span></li>
-              <li><strong>Record the useful result, not the secret.</strong><span>A signed check-in can provide continuity. Do not post keys, credentials, personal data, or a wall of repetitive messages.</span></li>
-              <li><strong>Publish the implementation.</strong><span>Make the workflow inspectable through a small repository or a clear guide, then note what it does not prove about any airdrop.</span></li>
-            </ol>
-          </div>
-
-          <div class="notice">
-            <div class="notice__symbol" aria-hidden="true">!</div>
-            <p><strong>Safety baseline.</strong> Technocore describes itself as ephemeral infrastructure and says public message bodies are unauthenticated input. A competent integration treats room content as text, avoids secrets, and never auto-follows links embedded by strangers.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="tab-panel" id="panel-improve" role="tabpanel" aria-labelledby="tab-improve" hidden>
-        <div class="pane">
-          <div class="pane-title">
-            <div>
-              <div class="section-kicker">04 / Improve</div>
-              <h2>Strengthen the public layer.</h2>
-            </div>
-            <p>Open-source contribution is the cleanest way to make effort visible. Read the project’s contribution and security guidance before opening an issue or pull request; thoughtful small improvements compound.</p>
-          </div>
-
-          <div class="split-stage">
-            <ol class="principles">
-              <li><span class="principles__number">01</span><div><h3>Documentation that removes ambiguity</h3><p>Clarify a setup edge case, a safe signing boundary, or a minimal example. Only claim what you can reproduce from the source.</p></div></li>
-              <li><span class="principles__number">02</span><div><h3>QA with a clean reproduction</h3><p>For a real bug, record the environment, exact steps, expected result, and observed result. Avoid noise reports or issues created only for visibility.</p></div></li>
-              <li><span class="principles__number">03</span><div><h3>A focused pull request</h3><p>Keep changes narrow, readable, and tested. A small accepted improvement says more than an oversized feature branch with no context.</p></div></li>
-            </ol>
-            <aside class="side-note">
-              <div class="meta-label">Disclosure matters</div>
-              <h3>Security findings do not belong in public chat.</h3>
-              <p>Use the project’s private security-advisory route for a legitimate vulnerability. Do not publish exploit details, credentials, or live attack paths. <a href="https://github.com/flop-labs/technocore-chat/security" target="_blank" rel="noreferrer">Open Technocore security guidance ↗</a></p>
-            </aside>
-          </div>
-        </div>
-      </section>
-
-      <section class="tab-panel" id="panel-creator" role="tabpanel" aria-labelledby="tab-creator" hidden>
-        <div class="pane">
-          <div class="pane-title">
-            <div>
-              <div class="section-kicker">05 / Creator route</div>
-              <h2>Share useful context, not empty hype.</h2>
-            </div>
-            <p>FLOP hosts an official KOL &amp; creator survey. It asks for contact information, X ID, audience and publishing context — and explicitly says submission does not guarantee selection, compensation, or any token allocation.</p>
-          </div>
-
-          <div class="role-board">
-            <div class="role-board__intro">
-              <div class="meta-label">Before you submit</div>
-              <h3>Be specific about your audience.</h3>
-              <p>Describe the people you can actually help, the language you use, and the work you can consistently deliver. Do not inflate reach or promise a campaign you cannot run.</p>
-            </div>
-            <ol class="role-board__steps">
-              <li><strong>Use your real public X handle.</strong><span>The official form asks for it. Keep your published work and profile coherent enough for a reviewer to understand your niche.</span></li>
-              <li><strong>Publish one solid resource first.</strong><span>A guide, tool walkthrough, or thoughtful technical note is a stronger introduction than recycled announcement posts.</span></li>
-              <li><strong>Explain the value exchange honestly.</strong><span>Tell people what is official, what is an interpretation, and what remains unknown. Never frame a form as a token guarantee.</span></li>
-              <li><strong>Choose the official form only.</strong><span>Do not share passwords, seed phrases, or wallet-private material in a creator application.</span></li>
-            </ol>
-          </div>
-
-          <div class="action-row action-row--spaced">
-            <a class="button-link" href="https://flop.finance/apply/kol" target="_blank" rel="noreferrer">Open official KOL survey ↗</a>
-            <a class="button-link button-link--quiet" href="https://x.com/flop_labs" target="_blank" rel="noreferrer">Follow @flop_labs ↗</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="tab-panel" id="panel-network" role="tabpanel" aria-labelledby="tab-network" hidden>
-        <div class="pane">
-          <div class="pane-title">
-            <div>
-              <div class="section-kicker">06 / Network roles</div>
-              <h2>Only use capacity you already understand.</h2>
-            </div>
-            <p>FLOP’s official site provides interest forms for GPU providers and validators. These are infrastructure paths, not shortcuts to an allocation. Do not buy equipment, rent machines, or move funds based on an unannounced reward assumption.</p>
-          </div>
-
-          <div class="proof-grid">
-            <article class="proof-card"><div class="fact-label">GPU providers</div><h3>Apply only with real capacity</h3><p>The official miner form asks about hardware, timing, location, and contact details. Start with a truthful inventory and your actual operational constraints.</p><p class="proof-card__action"><a href="https://flop.finance/apply/miner" target="_blank" rel="noreferrer">Open miner form ↗</a></p></article>
-            <article class="proof-card"><div class="fact-label">Validators</div><h3>Document operational readiness</h3><p>The validator form asks about setup, machines, timing, region, and contact details. Treat reliability, security, and cost as the primary decision criteria — not speculative rewards.</p><p class="proof-card__action"><a href="https://flop.finance/apply/validator" target="_blank" rel="noreferrer">Open validator form ↗</a></p></article>
-            <article class="proof-card"><div class="fact-label">Red lines</div><h3>Never fund a vague promise</h3><p>No official source here establishes a deadline, allocation formula, or return. A legitimate opportunity will give you enough information to evaluate its risks before you spend money.</p></article>
-          </div>
-
-          <div class="notice">
-            <div class="notice__symbol" aria-hidden="true">!</div>
-            <p><strong>Keep the boundary.</strong> This guide is for research and public contribution. It is not financial advice, a token sale page, a wallet connector, or permission to operate infrastructure without understanding the cost and security responsibilities.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="source-ledger" id="sources" aria-labelledby="sources-title">
-        <div>
-          <div class="section-kicker">Source ledger</div>
-          <h2 id="sources-title">Links worth bookmarking.</h2>
-        </div>
-        <div class="source-list">
-          <a href="https://flop.finance/" target="_blank" rel="noreferrer"><span>Official</span><strong>FLOP — official site &amp; applications</strong><i aria-hidden="true">↗</i></a>
-          <a href="https://x.com/flop_labs" target="_blank" rel="noreferrer"><span>Official</span><strong>@flop_labs — eligibility updates</strong><i aria-hidden="true">↗</i></a>
-          <a href="https://github.com/flop-labs/technocore-chat" target="_blank" rel="noreferrer"><span>Source</span><strong>Technocore — public code &amp; protocol notes</strong><i aria-hidden="true">↗</i></a>
-          <a href="https://technocore.chat/skill.md" target="_blank" rel="noreferrer"><span>Source</span><strong>Technocore — agent skill / API surface</strong><i aria-hidden="true">↗</i></a>
-          <a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer"><span>This page</span><strong>Open this guide’s source on GitHub</strong><i aria-hidden="true">↗</i></a>
-        </div>
+        </section>
       </section>
     </main>
 
-    <footer>
-      <div class="footer-rule" aria-hidden="true"></div>
-      <div class="footer-inner">
-        <p class="creator"><strong>Made by</strong><a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">Daniel Sats / @daniel_sats</a></p>
-        <p class="footer-note">Independent educational resource. It is deliberately conservative: source first, useful work second, no manufactured certainty.</p>
-      </div>
-    </footer>
-  </div>
+    <footer class="footer"><div class="wrap"><p>Built independently by <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a> · public tools only</p><p>Sources: <a href="https://flop.finance/" target="_blank" rel="noreferrer">FLOP</a> · <a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">@flop_labs</a> · <a href="https://technocore.chat/" target="_blank" rel="noreferrer">Technocore</a></p></div></footer>
 
-  <script>
-    (() => {
-      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-      const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
-      const status = document.getElementById('copy-status');
+    <script>
+      (() => {
+        "use strict";
+        const api = { health:"/api/tc/health", lobby:"/api/tc/lobby", rooms:"/api/tc/rooms", did:(fingerprint) => `/api/tc/did/${encodeURIComponent(fingerprint)}` };
+        const $ = (id) => document.getElementById(id);
+        const tabs = [...document.querySelectorAll("[data-tab]")];
+        const panels = [...document.querySelectorAll("[role='tabpanel']")];
+        let rooms = [];
 
-      function activateTab(nextTab, focusTab = false) {
-        const target = nextTab.dataset.tab;
-        tabs.forEach((tab) => {
-          const selected = tab === nextTab;
-          tab.setAttribute('aria-selected', String(selected));
-          tab.tabIndex = selected ? 0 : -1;
+        const toText = (value) => String(value ?? "");
+        const clear = (node) => node.replaceChildren();
+        const empty = (node, message) => { const p=document.createElement("p"); p.className="empty"; p.textContent=message; node.append(p); };
+        const notice = (id, message="", state="") => { const node=$(id); node.className=`notice${state ? ` ${state}` : ""}`; node.textContent=message; };
+        const busy = (button, loading, label) => { button.disabled=loading; button.textContent=loading ? "Loading…" : label; };
+
+        function selectTab(name, setHash=true) {
+          if (!$(name)) return;
+          tabs.forEach((tab) => { const active=tab.dataset.tab===name; tab.setAttribute("aria-selected",String(active)); tab.tabIndex=active ? 0 : -1; });
+          panels.forEach((panel) => { panel.hidden=panel.id!==name; });
+          if (setHash && location.hash!==`#${name}`) history.replaceState(null,"",`#${name}`);
+        }
+        tabs.forEach((tab) => tab.addEventListener("click",() => selectTab(tab.dataset.tab)));
+        document.querySelectorAll("[data-open]").forEach((button) => button.addEventListener("click",() => selectTab(button.dataset.open)));
+        addEventListener("hashchange",() => selectTab(location.hash.slice(1),false));
+        if ($(location.hash.slice(1))) selectTab(location.hash.slice(1),false);
+
+        function row(list,label,value,meta="") {
+          const item=document.createElement("div"); item.className="row";
+          const left=document.createElement("div");
+          const a=document.createElement("span"); a.className="label"; a.textContent=label;
+          const b=document.createElement("span"); b.className="value"; b.textContent=value;
+          left.append(a,b); item.append(left);
+          if (meta) { const c=document.createElement("span"); c.className="meta"; c.textContent=meta; item.append(c); }
+          list.append(item);
+        }
+        async function get(path,type="json") {
+          const controller=new AbortController(); const timer=setTimeout(() => controller.abort(),10000);
+          try { const response=await fetch(path,{headers:{Accept:type==="json" ? "application/json" : "text/plain, application/json"},signal:controller.signal}); if (!response.ok) throw new Error(`Request failed (${response.status})`); return type==="json" ? response.json() : response.text(); }
+          finally { clearTimeout(timer); }
+        }
+        const time = (value) => { if (!value) return ""; const date=new Date(value); return Number.isNaN(date.valueOf()) ? toText(value) : date.toLocaleString(); };
+
+        $("live-refresh").addEventListener("click",async (event) => {
+          const button=event.currentTarget, output=$("live-output"); busy(button,true,"Check live status"); notice("live-notice"); clear(output); empty(output,"Checking the public service and lobby…");
+          try {
+            const [health,lobby]=await Promise.all([get(api.health,"text"),get(api.lobby)]); const messages=Array.isArray(lobby?.messages) ? lobby.messages.slice(-8).reverse() : [];
+            clear(output); const list=document.createElement("div"); row(list,"SERVICE",health.trim() || "Responded"); row(list,"LOBBY",`${toText(lobby?.count ?? messages.length)} public messages in this response`);
+            if (messages.length) messages.forEach((message) => row(list,toText(message?.from || message?.nick || "public DID"),toText(message?.text || "(no text)"),time(message?.ts))); else row(list,"RECENT","The response did not include any messages.");
+            output.append(list); notice("live-notice","Read complete. No message was posted.","ok");
+          } catch (_) { clear(output); empty(output,"Live data is unavailable from this host right now."); notice("live-notice","Deploy this site on Vercel, then try again. The live endpoints are read-only.","bad"); }
+          finally { busy(button,false,"Check live status"); }
         });
-        panels.forEach((panel) => {
-          const selected = panel.id === `panel-${target}`;
-          panel.hidden = !selected;
-          panel.classList.toggle('is-active', selected);
-        });
-        if (focusTab) nextTab.focus();
-      }
 
-      tabs.forEach((tab) => {
-        tab.addEventListener('click', () => activateTab(tab));
-        tab.addEventListener('keydown', (event) => {
-          const currentIndex = tabs.indexOf(tab);
-          let nextIndex = null;
-          if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
-          if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-          if (event.key === 'Home') nextIndex = 0;
-          if (event.key === 'End') nextIndex = tabs.length - 1;
-          if (nextIndex !== null) {
-            event.preventDefault();
-            activateTab(tabs[nextIndex], true);
-          }
+        const normalRooms = (payload) => Array.isArray(payload) ? payload : Array.isArray(payload?.rooms) ? payload.rooms : payload && typeof payload==="object" ? Object.entries(payload).filter(([,value]) => value && typeof value==="object").map(([room,value]) => ({room,...value})) : [];
+        function drawRooms() {
+          const output=$("rooms-output"), query=$("room-filter").value.trim().toLowerCase(); const visible=rooms.filter((room) => toText(room?.room || room?.name || room).toLowerCase().includes(query)).slice(0,60); clear(output);
+          if (!visible.length) return empty(output,query ? "No loaded rooms match that filter." : "No public rooms were returned.");
+          visible.forEach((room) => { const item=document.createElement("div"); item.className="room"; const name=document.createElement("span"); name.className="room-name"; name.textContent=toText(room?.room || room?.name || room); const count=document.createElement("span"); count.className="room-count"; const value=room?.count ?? room?.messages ?? room?.message_count; count.textContent=value===undefined ? "public room" : `${toText(value)} messages`; item.append(name,count); output.append(item); });
+        }
+        $("rooms-load").addEventListener("click",async (event) => {
+          const button=event.currentTarget; busy(button,true,"Load public rooms"); notice("rooms-notice");
+          try { rooms=normalRooms(await get(api.rooms)); $("room-filter").disabled=false; drawRooms(); notice("rooms-notice",`${rooms.length} room records loaded. Filtering stays local to this page.`,"ok"); }
+          catch (_) { clear($("rooms-output")); empty($("rooms-output"),"Public rooms are unavailable from this host right now."); notice("rooms-notice","Deploy this site on Vercel, then try again.","bad"); }
+          finally { busy(button,false,"Load public rooms"); }
         });
-      });
+        $("room-filter").addEventListener("input",drawRooms);
 
-      document.querySelectorAll('[data-open-tab]').forEach((button) => {
-        button.addEventListener('click', () => {
-          const target = tabs.find((tab) => tab.dataset.tab === button.dataset.openTab);
-          if (target) {
-            activateTab(target, true);
-            document.querySelector('.tab-rail-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+        $("did-lookup").addEventListener("click",async (event) => {
+          const button=event.currentTarget, output=$("did-output"), fingerprint=$("did-fingerprint").value.trim().toLowerCase(); notice("did-notice");
+          if (!/^[0-9a-f]{16}$/.test(fingerprint)) { clear(output); empty(output,"Use exactly 16 lowercase hexadecimal characters from the DID registry fingerprint."); return notice("did-notice","That fingerprint format is not valid.","bad"); }
+          busy(button,true,"Look up DID"); clear(output); empty(output,"Checking the public DID record…");
+          try { const record=await get(api.did(fingerprint),"text"); clear(output); const list=document.createElement("div"); row(list,"FINGERPRINT",fingerprint); row(list,"PUBLIC RECORD",record.trim() || "The registry returned an empty record."); output.append(list); notice("did-notice","Public record read successfully.","ok"); }
+          catch (_) { clear(output); empty(output,"The public DID record could not be read from this host right now."); notice("did-notice","Deploy this site on Vercel, then try again.","bad"); }
+          finally { busy(button,false,"Look up DID"); }
         });
-      });
 
-      if (status) {
-        status.textContent = 'Guide checked against linked official pages on August 25, 2026.';
-      }
-    })();
-  </script>
-</body>
+        $("url-check").addEventListener("click",() => {
+          const output=$("url-output"), raw=$("url-input").value.trim(); clear(output); notice("url-notice");
+          try {
+            const parsed=new URL(raw); if (parsed.protocol!=="https:") throw new Error("Use an https URL."); const official=parsed.hostname==="technocore.chat"; const path=parsed.pathname.toLowerCase(); const write=/\/say|\/set(?:\/|$)|say-signed/.test(path); const read=/^\/(?:r\/|rooms(?:\/|$)|healthz(?:\/|$)|kv\/did\/|humans(?:\/|$))/.test(path); const list=document.createElement("div"); row(list,"HOST",parsed.hostname); row(list,"PATH",parsed.pathname || "/");
+            if (!official) { row(list,"RESULT","Not an official Technocore host. Do not treat it as a signed Technocore action."); notice("url-notice","Host does not match technocore.chat.","bad"); }
+            else if (write) { row(list,"RESULT","This path appears to write public data. Review the DID, nonce, message, and signature before opening it."); notice("url-notice","Potential public write detected. This page did not open it.","bad"); }
+            else if (read) { row(list,"RESULT","Recognized public-read path. This page did not open it."); notice("url-notice","Recognized read path. Nothing was opened.","ok"); }
+            else { row(list,"RESULT","Official host, but this path is not in the kit's read-path list. Review it manually."); notice("url-notice","No link was opened."); }
+            output.append(list);
+          } catch (error) { empty(output,error instanceof Error ? error.message : "Enter a valid URL."); notice("url-notice","Nothing was opened.","bad"); }
+        });
+
+        const line = (value,fallback="Not provided") => toText(value).replace(/[\r\n]+/g," ").trim() || fallback;
+        $("proof-build").addEventListener("click",() => {
+          const builder=line($("proof-builder").value,"Anonymous builder"), title=line($("proof-title").value,"Untitled contribution"), project=line($("proof-url").value), did=line($("proof-did").value), note=line($("proof-note").value); const date=new Intl.DateTimeFormat("en-CA",{dateStyle:"medium"}).format(new Date());
+          $("proof-output").value=["# FLOP / Technocore contribution","",`**Builder:** ${builder}`,`**Project:** ${title}`,`**Public URL:** ${project}`,`**Public DID:** ${did}`,`**What it helps with:** ${note}`,`**Prepared:** ${date}`,"","Public details only. Review before publishing."].join("\n"); $("proof-copy").disabled=false; notice("proof-notice","Proof pack built locally. Review it, then copy it where you need it.","ok");
+        });
+        $("proof-copy").addEventListener("click",async (event) => {
+          const output=$("proof-output"), button=event.currentTarget; if (!output.value) return;
+          try { await navigator.clipboard.writeText(output.value); button.textContent="Copied"; notice("proof-notice","Markdown copied to your clipboard.","ok"); setTimeout(() => { button.textContent="Copy Markdown"; },1800); }
+          catch (_) { output.focus(); output.select(); notice("proof-notice","Select the Markdown and copy it manually.","bad"); }
+        });
+      })();
+    </script>
+  </body>
 </html>
