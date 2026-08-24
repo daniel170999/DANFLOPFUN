@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical, source-led guide to FLOP, Technocore, and useful public contribution.">
+  <meta name="theme-color" content="#11120f">
+  <title>FLOP Field Notes — a practical route</title>
+  <style>
+    :root {
+      --ink: #11120f;
+      --ink-soft: #1b1d18;
+      --paper: #f4f2eb;
+      --paper-warm: #e9e5d9;
+      --line: #b8b3a7;
+      --line-dark: #35372f;
+      --muted: #66675f;
+      --signal: #c8ff3d;
+      --signal-deep: #8fad1e;
+      --orange: #ff7147;
+      --white: #fffefa;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    a {
+      color: inherit;
+      text-decoration-color: currentColor;
+      text-underline-offset: 0.18em;
+    }
+
+    a:hover { text-decoration-thickness: 2px; }
+
+    :focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 3px;
+    }
+
+    .page-shell { overflow: hidden; }
+
+    .top-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 2.5rem;
+      padding: 0.55rem max(1.25rem, calc((100vw - 80rem) / 2));
+      color: var(--paper);
+      background: var(--ink);
+      font: 700 0.68rem/1.2 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .top-strip__status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: #e7e6df;
+    }
+
+    .pulse-dot {
+      width: 0.58rem;
+      height: 0.58rem;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 0 0.28rem rgb(200 255 61 / 14%);
+    }
+
+    .top-strip a { color: var(--signal); }
+
+    .masthead {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2rem;
+      align-items: end;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 1.2rem 1.25rem 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      width: max-content;
+      color: var(--ink);
+      font: 800 clamp(1.05rem, 2vw, 1.3rem)/1 var(--mono);
+      letter-spacing: -0.075em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 1.9rem;
+      height: 1.9rem;
+      place-items: center;
+      color: var(--ink);
+      background: var(--signal);
+      border: 2px solid var(--ink);
+      box-shadow: 0.25rem 0.25rem 0 var(--ink);
+      font-size: 1.1rem;
+      letter-spacing: -0.18em;
+    }
+
+    .masthead__links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 1.1rem;
+      padding-bottom: 0.15rem;
+      font: 700 0.72rem/1.25 var(--mono);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .masthead__links a { text-decoration: none; }
+    .masthead__links a:hover { text-decoration: underline; }
+
+    .tab-rail-wrap {
+      max-width: 80rem;
+      margin: 1.45rem auto 0;
+      padding: 0 1.25rem;
+    }
+
+    .tab-rail {
+      display: flex;
+      overflow-x: auto;
+      border-top: 1px solid var(--line-dark);
+      border-bottom: 1px solid var(--line-dark);
+      scrollbar-width: thin;
+    }
+
+    .tab {
+      position: relative;
+      flex: 0 0 auto;
+      min-height: 3.15rem;
+      padding: 0.8rem 1rem;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-right: 1px solid var(--line);
+      cursor: pointer;
+      font: 800 0.68rem/1 var(--mono);
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+    }
+
+    .tab:first-child { border-left: 1px solid var(--line); }
+    .tab:hover { color: var(--ink); background: var(--paper-warm); }
+    .tab[aria-selected="true"] { color: var(--ink); background: var(--signal); }
+    .tab[aria-selected="true"]::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      content: "";
+      background: var(--ink);
+    }
+
+    main {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0 1.25rem 3rem;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.is-active { display: block; animation: settle 220ms ease-out; }
+
+    @keyframes settle {
+      from { opacity: 0; transform: translateY(0.35rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+      gap: clamp(2rem, 6vw, 6rem);
+      padding: clamp(3rem, 8vw, 6.5rem) 0 3.7rem;
+      border-bottom: 1px solid var(--line-dark);
+    }
+
+    .eyebrow,
+    .section-kicker,
+    .meta-label,
+    .fact-label {
+      font: 800 0.68rem/1.25 var(--mono);
+      letter-spacing: 0.075em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow { color: var(--signal-deep); }
+
+    h1,
+    h2,
+    h3,
+    p { margin-top: 0; }
+
+    h1 {
+      max-width: 12ch;
+      margin: 1rem 0 1.4rem;
+      font-size: clamp(3rem, 8vw, 6.8rem);
+      font-weight: 750;
+      letter-spacing: -0.085em;
+      line-height: 0.88;
+    }
+
+    .hero-copy {
+      max-width: 43rem;
+      margin-bottom: 1.6rem;
+      color: #363831;
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      line-height: 1.55;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      align-items: center;
+    }
+
+    .action-row--spaced { margin-top: 1.6rem; }
+
+    .button-link,
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.7rem;
+      padding: 0.7rem 0.9rem;
+      color: var(--ink);
+      background: var(--signal);
+      border: 1px solid var(--ink);
+      box-shadow: 0.2rem 0.2rem 0 var(--ink);
+      cursor: pointer;
+      font: 800 0.7rem/1 var(--mono);
+      letter-spacing: 0.04em;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .button-link:hover,
+    .button:hover { transform: translate(0.1rem, 0.1rem); box-shadow: 0.1rem 0.1rem 0 var(--ink); text-decoration: none; }
+    .button-link--quiet,
+    .button--quiet { color: var(--ink); background: transparent; box-shadow: none; }
+
+    .status-sheet {
+      align-self: end;
+      background: var(--ink);
+      color: var(--paper);
+      border: 1px solid var(--ink);
+      box-shadow: 0.42rem 0.42rem 0 var(--signal);
+    }
+
+    .status-sheet__head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 1rem;
+      color: var(--signal);
+      border-bottom: 1px solid #595c51;
+      font: 800 0.67rem/1 var(--mono);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .status-sheet__body { padding: 1.1rem 1rem 1.2rem; }
+
+    .status-sheet__big {
+      margin: 0 0 1rem;
+      font-size: clamp(1.42rem, 2.8vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .status-sheet ul {
+      display: grid;
+      gap: 0.75rem;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .status-sheet li {
+      display: grid;
+      grid-template-columns: 0.45rem 1fr;
+      gap: 0.65rem;
+      color: #d7d9d0;
+      font-size: 0.82rem;
+      line-height: 1.42;
+    }
+
+    .status-sheet li::before {
+      width: 0.4rem;
+      height: 0.4rem;
+      margin-top: 0.34rem;
+      content: "";
+      background: var(--signal);
+    }
+
+    .route-wrap { padding: clamp(2.4rem, 5vw, 4.5rem) 0 0; }
+
+    .section-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
+      gap: 2rem;
+      align-items: start;
+      margin-bottom: 1.6rem;
+    }
+
+    .section-heading h2,
+    .pane-title h2 {
+      margin: 0;
+      font-size: clamp(1.75rem, 4vw, 3.2rem);
+      letter-spacing: -0.065em;
+      line-height: 0.95;
+    }
+
+    .section-heading p {
+      max-width: 42rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.97rem;
+      line-height: 1.55;
+    }
+
+    .route {
+      counter-reset: steps;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--line-dark);
+      list-style: none;
+    }
+
+    .route li {
+      position: relative;
+      display: grid;
+      grid-template-columns: 4.8rem minmax(0, 1fr) minmax(13rem, 0.7fr);
+      gap: 1.25rem;
+      padding: 1.3rem 0;
+      border-bottom: 1px solid var(--line);
+      counter-increment: steps;
+    }
+
+    .route li::before {
+      color: var(--signal-deep);
+      content: "0" counter(steps);
+      font: 800 0.8rem/1 var(--mono);
+      letter-spacing: -0.06em;
+    }
+
+    .route h3 { margin: 0 0 0.35rem; font-size: 1.12rem; letter-spacing: -0.035em; }
+    .route p { margin: 0; color: #4b4d46; font-size: 0.91rem; line-height: 1.5; }
+    .route .route-proof { color: var(--muted); font: 0.74rem/1.45 var(--mono); }
+
+    .notice {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 1rem;
+      margin-top: 2.1rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--line-dark);
+      background: #ebe8dc;
+    }
+
+    .notice__symbol {
+      display: grid;
+      width: 1.7rem;
+      height: 1.7rem;
+      place-items: center;
+      color: var(--paper);
+      background: var(--orange);
+      border-radius: 50%;
+      font: 800 1rem/1 var(--mono);
+    }
+
+    .notice p { margin: 0; color: #3f413a; font-size: 0.88rem; line-height: 1.52; }
+    .notice strong { color: var(--ink); }
+
+    .pane {
+      padding: clamp(3rem, 8vw, 6rem) 0 0;
+    }
+
+    .pane-title {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 2rem;
+      padding-bottom: 2.1rem;
+      border-bottom: 1px solid var(--line-dark);
+    }
+
+    .pane-title .section-kicker { color: var(--signal-deep); }
+    .pane-title h2 { margin-top: 0.7rem; }
+    .pane-title p { max-width: 43rem; margin: 0.2rem 0 0; color: #4c4e47; font-size: 1.02rem; line-height: 1.55; }
+
+    .split-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(17rem, 0.8fr);
+      gap: clamp(1.25rem, 4vw, 4rem);
+      padding: 2.4rem 0 0;
+    }
+
+    .principles { margin: 0; padding: 0; list-style: none; }
+
+    .principles li {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      gap: 0.75rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .principles li:first-child { border-top: 1px solid var(--line); }
+    .principles__number { color: var(--signal-deep); font: 800 0.73rem/1.4 var(--mono); }
+    .principles h3 { margin: 0 0 0.22rem; font-size: 1rem; letter-spacing: -0.025em; }
+    .principles p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
+
+    .side-note {
+      align-self: start;
+      padding: 1.1rem;
+      color: var(--paper);
+      background: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
+    .side-note .meta-label { color: var(--signal); }
+    .side-note h3 { margin: 0.55rem 0 0.75rem; font-size: 1.27rem; letter-spacing: -0.045em; }
+    .side-note p { margin: 0; color: #d9dbd1; font-size: 0.86rem; line-height: 1.55; }
+    .side-note a { color: var(--signal); }
+
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 2.4rem;
+      border: 1px solid var(--line-dark);
+      background: var(--line-dark);
+    }
+
+    .proof-card { min-height: 11.5rem; padding: 1.1rem; background: var(--paper); }
+    .proof-card h3 { margin: 0.7rem 0 0.45rem; font-size: 1.02rem; letter-spacing: -0.03em; }
+    .proof-card p { margin: 0; color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
+    .proof-card p.proof-card__action { margin-top: 1rem; }
+    .proof-card .fact-label { color: var(--signal-deep); }
+
+    .role-board {
+      display: grid;
+      grid-template-columns: 0.72fr 1.28fr;
+      gap: 0;
+      margin-top: 2.4rem;
+      border: 1px solid var(--line-dark);
+    }
+
+    .role-board__intro {
+      padding: 1.3rem;
+      color: var(--paper);
+      background: var(--ink);
+    }
+
+    .role-board__intro h3 { margin: 0.55rem 0 0.7rem; font-size: 1.55rem; letter-spacing: -0.055em; }
+    .role-board__intro p { margin: 0; color: #d5d8cf; font-size: 0.88rem; line-height: 1.55; }
+    .role-board__steps { margin: 0; padding: 0; list-style: none; }
+    .role-board__steps li { padding: 1.15rem 1.25rem; border-bottom: 1px solid var(--line); }
+    .role-board__steps li:last-child { border-bottom: 0; }
+    .role-board__steps strong { display: block; margin-bottom: 0.25rem; font-size: 0.94rem; }
+    .role-board__steps span { display: block; color: var(--muted); font-size: 0.82rem; line-height: 1.46; }
+
+    .source-ledger {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 2rem;
+      margin-top: 3.6rem;
+      padding-top: 1.3rem;
+      border-top: 1px solid var(--line-dark);
+    }
+
+    .source-ledger h2 { margin: 0.45rem 0 0; font-size: 1.6rem; letter-spacing: -0.05em; }
+    .source-list { display: grid; gap: 0; border-top: 1px solid var(--line); }
+    .source-list a {
+      display: grid;
+      grid-template-columns: 7.5rem 1fr auto;
+      gap: 0.8rem;
+      align-items: center;
+      padding: 0.84rem 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .source-list a:hover { color: var(--signal-deep); }
+    .source-list span { color: var(--muted); font: 700 0.64rem/1.2 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
+    .source-list i { color: var(--signal-deep); font-style: normal; font-size: 1rem; }
+
+    footer {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 2.7rem 1.25rem 1.5rem;
+    }
+
+    .footer-rule { height: 5px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 6px); }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      align-items: end;
+      padding-top: 1.1rem;
+    }
+
+    .creator { margin: 0; font-size: 0.82rem; line-height: 1.5; }
+    .creator strong { display: block; font: 800 0.72rem/1.2 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
+    .creator a { font-weight: 700; }
+    .footer-note { max-width: 34rem; margin: 0; color: var(--muted); font-size: 0.73rem; line-height: 1.48; text-align: right; }
+
+    .copy-status { min-height: 1.2em; margin: 0.55rem 0 0; color: var(--signal-deep); font: 700 0.68rem/1.3 var(--mono); }
+
+    @media (max-width: 760px) {
+      .top-strip { align-items: flex-start; padding-top: 0.7rem; padding-bottom: 0.7rem; }
+      .top-strip__status { max-width: 13rem; }
+      .masthead { grid-template-columns: 1fr; gap: 1rem; }
+      .masthead__links { justify-content: flex-start; }
+      .hero,
+      .section-heading,
+      .pane-title,
+      .split-stage,
+      .source-ledger { grid-template-columns: 1fr; }
+      h1 { max-width: 10ch; }
+      .status-sheet { max-width: 31rem; }
+      .route li { grid-template-columns: 2.7rem 1fr; gap: 0.75rem; }
+      .route .route-proof { grid-column: 2; }
+      .proof-grid { grid-template-columns: 1fr; }
+      .role-board { grid-template-columns: 1fr; }
+      .source-list a { grid-template-columns: 6.5rem 1fr auto; }
+      .footer-inner { align-items: flex-start; flex-direction: column; }
+      .footer-note { text-align: left; }
+    }
+
+    @media (max-width: 430px) {
+      .top-strip { font-size: 0.59rem; }
+      .masthead, .tab-rail-wrap, main, footer { padding-right: 1rem; padding-left: 1rem; }
+      .tab { padding-inline: 0.85rem; }
+      .route li { grid-template-columns: 2.2rem 1fr; }
+      .source-list a { grid-template-columns: 1fr auto; }
+      .source-list span { grid-column: 1 / -1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .tab-panel.is-active { animation: none; }
+      .button-link, .button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <div class="top-strip">
+      <div class="top-strip__status"><span class="pulse-dot" aria-hidden="true"></span>Independent field guide / verified links first</div>
+      <a href="https://flop.finance/" target="_blank" rel="noreferrer">Official FLOP ↗</a>
+    </div>
+
+    <header class="masthead">
+      <a class="brand" href="#start" aria-label="FLOP Field Notes home">
+        <span class="brand-mark" aria-hidden="true">F.</span>
+        <span>FLOP FIELD NOTES</span>
+      </a>
+      <nav class="masthead__links" aria-label="Site links">
+        <a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a>
+        <a href="#sources">Sources</a>
+      </nav>
+    </header>
+
+    <div class="tab-rail-wrap">
+      <div class="tab-rail" role="tablist" aria-label="FLOP guide sections">
+        <button class="tab" id="tab-start" type="button" role="tab" aria-selected="true" aria-controls="panel-start" data-tab="start">01 / Start here</button>
+        <button class="tab" id="tab-build" type="button" role="tab" aria-selected="false" aria-controls="panel-build" data-tab="build" tabindex="-1">02 / Build useful</button>
+        <button class="tab" id="tab-integrate" type="button" role="tab" aria-selected="false" aria-controls="panel-integrate" data-tab="integrate" tabindex="-1">03 / Integrate</button>
+        <button class="tab" id="tab-improve" type="button" role="tab" aria-selected="false" aria-controls="panel-improve" data-tab="improve" tabindex="-1">04 / Improve</button>
+        <button class="tab" id="tab-creator" type="button" role="tab" aria-selected="false" aria-controls="panel-creator" data-tab="creator" tabindex="-1">05 / Creator</button>
+        <button class="tab" id="tab-network" type="button" role="tab" aria-selected="false" aria-controls="panel-network" data-tab="network" tabindex="-1">06 / Network roles</button>
+      </div>
+    </div>
+
+    <main id="start">
+      <section class="tab-panel is-active" id="panel-start" role="tabpanel" aria-labelledby="tab-start">
+        <div class="hero">
+          <div>
+            <div class="eyebrow">A sensible FLOP route</div>
+            <h1>Start with the work.<br>Keep the receipts.</h1>
+            <p class="hero-copy">This is a practical route for people who want to explore FLOP and Technocore without pretending there is a published points table. Make a real contribution, document it clearly, and follow the official channel for anything eligibility-related.</p>
+            <div class="action-row">
+              <a class="button-link" href="https://flop.finance/" target="_blank" rel="noreferrer">Open official FLOP ↗</a>
+              <button class="button button--quiet" type="button" data-open-tab="build">See useful work →</button>
+            </div>
+            <p class="copy-status" id="copy-status" aria-live="polite"></p>
+          </div>
+
+          <aside class="status-sheet" aria-label="Current public facts">
+            <div class="status-sheet__head"><span>Public status</span><span>Read first</span></div>
+            <div class="status-sheet__body">
+              <p class="status-sheet__big">No claim link. No public scorecard.</p>
+              <ul>
+                <li>FLOP’s official site directs people to follow <strong>@flop_labs</strong> for airdrop eligibility.</li>
+                <li>Technocore is useful agent infrastructure, not a wallet or an airdrop portal.</li>
+                <li>Anything promising a guaranteed allocation deserves extra scrutiny.</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+
+        <div class="route-wrap">
+          <div class="section-heading">
+            <div>
+              <div class="section-kicker">The route</div>
+              <h2>Four steps.<br>Zero theatre.</h2>
+            </div>
+            <p>Use this as a personal checklist, not as an official requirement list. The only thing an airdrop team can fairly evaluate is work that is legible, useful, and tied to a consistent identity.</p>
+          </div>
+
+          <ol class="route">
+            <li>
+              <div>
+                <h3>Watch the official source.</h3>
+                <p>Follow <a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">@flop_labs</a> and use <a href="https://flop.finance/" target="_blank" rel="noreferrer">flop.finance</a> as the source of truth for any new eligibility or application notice.</p>
+              </div>
+              <p class="route-proof">Keep: the official URL, the date you checked it, and any announcement permalink.</p>
+            </li>
+            <li>
+              <div>
+                <h3>Create one local agent identity.</h3>
+                <p>Technocore supports signed messages through an Ed25519 <code>did:key</code>. Treat it as a continuity key for the agent — not as a wallet and never as a reason to share a seed phrase.</p>
+              </div>
+              <p class="route-proof">Keep: public DID + a safe local backup. Never publish the private key.</p>
+            </li>
+            <li>
+              <div>
+                <h3>Make one accountable check-in.</h3>
+                <p>A signed record can show that the same agent identity is active. One useful, contextual note beats a pile of repetitive greetings. Technocore messages are public and ephemeral, so do not treat the room as durable storage.</p>
+              </div>
+              <p class="route-proof">Keep: signed message receipt or a timestamped screenshot — not secrets.</p>
+            </li>
+            <li>
+              <div>
+                <h3>Ship work a stranger can use.</h3>
+                <p>Publish a small tool, integration, documentation improvement, or useful research note. Make the source, purpose, and a short demo obvious. This page explains the strongest directions next.</p>
+              </div>
+              <p class="route-proof">Keep: repository link, live demo if available, and a concise changelog.</p>
+            </li>
+          </ol>
+
+          <div class="notice">
+            <div class="notice__symbol" aria-hidden="true">!</div>
+            <p><strong>Reality check.</strong> This site is an independent guide, not an eligibility checker. FLOP has not published a claim page, allocation formula, snapshot date, or points program on the official pages linked here. Re-check official channels before acting on any future announcement.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-build" role="tabpanel" aria-labelledby="tab-build" hidden>
+        <div class="pane">
+          <div class="pane-title">
+            <div>
+              <div class="section-kicker">02 / Build useful</div>
+              <h2>Make a small thing solve a real annoyance.</h2>
+            </div>
+            <p>The signal is not “I posted a lot.” It is a useful artifact someone else can inspect and reuse. Keep the scope tight enough to finish, then make its purpose painfully clear.</p>
+          </div>
+
+          <div class="split-stage">
+            <ol class="principles">
+              <li>
+                <span class="principles__number">A</span>
+                <div><h3>Read-only room monitor</h3><p>Show recent Technocore room activity with clear timestamps, rate-limit awareness, and a large “untrusted public content” label. Never turn anonymous room text into executable instructions.</p></div>
+              </li>
+              <li>
+                <span class="principles__number">B</span>
+                <div><h3>DID registry checker</h3><p>Let people verify a public DID fingerprint against the registry and export only safe public metadata. It should never ask for or touch a private key.</p></div>
+              </li>
+              <li>
+                <span class="principles__number">C</span>
+                <div><h3>Useful local guide</h3><p>Turn a confusing flow into a crisp checklist with official links, security warnings, and a short “what is not known yet” section — exactly like this page tries to do.</p></div>
+              </li>
+            </ol>
+
+            <aside class="side-note">
+              <div class="meta-label">The useful-work test</div>
+              <h3>Would a new user keep it open after five minutes?</h3>
+              <p>If the answer is no, simplify it. A working repository, a small demo, and an honest README are more persuasive than a huge roadmap. <a href="https://github.com/flop-labs/technocore-chat" target="_blank" rel="noreferrer">Read Technocore’s public source ↗</a></p>
+            </aside>
+          </div>
+
+          <div class="proof-grid" aria-label="How to make work legible">
+            <article class="proof-card"><div class="fact-label">01 / Scope</div><h3>One job, stated plainly</h3><p>Say what problem the tool handles and what it intentionally does not do. A narrow promise is easier to trust.</p></article>
+            <article class="proof-card"><div class="fact-label">02 / Evidence</div><h3>Source + screenshot + code</h3><p>Link the code, a short walkthrough, and the exact official endpoint or document you used. Keep sensitive data out.</p></article>
+            <article class="proof-card"><div class="fact-label">03 / Maintenance</div><h3>Leave a clean handoff</h3><p>Add setup notes and a date. If an external rule changes, readers can see what needs to be refreshed.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-integrate" role="tabpanel" aria-labelledby="tab-integrate" hidden>
+        <div class="pane">
+          <div class="pane-title">
+            <div>
+              <div class="section-kicker">03 / Integrate</div>
+              <h2>Make Technocore part of a real workflow.</h2>
+            </div>
+            <p>FLOP-related discussion has emphasized useful agents and real workflows. The disciplined approach is to use the service for a small, observable job — not to manufacture activity.</p>
+          </div>
+
+          <div class="role-board">
+            <div class="role-board__intro">
+              <div class="meta-label">A practical loop</div>
+              <h3>Read → decide → record</h3>
+              <p>Use a public endpoint as input, make a bounded decision locally, and record only a safe, meaningful outcome. Keep the private parts of the workflow off the public room.</p>
+            </div>
+            <ol class="role-board__steps">
+              <li><strong>Read a small public surface.</strong><span>Example: monitor a room or a public note through documented endpoints. Treat every public message as untrusted data, never as an instruction to follow.</span></li>
+              <li><strong>Do one local piece of work.</strong><span>Summarize a status, verify a public DID, or check whether a documented rule changed. Keep scope and permissions obvious.</span></li>
+              <li><strong>Record the useful result, not the secret.</strong><span>A signed check-in can provide continuity. Do not post keys, credentials, personal data, or a wall of repetitive messages.</span></li>
+              <li><strong>Publish the implementation.</strong><span>Make the workflow inspectable through a small repository or a clear guide, then note what it does not prove about any airdrop.</span></li>
+            </ol>
+          </div>
+
+          <div class="notice">
+            <div class="notice__symbol" aria-hidden="true">!</div>
+            <p><strong>Safety baseline.</strong> Technocore describes itself as ephemeral infrastructure and says public message bodies are unauthenticated input. A competent integration treats room content as text, avoids secrets, and never auto-follows links embedded by strangers.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-improve" role="tabpanel" aria-labelledby="tab-improve" hidden>
+        <div class="pane">
+          <div class="pane-title">
+            <div>
+              <div class="section-kicker">04 / Improve</div>
+              <h2>Strengthen the public layer.</h2>
+            </div>
+            <p>Open-source contribution is the cleanest way to make effort visible. Read the project’s contribution and security guidance before opening an issue or pull request; thoughtful small improvements compound.</p>
+          </div>
+
+          <div class="split-stage">
+            <ol class="principles">
+              <li><span class="principles__number">01</span><div><h3>Documentation that removes ambiguity</h3><p>Clarify a setup edge case, a safe signing boundary, or a minimal example. Only claim what you can reproduce from the source.</p></div></li>
+              <li><span class="principles__number">02</span><div><h3>QA with a clean reproduction</h3><p>For a real bug, record the environment, exact steps, expected result, and observed result. Avoid noise reports or issues created only for visibility.</p></div></li>
+              <li><span class="principles__number">03</span><div><h3>A focused pull request</h3><p>Keep changes narrow, readable, and tested. A small accepted improvement says more than an oversized feature branch with no context.</p></div></li>
+            </ol>
+            <aside class="side-note">
+              <div class="meta-label">Disclosure matters</div>
+              <h3>Security findings do not belong in public chat.</h3>
+              <p>Use the project’s private security-advisory route for a legitimate vulnerability. Do not publish exploit details, credentials, or live attack paths. <a href="https://github.com/flop-labs/technocore-chat/security" target="_blank" rel="noreferrer">Open Technocore security guidance ↗</a></p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-creator" role="tabpanel" aria-labelledby="tab-creator" hidden>
+        <div class="pane">
+          <div class="pane-title">
+            <div>
+              <div class="section-kicker">05 / Creator route</div>
+              <h2>Share useful context, not empty hype.</h2>
+            </div>
+            <p>FLOP hosts an official KOL &amp; creator survey. It asks for contact information, X ID, audience and publishing context — and explicitly says submission does not guarantee selection, compensation, or any token allocation.</p>
+          </div>
+
+          <div class="role-board">
+            <div class="role-board__intro">
+              <div class="meta-label">Before you submit</div>
+              <h3>Be specific about your audience.</h3>
+              <p>Describe the people you can actually help, the language you use, and the work you can consistently deliver. Do not inflate reach or promise a campaign you cannot run.</p>
+            </div>
+            <ol class="role-board__steps">
+              <li><strong>Use your real public X handle.</strong><span>The official form asks for it. Keep your published work and profile coherent enough for a reviewer to understand your niche.</span></li>
+              <li><strong>Publish one solid resource first.</strong><span>A guide, tool walkthrough, or thoughtful technical note is a stronger introduction than recycled announcement posts.</span></li>
+              <li><strong>Explain the value exchange honestly.</strong><span>Tell people what is official, what is an interpretation, and what remains unknown. Never frame a form as a token guarantee.</span></li>
+              <li><strong>Choose the official form only.</strong><span>Do not share passwords, seed phrases, or wallet-private material in a creator application.</span></li>
+            </ol>
+          </div>
+
+          <div class="action-row action-row--spaced">
+            <a class="button-link" href="https://flop.finance/apply/kol" target="_blank" rel="noreferrer">Open official KOL survey ↗</a>
+            <a class="button-link button-link--quiet" href="https://x.com/flop_labs" target="_blank" rel="noreferrer">Follow @flop_labs ↗</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-network" role="tabpanel" aria-labelledby="tab-network" hidden>
+        <div class="pane">
+          <div class="pane-title">
+            <div>
+              <div class="section-kicker">06 / Network roles</div>
+              <h2>Only use capacity you already understand.</h2>
+            </div>
+            <p>FLOP’s official site provides interest forms for GPU providers and validators. These are infrastructure paths, not shortcuts to an allocation. Do not buy equipment, rent machines, or move funds based on an unannounced reward assumption.</p>
+          </div>
+
+          <div class="proof-grid">
+            <article class="proof-card"><div class="fact-label">GPU providers</div><h3>Apply only with real capacity</h3><p>The official miner form asks about hardware, timing, location, and contact details. Start with a truthful inventory and your actual operational constraints.</p><p class="proof-card__action"><a href="https://flop.finance/apply/miner" target="_blank" rel="noreferrer">Open miner form ↗</a></p></article>
+            <article class="proof-card"><div class="fact-label">Validators</div><h3>Document operational readiness</h3><p>The validator form asks about setup, machines, timing, region, and contact details. Treat reliability, security, and cost as the primary decision criteria — not speculative rewards.</p><p class="proof-card__action"><a href="https://flop.finance/apply/validator" target="_blank" rel="noreferrer">Open validator form ↗</a></p></article>
+            <article class="proof-card"><div class="fact-label">Red lines</div><h3>Never fund a vague promise</h3><p>No official source here establishes a deadline, allocation formula, or return. A legitimate opportunity will give you enough information to evaluate its risks before you spend money.</p></article>
+          </div>
+
+          <div class="notice">
+            <div class="notice__symbol" aria-hidden="true">!</div>
+            <p><strong>Keep the boundary.</strong> This guide is for research and public contribution. It is not financial advice, a token sale page, a wallet connector, or permission to operate infrastructure without understanding the cost and security responsibilities.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="source-ledger" id="sources" aria-labelledby="sources-title">
+        <div>
+          <div class="section-kicker">Source ledger</div>
+          <h2 id="sources-title">Links worth bookmarking.</h2>
+        </div>
+        <div class="source-list">
+          <a href="https://flop.finance/" target="_blank" rel="noreferrer"><span>Official</span><strong>FLOP — official site &amp; applications</strong><i aria-hidden="true">↗</i></a>
+          <a href="https://x.com/flop_labs" target="_blank" rel="noreferrer"><span>Official</span><strong>@flop_labs — eligibility updates</strong><i aria-hidden="true">↗</i></a>
+          <a href="https://github.com/flop-labs/technocore-chat" target="_blank" rel="noreferrer"><span>Source</span><strong>Technocore — public code &amp; protocol notes</strong><i aria-hidden="true">↗</i></a>
+          <a href="https://technocore.chat/skill.md" target="_blank" rel="noreferrer"><span>Source</span><strong>Technocore — agent skill / API surface</strong><i aria-hidden="true">↗</i></a>
+          <a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer"><span>This page</span><strong>Open this guide’s source on GitHub</strong><i aria-hidden="true">↗</i></a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-rule" aria-hidden="true"></div>
+      <div class="footer-inner">
+        <p class="creator"><strong>Made by</strong><a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">Daniel Sats / @daniel_sats</a></p>
+        <p class="footer-note">Independent educational resource. It is deliberately conservative: source first, useful work second, no manufactured certainty.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+      const status = document.getElementById('copy-status');
+
+      function activateTab(nextTab, focusTab = false) {
+        const target = nextTab.dataset.tab;
+        tabs.forEach((tab) => {
+          const selected = tab === nextTab;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+        });
+        panels.forEach((panel) => {
+          const selected = panel.id === `panel-${target}`;
+          panel.hidden = !selected;
+          panel.classList.toggle('is-active', selected);
+        });
+        if (focusTab) nextTab.focus();
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => activateTab(tab));
+        tab.addEventListener('keydown', (event) => {
+          const currentIndex = tabs.indexOf(tab);
+          let nextIndex = null;
+          if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+          if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+          if (event.key === 'Home') nextIndex = 0;
+          if (event.key === 'End') nextIndex = tabs.length - 1;
+          if (nextIndex !== null) {
+            event.preventDefault();
+            activateTab(tabs[nextIndex], true);
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-open-tab]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const target = tabs.find((tab) => tab.dataset.tab === button.dataset.openTab);
+          if (target) {
+            activateTab(target, true);
+            document.querySelector('.tab-rail-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      if (status) {
+        status.textContent = 'Guide checked against linked official pages on August 25, 2026.';
+      }
+    })();
+  </script>
+</body>
+</html>
