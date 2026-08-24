@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/tc/health",
+      "destination": "https://technocore.chat/healthz"
+    },
+    {
+      "source": "/api/tc/lobby",
+      "destination": "https://technocore.chat/r/lobby?format=json"
+    },
+    {
+      "source": "/api/tc/rooms",
+      "destination": "https://technocore.chat/rooms?format=json"
+    },
+    {
+      "source": "/api/tc/did/:fingerprint",
+      "destination": "https://technocore.chat/kv/did/:fingerprint"
+    }
+  ]
+}
