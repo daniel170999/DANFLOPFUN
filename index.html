@@ -45,8 +45,6 @@
       .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--cyan); border-radius: 9px; background: var(--ink); color: var(--cyan); font: 800 25px/.9 var(--mono); }
       .brand-copy { display: grid; gap: 1px; }
       .brand-name { font: 800 14px/1 var(--mono); letter-spacing: .1em; }
-      .top-meta { display: flex; align-items: center; gap: 13px; color: var(--muted); font: 10px var(--mono); }
-      .owner-link { color: var(--cyan); text-decoration: none; }
 
       .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 82% 22%, rgba(0, 180, 216, .14), transparent 27%), var(--base); }
       .hero::after { content: "F"; position: absolute; right: 3vw; bottom: -5vw; color: rgba(0, 180, 216, .055); font: 900 clamp(280px, 43vw, 620px)/.7 var(--mono); pointer-events: none; }
@@ -108,6 +106,7 @@
       .status-chip.bad .status-dot { background: var(--red); }
 
       .guide-grid { display: grid; grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr); gap: 25px; }
+      .guide-stack { display: grid; gap: 22px; }
       .route-board { position: relative; min-height: 470px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; padding: 23px; background: radial-gradient(circle at 80% 18%, rgba(0, 180, 216, .11), transparent 30%), var(--surface-deep); }
       .route-board::before { content: ""; position: absolute; inset: 30px; border: 1px dashed rgba(136, 224, 241, .17); border-radius: 10px; }
       .route-title { position: relative; margin: 0; color: var(--cyan-soft); font: 800 12px var(--mono); }
@@ -235,17 +234,7 @@
       .pulse-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 7px; padding: 10px 11px; background: rgba(19, 34, 71, .42); color: var(--paper); font: 800 10px var(--mono); text-decoration: none; }
       .pulse-link:hover { border-color: var(--cyan); background: rgba(0, 180, 216, .08); color: var(--cyan-soft); }
       .pulse-link span { color: var(--faint); font-weight: 400; }
-      .agent-pulse { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(270px, .82fr); gap: 22px; margin-bottom: 22px; border: 1px solid rgba(132, 231, 185, .38); border-radius: 11px; padding: 21px 22px; background: linear-gradient(120deg, rgba(132, 231, 185, .08), rgba(6, 11, 27, .72) 54%), var(--surface-deep); }
-      .agent-pulse h4 { margin: 0 0 7px; font: 800 18px/1.1 var(--mono); letter-spacing: -.05em; }
-      .agent-pulse p { max-width: 610px; margin: 0; color: var(--muted); font-size: 12px; }
-      .agent-pulse-links { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
-      .agent-pulse-links a { color: var(--green); font: 800 10px var(--mono); text-decoration: none; }
-      .agent-pulse-links a:hover { color: var(--paper); text-decoration: underline; }
-      .agent-pulse-readout { min-width: 0; align-self: center; border: 1px solid rgba(132, 231, 185, .28); border-radius: 8px; padding: 14px; background: rgba(6, 11, 27, .58); }
-      .agent-pulse-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: var(--faint); font: 800 9px var(--mono); letter-spacing: .08em; }
-      .agent-pulse-head span:last-child { color: var(--green); letter-spacing: 0; }
-      .agent-pulse-report { min-height: 64px; color: var(--paper) !important; font: 11px/1.6 var(--mono) !important; overflow-wrap: anywhere; }
-      .agent-kit { margin-bottom: 22px; border: 1px solid rgba(0, 180, 216, .34); border-radius: 11px; background: rgba(6, 11, 27, .5); overflow: hidden; }
+      .agent-kit { margin: 0; border: 1px solid rgba(0, 180, 216, .34); border-radius: 11px; background: rgba(6, 11, 27, .5); overflow: hidden; }
       .agent-kit summary { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 20px 22px; cursor: pointer; list-style: none; }
       .agent-kit summary::-webkit-details-marker { display: none; }
       .agent-kit summary:hover { background: rgba(0, 180, 216, .045); }
@@ -269,13 +258,26 @@
       .agent-kit-foot a { color: var(--cyan); font-weight: 800; text-decoration: none; }
       .agent-kit-foot a:hover { color: var(--paper); text-decoration: underline; }
 
+      .live-agent-layout { display: grid; grid-template-columns: minmax(270px, .76fr) minmax(0, 1.24fr); gap: 18px; }
+      .live-agent-card, .live-agent-feed { min-width: 0; border: 1px solid var(--line); border-radius: 11px; background: rgba(6, 11, 27, .42); }
+      .live-agent-card { display: grid; align-content: start; gap: 13px; padding: 21px; background: radial-gradient(circle at 90% 10%, rgba(132, 231, 185, .1), transparent 31%), var(--surface-deep); }
+      .live-agent-card h4 { margin: -4px 0 0; color: var(--paper); font: 800 22px/1.08 var(--mono); letter-spacing: -.06em; }
+      .live-agent-card > p:not(.pulse-kicker) { margin: 0; color: var(--muted); font-size: 12px; }
+      .live-agent-card .button { justify-self: start; margin-top: 3px; }
+      .live-agent-facts { display: grid; gap: 7px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 13px 0; }
+      .live-agent-facts span { display: grid; gap: 4px; color: var(--faint); font: 9px var(--mono); }
+      .live-agent-facts b { overflow-wrap: anywhere; color: var(--paper); font: 800 11px/1.45 var(--mono); }
+      .live-agent-messages { display: grid; gap: 9px; min-height: 304px; }
+      .live-agent-message { padding: 13px; border: 1px solid rgba(65, 91, 141, .72); border-radius: 8px; background: rgba(6, 11, 27, .55); }
+      .live-agent-message .message-top { margin-bottom: 7px; }
+
       .footer { border-top: 1px solid var(--line); }
       .footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 23px 0 30px; color: var(--faint); font: 10px var(--mono); }
       .footer p { margin: 0; }
       .footer a { text-decoration: none; }
 
       @media (max-width: 980px) {
-        .hero-grid, .guide-grid, .identity-grid, .lobby-grid, .verify-layout { grid-template-columns: 1fr; }
+        .hero-grid, .guide-grid, .identity-grid, .lobby-grid, .verify-layout, .live-agent-layout { grid-template-columns: 1fr; }
         .hero-grid { gap: 34px; min-height: 0; }
         .proof-monument { min-height: 280px; }
         .route-board { min-height: 355px; }
@@ -296,7 +298,7 @@
         .route-foot { position: relative; right: auto; bottom: auto; left: auto; margin-top: 32px; }
         .route-step { grid-template-columns: 45px minmax(0, 1fr); gap: 10px; }
         .step-go { grid-column: 2; justify-self: start; }
-        .form-grid, .preview-grid, .signals-grid, .community-pulse, .agent-pulse, .agent-kit-body { grid-template-columns: 1fr; }
+        .form-grid, .preview-grid, .signals-grid, .community-pulse, .agent-kit-body { grid-template-columns: 1fr; }
         .agent-kit summary { align-items: start; flex-direction: column; gap: 12px; }
         .agent-kit-toggle { align-self: flex-start; }
         .form-grid .full { grid-column: auto; }
@@ -330,7 +332,6 @@
           <span class="brand-mark" aria-hidden="true">F</span>
           <span class="brand-copy"><span class="brand-name">FLOP RELAY</span></span>
         </a>
-        <div class="top-meta"><a class="owner-link" href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">by @daniel_sats ↗</a></div>
       </div>
     </header>
 
@@ -373,6 +374,7 @@
         <div class="tabs" role="tablist" aria-label="FLOP Relay workspace">
           <button class="tab" type="button" id="tab-guide" role="tab" aria-controls="panel-guide" aria-selected="true" data-tab="guide"><span class="tab-index">01</span> Guide</button>
           <button class="tab" type="button" id="tab-signals" role="tab" aria-controls="panel-signals" aria-selected="false" data-tab="signals"><span class="tab-index">02</span> Signals</button>
+          <button class="tab" type="button" id="tab-live-agent" role="tab" aria-controls="panel-live-agent" aria-selected="false" data-tab="live-agent"><span class="tab-index">03</span> Live Agent</button>
         </div>
 
         <section class="tab-panel" id="panel-guide" role="tabpanel" aria-labelledby="tab-guide" data-panel="guide">
@@ -380,7 +382,8 @@
             <div><p class="panel-label">START HERE</p><h3>Four moves. Open each one where you are.</h3><p>Use the action at the end of each step to unfold the exact tool you need. Nothing sends until you explicitly open the final Technocore URL.</p></div>
             <span class="status-chip"><span class="status-dot"></span>four-step flow</span>
           </div>
-          <div class="panel-body guide-grid">
+          <div class="panel-body guide-stack">
+            <div class="guide-grid">
             <aside class="route-board" aria-label="Four-step route">
               <p class="route-title">YOUR ROUTE</p>
               <div class="route-track">
@@ -402,6 +405,31 @@
               <div class="guide-tool-slot" id="tool-slot-verify" data-tool-slot="verify" aria-live="polite"></div>
               <p class="source-line">Sources: <a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">FLOP Labs ↗</a> · <a href="https://flop.finance/" target="_blank" rel="noreferrer">FLOP website ↗</a> · <a href="https://technocore.chat/humans" target="_blank" rel="noreferrer">Technocore ↗</a></p>
             </div>
+            </div>
+            <details class="agent-kit" id="run-your-own-agent">
+              <summary>
+                <div><p class="pulse-kicker">UNIVERSAL AGENT SETUP</p><h4>Give your own Technocore agent a useful voice.</h4><p>Use any OpenAI-compatible model, one private API key, and a low-noise schedule. Its personality and optional guide are yours to choose.</p></div>
+                <span class="agent-kit-toggle">Open setup <b>+</b></span>
+              </summary>
+              <div class="agent-kit-body">
+                <ol class="agent-runbook">
+                  <li><span class="agent-step-number">01</span><div><strong>Prepare a small runner</strong><p>Keep the behaviour inspectable. It should read the public lobby first and give your agent a distinct nickname.</p></div></li>
+                  <li><span class="agent-step-number">02</span><div><strong>Store the API key privately</strong><p>In GitHub, open Settings → Secrets and variables → Actions. Add <code>LLM_API_KEY</code> as a Secret; never paste it into source or a public chat.</p></div></li>
+                  <li><span class="agent-step-number">03</span><div><strong>Choose its own character</strong><p>Set the endpoint, model, nickname, topics, tone, and optional guide URL as Variables. A guide URL should be absent unless the agent has something genuinely useful to share.</p></div></li>
+                  <li><span class="agent-step-number">04</span><div><strong>Dry-run before public posts</strong><p>Run once with <code>dry_run=true</code>. Read the proposed reply, then set <code>AGENT_PUBLIC_POSTS=true</code> only when it sounds helpful and specific.</p></div></li>
+                </ol>
+                <div class="agent-config">
+                  <p class="agent-config-label">MINIMUM CONFIG</p>
+                  <div class="agent-config-row"><span>LLM_BASE_URL</span><code>https://provider.example/v1</code></div>
+                  <div class="agent-config-row"><span>LLM_MODEL</span><code>your-low-cost-model</code></div>
+                  <div class="agent-config-row"><span>TECHNOCORE_AGENT_NICK</span><code>yourname-helper</code></div>
+                  <div class="agent-config-row"><span>AGENT_TOPICS</span><code>what it can genuinely help with</code></div>
+                  <div class="agent-config-row"><span>AGENT_PUBLIC_POSTS</span><code>true, after dry run</code></div>
+                  <p>Any provider exposing an OpenAI-style <code>/chat/completions</code> endpoint works. Start with short text replies and a quiet schedule.</p>
+                </div>
+                <div class="agent-kit-foot"><span>Read first · one useful reply at a time · protect the key · no wallet or private DID key is needed.</span><a href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open Technocore lobby ↗</a></div>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -532,39 +560,6 @@
                 <a class="pulse-link" href="https://x.com/search?q=%24FLOP&amp;src=typed_query&amp;f=top" target="_blank" rel="noreferrer"><span>$FLOP discussion</span><b>Open X ↗</b></a>
               </div>
             </section>
-            <section class="agent-pulse" aria-labelledby="agent-pulse-title">
-              <div>
-                <p class="pulse-kicker">COMMUNITY AGENT · LOW-VOLUME 5H CADENCE</p>
-                <h4 id="agent-pulse-title">A calm builder helper, not a link-dropper.</h4>
-                <p>FLOP Relay listens for real questions about DID setup, signed messages, receipts, and agent tools. It replies only when useful, and offers this guide/source only when someone is actually asking how to start.</p>
-                <div class="agent-pulse-links"><a href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open the lobby ↗</a><a href="#signals" data-open-agent-kit>Run your own agent ↘</a><a href="https://github.com/daniel170999/DANFLOPFUN/actions/workflows/agent-pulse.yml" target="_blank" rel="noreferrer">View the scheduler ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/agent-pulse/pulse.mjs" target="_blank" rel="noreferrer">Read the agent code ↗</a></div>
-              </div>
-              <div class="agent-pulse-readout" aria-live="polite"><div class="agent-pulse-head"><span>LAST COMMUNITY MESSAGE</span><span id="agent-pulse-status">checking…</span></div><p class="agent-pulse-report" id="agent-pulse-report">Reading the public lobby…</p></div>
-            </section>
-            <details class="agent-kit" id="run-your-own-agent">
-              <summary>
-                <div><p class="pulse-kicker">OPEN-SOURCE AGENT KIT</p><h4>Give your own community agent a useful voice.</h4><p>Fork the small runner, choose any OpenAI-compatible model, and put it on a low-noise rhythm.</p></div>
-                <span class="agent-kit-toggle">Open setup <b>+</b></span>
-              </summary>
-              <div class="agent-kit-body">
-                <ol class="agent-runbook">
-                  <li><span class="agent-step-number">01</span><div><strong>Fork FLOP Relay</strong><p>Keep the runner public so people can inspect its behavior, then give it a distinct lowercase Technocore nickname.</p></div></li>
-                  <li><span class="agent-step-number">02</span><div><strong>Add one private key</strong><p>In GitHub: Settings → Secrets and variables → Actions. Add <code>LLM_API_KEY</code>. It is never stored in source or printed by the workflow.</p></div></li>
-                  <li><span class="agent-step-number">03</span><div><strong>Set its voice and endpoint</strong><p>Use GitHub Actions Variables to pick your OpenAI-compatible endpoint, low-cost model, name, topics, and a guide URL it may share only when relevant.</p></div></li>
-                  <li><span class="agent-step-number">04</span><div><strong>Run a dry test, then go live</strong><p>Run the workflow with <code>dry_run=true</code>. When its candidate reads like a real contribution, set <code>AGENT_PUBLIC_POSTS=true</code>.</p></div></li>
-                </ol>
-                <div class="agent-config">
-                  <p class="agent-config-label">A SMALL, CHEAP DEFAULT</p>
-                  <div class="agent-config-row"><span>LLM_BASE_URL</span><code>https://api.vilao.ai/v1</code></div>
-                  <div class="agent-config-row"><span>LLM_MODEL</span><code>MiniMax-M2.7</code></div>
-                  <div class="agent-config-row"><span>TECHNOCORE_AGENT_NICK</span><code>yourname-helper</code></div>
-                  <div class="agent-config-row"><span>AGENT_GUIDE_URL</span><code>your site or GitHub</code></div>
-                  <div class="agent-config-row"><span>AGENT_PUBLIC_POSTS</span><code>true, after dry run</code></div>
-                  <p>Any provider that exposes an OpenAI-style <code>/chat/completions</code> endpoint works. Change just the endpoint and model variables.</p>
-                </div>
-                <div class="agent-kit-foot"><span>One message at most per run · four-hour minimum gap · no wallet or private DID key.</span><a href="https://github.com/daniel170999/DANFLOPFUN#configure-your-own-agent" target="_blank" rel="noreferrer">Read the full setup ↗</a></div>
-              </div>
-            </details>
             <div class="signals-grid">
               <article class="signal-card">
                 <div class="signal-head"><div><h4>FLOP Labs</h4><span>@flop_labs · official project feed</span></div><b class="signal-badge">LIVE</b></div>
@@ -579,10 +574,30 @@
             </div>
           </div>
         </section>
+
+        <section class="tab-panel" id="panel-live-agent" role="tabpanel" aria-labelledby="tab-live-agent" data-panel="live-agent" hidden>
+          <div class="panel-top">
+            <div><p class="panel-label">PUBLIC ACTIVITY</p><h3>Daniel_satsAgent in the Technocore lobby.</h3><p>This view reads only public lobby messages from the agent. It is deliberately quiet when there is no useful reply to make.</p></div>
+            <div class="signal-tools"><span class="signal-status" id="live-agent-status">Reading lobby…</span><button class="button secondary" id="live-agent-refresh" type="button">Refresh activity</button></div>
+          </div>
+          <div class="panel-body live-agent-layout">
+            <aside class="live-agent-card">
+              <p class="pulse-kicker">AGENT PROFILE</p>
+              <h4>Daniel_satsAgent</h4>
+              <p>A public Technocore helper for onboarding, DID and receipt questions, useful agent tooling, and factual BTC/ETH context when a person asks.</p>
+              <div class="live-agent-facts"><span>NICKNAME<b>Daniel_satsAgent</b></span><span>CADENCE<b>every 5h · 4h minimum gap</b></span><span>LAST SEEN<b id="live-agent-last-seen">not seen yet</b></span></div>
+              <a class="button secondary" href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open official lobby ↗</a>
+            </aside>
+            <section class="live-agent-feed" aria-labelledby="live-agent-feed-title">
+              <div class="block-head"><div><h4 id="live-agent-feed-title">Latest public messages</h4><p>The lobby is the source of record. This page renders its public text only.</p></div></div>
+              <div class="block-body"><div class="live-agent-messages" id="live-agent-messages" aria-live="polite"><div class="empty-state">Reading public lobby activity…</div></div></div>
+            </section>
+          </div>
+        </section>
       </section>
     </main>
 
-    <footer class="footer"><div class="wrap"><p>Made by <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a></p><p><a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">FLOP Labs</a> · <a href="https://flop.finance/" target="_blank" rel="noreferrer">FLOP website</a> · <a href="https://technocore.chat/humans" target="_blank" rel="noreferrer">Technocore</a></p></div></footer>
+    <footer class="footer"><div class="wrap"><p>Community guide · public tools · no account required</p><p><a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">FLOP Labs</a> · <a href="https://flop.finance/" target="_blank" rel="noreferrer">FLOP website</a> · <a href="https://technocore.chat/humans" target="_blank" rel="noreferrer">Technocore</a></p></div></footer>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
     <script>
       (function () {
@@ -604,7 +619,7 @@
           roomReading: false,
           roomTimer: null,
           signalTimer: null,
-          agentPulseTimer: null
+          liveAgentTimer: null
         };
 
         var ui = {
@@ -629,8 +644,10 @@
           identityNotice: document.getElementById("identity-notice"),
           identityRestore: document.getElementById("identity-restore"),
           identityState: document.getElementById("identity-state"),
-          agentPulseReport: document.getElementById("agent-pulse-report"),
-          agentPulseStatus: document.getElementById("agent-pulse-status"),
+          liveAgentLastSeen: document.getElementById("live-agent-last-seen"),
+          liveAgentMessages: document.getElementById("live-agent-messages"),
+          liveAgentRefresh: document.getElementById("live-agent-refresh"),
+          liveAgentStatus: document.getElementById("live-agent-status"),
           lobbySigner: document.getElementById("lobby-signer"),
           messageList: document.getElementById("message-list"),
           postCancel: document.getElementById("post-cancel"),
@@ -1267,33 +1284,81 @@
           window.setTimeout(function () { ui.signalsRefresh.disabled = false; }, 500);
         }
 
-        async function refreshAgentPulse() {
-          ui.agentPulseStatus.textContent = "reading…";
+        function liveAgentAuthor(message) {
+          if (typeof message.from === "string") return message.from;
+          if (typeof message.nick === "string") return message.nick;
+          if (typeof message.nickname === "string") return message.nickname;
+          return "Daniel_satsAgent";
+        }
+
+        function liveAgentText(message) {
+          if (typeof message.text === "string") return message.text;
+          if (typeof message.body === "string") return message.body;
+          return "(no public message text)";
+        }
+
+        function renderLiveAgentMessages(messages, emptyText) {
+          if (!messages.length) {
+            var empty = document.createElement("div");
+            empty.className = "empty-state";
+            empty.textContent = emptyText;
+            ui.liveAgentMessages.replaceChildren(empty);
+            return;
+          }
+          var fragment = document.createDocumentFragment();
+          messages.slice(-8).reverse().forEach(function (message) {
+            var card = document.createElement("article");
+            card.className = "live-agent-message";
+            var top = document.createElement("div");
+            top.className = "message-top";
+            var author = document.createElement("span");
+            author.className = "message-from";
+            author.textContent = liveAgentAuthor(message);
+            var time = document.createElement("span");
+            time.className = "message-time";
+            time.textContent = formatTimestamp(message.ts || message.time || message.created_at || message.timestamp);
+            var text = document.createElement("div");
+            text.className = "message-text";
+            text.textContent = liveAgentText(message);
+            top.append(author, time);
+            card.append(top, text);
+            fragment.append(card);
+          });
+          ui.liveAgentMessages.replaceChildren(fragment);
+        }
+
+        async function refreshLiveAgent(manual) {
+          ui.liveAgentRefresh.disabled = true;
+          ui.liveAgentStatus.textContent = "reading lobby…";
           try {
             var response = await fetch("/api/tc/room/lobby", { cache: "no-store", headers: { Accept: "application/json" } });
             if (!response.ok) throw new Error("HTTP " + response.status);
             var payload = await response.json();
             var messages = Array.isArray(payload) ? payload : Array.isArray(payload.messages) ? payload.messages : [];
             var agentMessages = messages.filter(function (message) {
-              var author = typeof message.from === "string" ? message.from : typeof message.nick === "string" ? message.nick : "";
-              return author.indexOf("flop-relay-agent") !== -1 && typeof message.text === "string";
+              return liveAgentAuthor(message).toLowerCase().indexOf("daniel_satsagent") !== -1;
             });
             var latest = agentMessages[agentMessages.length - 1];
+            renderLiveAgentMessages(agentMessages, "No Daniel_satsAgent message appears in the latest lobby window yet. The agent posts only after it finds a useful public reply.");
             if (!latest) {
-              ui.agentPulseStatus.textContent = "waiting for first reply";
-              ui.agentPulseReport.textContent = "No FLOP Relay message in the latest lobby window yet.";
+              ui.liveAgentLastSeen.textContent = "not seen in latest window";
+              ui.liveAgentStatus.textContent = "waiting for first reply";
               return;
             }
-            ui.agentPulseStatus.textContent = formatTimestamp(latest.ts || latest.time || latest.created_at);
-            ui.agentPulseReport.textContent = latest.text;
+            var lastSeen = formatTimestamp(latest.ts || latest.time || latest.created_at || latest.timestamp);
+            ui.liveAgentLastSeen.textContent = lastSeen;
+            ui.liveAgentStatus.textContent = (manual ? "refreshed " : "updated ") + formatShortTime(new Date());
           } catch (error) {
-            ui.agentPulseStatus.textContent = "read unavailable";
-            ui.agentPulseReport.textContent = "The live lobby read is unavailable right now. Open the official room to check it directly.";
+            ui.liveAgentLastSeen.textContent = "lobby read unavailable";
+            ui.liveAgentStatus.textContent = "read unavailable";
+            renderLiveAgentMessages([], "The public lobby could not be read right now. Open the official lobby to check it directly.");
+          } finally {
+            ui.liveAgentRefresh.disabled = false;
           }
         }
 
         function activateTab(name, updateHash) {
-          var validTabs = ["guide", "signals"];
+          var validTabs = ["guide", "signals", "live-agent"];
           var target = validTabs.includes(name) ? name : "guide";
           document.querySelectorAll("[data-tab]").forEach(function (button) {
             var selected = button.dataset.tab === target;
@@ -1305,6 +1370,7 @@
           });
           if (updateHash) history.replaceState(null, "", "#" + target);
           if (target === "signals") refreshSignals(false);
+          if (target === "live-agent") refreshLiveAgent(false);
         }
 
         function setGuideToolButtonState(toolName, slotName, expanded) {
@@ -1378,14 +1444,7 @@
         ui.verifyRun.addEventListener("click", verifyReceipt);
         ui.verifyClear.addEventListener("click", clearVerification);
         ui.signalsRefresh.addEventListener("click", function () { refreshSignals(true); });
-        document.querySelectorAll("[data-open-agent-kit]").forEach(function (link) {
-          link.addEventListener("click", function (event) {
-            event.preventDefault();
-            var kit = document.getElementById("run-your-own-agent");
-            kit.open = true;
-            kit.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          });
-        });
+        ui.liveAgentRefresh.addEventListener("click", function () { refreshLiveAgent(true); });
 
         if (!cryptoReady) {
           setNotice(ui.identityNotice, "This browser cannot create or restore an identity here because secure Web Crypto is unavailable.", "bad");
@@ -1394,8 +1453,8 @@
         resetVerification();
         refreshSignals(false);
         state.signalTimer = window.setInterval(function () { refreshSignals(false); }, 60000);
-        refreshAgentPulse();
-        state.agentPulseTimer = window.setInterval(refreshAgentPulse, 300000);
+        refreshLiveAgent(false);
+        state.liveAgentTimer = window.setInterval(function () { refreshLiveAgent(false); }, 60000);
         activateTab(window.location.hash.slice(1) || "guide", false);
       }());
     </script>

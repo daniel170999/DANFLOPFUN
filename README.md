@@ -4,7 +4,7 @@
 
 **A compact, open-source guide for the FLOP × Technocore flow.**
 
-Built by [@daniel_sats](https://x.com/daniel_sats). FLOP Relay puts the public workflow in one place: make a local Ed25519 DID, protect its encrypted backup, publish the public reference, prepare one signed contribution, and verify the receipt locally.
+FLOP Relay puts the public workflow in one place: make a local Ed25519 DID, protect its encrypted backup, publish the public reference, prepare one signed contribution, and verify the receipt locally.
 
 ## The route
 
@@ -26,13 +26,13 @@ Built by [@daniel_sats](https://x.com/daniel_sats). FLOP Relay puts the public w
 
 ## Community agent
 
-`agent-pulse/pulse.mjs` is a small, independent participant for Technocore. It has a deliberately narrow character: calm, curious, technically honest, and more interested in helping a person solve a real onboarding or builder problem than generating chatter.
+`agent-pulse/pulse.mjs` is a generic reference runner for a small, independent Technocore participant. Each fork chooses its own name, nickname, topics, voice, and optional guide link; none of those personal settings are hardcoded in the public source.
 
-Every five hours, the GitHub Actions job reads the public lobby. It considers a reply only after someone else has spoken since its last turn, waits at least four hours between its own messages, and posts at most one concise line. The model can return `SKIP`; generic greetings, repeated promotion, financial claims, secret requests, duplicate messages, and unapproved outbound links are rejected.
+Every five hours, the GitHub Actions job reads the public lobby. It considers a reply only after someone else has spoken since its last turn, waits at least four hours between its own messages, and posts at most one concise line. The model can return `SKIP`; generic greetings, repeated promotion, financial claims, secret requests, duplicate messages, and unapproved outbound links are rejected. Closed `<think>` blocks are stripped and incomplete reasoning output is rejected before anything can post.
 
-FLOP Relay can point a newcomer to this guide/source only when a new lobby message is clearly asking about DID setup, Technocore onboarding, signing, or receipt verification. It does not lead with a link, does not claim to be official, and will not repeat the guide link while it remains in the public lobby window.
+When a fork configures `AGENT_GUIDE_URL`, it may point a newcomer to that independent guide only when a new lobby message is clearly asking about DID setup, Technocore onboarding, signing, or receipt verification. It does not lead with a link, does not claim to be official, and will not repeat the link while it remains in the public lobby window. Without that variable, it never includes a URL.
 
-The public conversation is at [Technocore lobby](https://technocore.chat/humans#r/lobby), and the scheduler source is [agent-pulse](agent-pulse/pulse.mjs) plus [the workflow](.github/workflows/agent-pulse.yml). Its messages are unsigned nickname posts; this automation never uses a wallet, seed phrase, or private DID key.
+The public conversation is at [Technocore lobby](https://technocore.chat/humans#r/lobby), and the scheduler source is [agent-pulse](agent-pulse/pulse.mjs) plus [the workflow](.github/workflows/agent-pulse.yml). Its messages are unsigned nickname posts; this automation never uses a wallet, seed phrase, or private DID key. It can provide a factual BTC/ETH price snapshot only when asked, without price targets, sentiment calls, or trading advice.
 
 ### Configure your own agent
 
@@ -50,17 +50,17 @@ Add these repository variables:
 | --- | --- | --- |
 | `LLM_BASE_URL` | `https://api.vilao.ai/v1` | Your provider's OpenAI-compatible base URL. |
 | `LLM_MODEL` | `MiniMax-M2.7` | The model ID sent to `chat/completions`. |
-| `TECHNOCORE_AGENT_NICK` | `yourname-helper` | A distinct lowercase public nickname. |
+| `TECHNOCORE_AGENT_NICK` | `yourname-helper` | A distinct public nickname. |
 | `AGENT_NAME` | `Your Relay` | The name used in its persona. |
-| `AGENT_OWNER_HANDLE` | `@yourhandle` | Public owner attribution used in the persona. |
-| `AGENT_GUIDE_URL` | `https://github.com/you/your-repo` | The only link it may share, and only for a relevant request. |
+| `AGENT_OWNER_HANDLE` | `@yourhandle` | Optional public owner attribution used in the persona. |
+| `AGENT_GUIDE_URL` | `https://example.com/your-guide` | Optional independent guide; the only link it may share, and only for a relevant request. |
 | `AGENT_TOPICS` | `DID setup, signing, verification, agent tools` | Topics it should care about. |
 | `AGENT_VOICE` | `calm, concise, technically honest` | How it should sound. |
 | `AGENT_PUBLIC_POSTS` | `false` | Set to `true` only after you approve a dry run. |
 
 Run **Actions → FLOP Relay community agent → Run workflow** with `dry_run=true`. That calls the model and prints a candidate, but never posts it. If the candidate is useful, set `AGENT_PUBLIC_POSTS=true`; scheduled five-hour runs then become the automatic posting path.
 
-The key is never written to this repository or printed by the runner. If your provider is not OpenAI-compatible, change the small `callLlm` adapter in [`agent-pulse/pulse.mjs`](agent-pulse/pulse.mjs) rather than putting credentials into source.
+The key is never written to this repository or printed by the runner. Any provider exposing an OpenAI-compatible `POST /chat/completions` endpoint works; if it does not, adapt the small `callLlm` function in [`agent-pulse/pulse.mjs`](agent-pulse/pulse.mjs) without putting credentials into source.
 
 ## Official references
 
