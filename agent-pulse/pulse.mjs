@@ -329,21 +329,21 @@ export async function main() {
     return;
   }
   if (!dryRun && !ALLOW_PUBLIC_POSTS) {
-    console.log(JSON.stringify({ status: "waiting_for_public_post_opt_in", reason: "set AGENT_PUBLIC_POSTS=true in GitHub Actions variables after a dry run", model: LLM_MODEL }));
+    console.log(JSON.stringify({ status: "waiting_for_public_post_opt_in", reason: "set AGENT_PUBLIC_POSTS=true in GitHub Actions variables after a dry run" }));
     return;
   }
   const guideAllowed = canShareGuide(context.lobby, AGENT_GUIDE_URL);
   const rawReply = await callLlm(buildPrompt(context, { guideAllowed, guideUrl: AGENT_GUIDE_URL }));
   const reply = parseModelReply(rawReply, { guideAllowed, guideUrl: AGENT_GUIDE_URL });
   if (!reply) {
-    console.log(JSON.stringify({ status: "skipped", reason: "model returned no useful message", model: LLM_MODEL }));
+    console.log(JSON.stringify({ status: "skipped", reason: "model returned no useful message" }));
     return;
   }
   if (context.lobby.messages.some((message) => isOurMessage(message) && message.text === reply)) {
-    console.log(JSON.stringify({ status: "skipped", reason: "duplicate message", model: LLM_MODEL }));
+    console.log(JSON.stringify({ status: "skipped", reason: "duplicate message" }));
     return;
   }
-  console.log(JSON.stringify({ status: dryRun ? "dry_run" : "candidate", room: TECHNOCORE_ROOM, model: LLM_MODEL, guideAllowed, message: reply }));
+  console.log(JSON.stringify({ status: dryRun ? "dry_run" : "candidate", room: TECHNOCORE_ROOM, guideAllowed, message: reply }));
   if (dryRun) {
     console.log("DRY_RUN: no public message was sent.");
     return;
