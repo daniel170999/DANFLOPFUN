@@ -6,9 +6,11 @@ import { pathToFileURL } from "node:url";
 const TECHNOCORE_BASE_URL = (process.env.TECHNOCORE_BASE_URL || "https://technocore.chat").replace(/\/$/u, "");
 const TECHNOCORE_ROOM = process.env.TECHNOCORE_ROOM || "lobby";
 const POST_NICK = process.env.POST_NICK || "community-relay";
-const LLM_BASE_URL = (process.env.LLM_BASE_URL || process.env.VILAO_BASE_URL || "https://api.vilao.ai/v1").replace(/\/$/u, "");
-const LLM_MODEL = process.env.LLM_MODEL || process.env.VILAO_MODEL || "MiniMax-M2.7";
-const LLM_API_KEY = process.env.LLM_API_KEY || process.env.VILAO_API_KEY || "";
+const LLM_BASE_URL = cleanText(process.env.LLM_BASE_URL || "").replace(/\/$/u, "");
+const LLM_MODEL = configText(process.env.LLM_MODEL, "", 120);
+const LLM_API_KEY = process.env.LLM_API_KEY || "";
+const LLM_MAX_TOKENS = boundedInteger(process.env.LLM_MAX_TOKENS, 320, 64, 4096);
+const LLM_TEMPERATURE = boundedNumber(process.env.LLM_TEMPERATURE, 0.65, 0, 1.5);
 const ALLOW_PUBLIC_POSTS = process.env.ALLOW_PUBLIC_POSTS === "true";
 const ROOM_PATTERN = /^[a-z0-9][a-z0-9_-]{0,47}$/u;
 const NICK_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,47}$/u;
@@ -39,6 +41,16 @@ function integerOrNull(value) {
 function numberOrNull(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function boundedInteger(value, fallback, minimum, maximum) {
+  const number = integerOrNull(value);
+  return number !== null && number >= minimum && number <= maximum ? number : fallback;
+}
+
+function boundedNumber(value, fallback, minimum, maximum) {
+  const number = numberOrNull(value);
+  return number !== null && number >= minimum && number <= maximum ? number : fallback;
 }
 
 function cleanText(value) {
@@ -229,7 +241,7 @@ export function stripModelReasoning(raw) {
 }
 
 async function callLlm(prompt) {
-  if (!LLM_API_KEY) throw new Error("LLM_API_KEY is not configured.");
+  if (!LLM_API_KEY || !LLM_BASE_URL || !LLM_MODEL) throw new Error("LLM_API_KEY, LLM_BASE_URL, and LLM_MODEL must be configured.");
   const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
@@ -243,8 +255,8 @@ async function callLlm(prompt) {
         { role: "system", content: "Return exactly SKIP or one final plain-text community message. Do not include analysis or <think> tags. Never expose secrets." },
         { role: "user", content: prompt },
       ],
-      temperature: 0.65,
-      max_tokens: 320,
+      temperature: LLM_TEMPERATURE,
+      max_tokens: LLM_MAX_TOKENS,
       stream: false,
     }),
     signal: AbortSignal.timeout(30_000),
@@ -300,14 +312,19 @@ export async function postMessage(message) {
 
 export async function main() {
   const dryRun = process.argv.includes("--dry-run");
+  const missingConfig = [
+    !LLM_API_KEY && "LLM_API_KEY",
+    !LLM_BASE_URL && "LLM_BASE_URL",
+    !LLM_MODEL && "LLM_MODEL",
+  ].filter(Boolean);
+  if (missingConfig.length) {
+    console.log(JSON.stringify({ status: "waiting_for_llm_config", missing: missingConfig, reason: "no public message was sent" }));
+    return;
+  }
   const context = await collectContext();
   const gate = conversationGate(context.lobby);
   if (!gate.shouldThink) {
     console.log(JSON.stringify({ status: "skipped", reason: gate.reason, room: TECHNOCORE_ROOM, messages: context.lobby.messageCount }));
-    return;
-  }
-  if (!LLM_API_KEY) {
-    console.log(JSON.stringify({ status: "waiting_for_api_key", reason: "no public message was sent", model: LLM_MODEL }));
     return;
   }
   if (!dryRun && !ALLOW_PUBLIC_POSTS) {

@@ -1,4 +1,4 @@
-name: FLOP Relay community agent
+name: Technocore community agent
 
 on:
   schedule:
@@ -29,19 +29,20 @@ jobs:
       AGENT_VOICE: ${{ vars.AGENT_VOICE }}
       LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
       LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_MAX_TOKENS: ${{ vars.LLM_MAX_TOKENS }}
+      LLM_TEMPERATURE: ${{ vars.LLM_TEMPERATURE }}
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-      VILAO_API_KEY: ${{ secrets.VILAO_API_KEY }}
       ALLOW_PUBLIC_POSTS: ${{ vars.AGENT_PUBLIC_POSTS }}
     steps:
       - name: Check API configuration
         id: config
         shell: bash
         run: |
-          if [ -n "${LLM_API_KEY:-}" ] || [ -n "${VILAO_API_KEY:-}" ]; then
+          if [ -n "${LLM_API_KEY:-}" ] && [ -n "${LLM_BASE_URL:-}" ] && [ -n "${LLM_MODEL:-}" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "LLM_API_KEY (preferred) or VILAO_API_KEY is not configured; no public message will be sent."
+            echo "LLM_API_KEY, LLM_BASE_URL, and LLM_MODEL must all be configured; no public message will be sent."
           fi
 
       - name: Checkout agent source
