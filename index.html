@@ -3,422 +3,540 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="FLOP Relay: a practical Technocore guide, local signer, and live community signal desk." />
+    <meta name="description" content="FLOP Relay is a browser-local Technocore identity, lobby, and proof verification desk." />
     <meta name="theme-color" content="#0A1128" />
-    <title>FLOP Relay · @daniel_sats</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%230A1128'/%3E%3Cpath d='M14 15h26c7 0 11 4 11 11v5c0 7-4 11-11 11H28v8H14V15Zm13 11v7h12c2 0 3-1 3-3.5S41 26 39 26H27Z' fill='%2300B4D8'/%3E%3C/svg%3E" />
+    <title>FLOP Relay · Proof Desk</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230A1128'/%3E%3Cpath d='M17 13h31v10H29v8h16v10H29v10H17V13Z' fill='%2300B4D8'/%3E%3C/svg%3E" />
     <style>
       :root {
         color-scheme: dark;
+        --ink: #071027;
         --base: #0a1128;
-        --deep: #070c1c;
-        --surface: #0f1a37;
-        --surface-2: #132143;
-        --line: #27385a;
-        --line-bright: #3b527c;
-        --ice: #f5f7fa;
-        --muted: #9aa9c4;
-        --faint: #70809d;
+        --surface: #0e1b3d;
+        --surface-raised: #132247;
+        --surface-deep: #060b1b;
+        --line: #263a63;
+        --line-bright: #415b8d;
+        --paper: #f5f7fa;
+        --muted: #9aabc7;
+        --faint: #647899;
         --cyan: #00b4d8;
-        --cyan-soft: #8ae1f1;
-        --green: #8fe7bd;
-        --amber: #ffce76;
-        --danger: #ff9c91;
-        --mono: "Space Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        --cyan-soft: #88e0f1;
+        --green: #84e7b9;
+        --amber: #ffd074;
+        --red: #ff9b92;
+        --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
         --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
-      body { min-width: 320px; margin: 0; background: var(--base); color: var(--ice); font: 15px/1.5 var(--sans); }
-      a { color: var(--cyan); text-underline-offset: 3px; }
-      a:hover { color: var(--cyan-soft); }
+      body { min-width: 320px; margin: 0; overflow-x: hidden; background: var(--base); color: var(--paper); font: 15px/1.5 var(--sans); }
       button, input, textarea { font: inherit; }
       button { cursor: pointer; }
+      a { color: var(--cyan); text-underline-offset: 3px; }
+      a:hover { color: var(--cyan-soft); }
       button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
-      .wrap { width: min(1180px, calc(100% - 40px)); margin: auto; }
-      .site-header { position: sticky; z-index: 20; top: 0; border-bottom: 1px solid var(--line); background: rgba(10, 17, 40, .94); backdrop-filter: blur(14px); }
-      .site-header > .wrap { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-      .brand { display: flex; align-items: center; gap: 12px; color: var(--ice); text-decoration: none; min-width: max-content; }
-      .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--cyan); border-radius: 8px; color: var(--cyan); font: 700 17px/1 var(--mono); letter-spacing: -.1em; }
+      [hidden] { display: none !important; }
+      .wrap { width: min(1240px, calc(100% - 40px)); margin-inline: auto; }
+      .topbar { position: sticky; z-index: 20; top: 0; border-bottom: 1px solid var(--line); background: rgba(10, 17, 40, .92); backdrop-filter: blur(16px); }
+      .topbar .wrap { min-height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+      .brand { display: flex; align-items: center; gap: 12px; color: var(--paper); text-decoration: none; }
+      .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--cyan); border-radius: 9px; background: var(--ink); color: var(--cyan); font: 800 25px/.9 var(--mono); }
       .brand-copy { display: grid; gap: 1px; }
-      .brand-name { font: 700 14px var(--mono); letter-spacing: .08em; }
+      .brand-name { font: 800 14px/1 var(--mono); letter-spacing: .1em; }
       .brand-sub { color: var(--muted); font: 10px var(--mono); }
-      .nav { display: flex; align-items: center; gap: 20px; font: 700 11px var(--mono); }
-      .nav a { color: var(--muted); text-decoration: none; }
-      .nav a:hover { color: var(--cyan); }
-      .nav .owner { color: var(--cyan); }
-      .hero { position: relative; overflow: hidden; padding: 78px 0 58px; border-bottom: 1px solid var(--line); }
-      .hero::before { content: ""; position: absolute; right: -20vw; top: -28vw; width: 54vw; height: 54vw; border: 1px solid rgba(0, 180, 216, .13); border-radius: 50%; box-shadow: 0 0 0 56px rgba(0, 180, 216, .025), 0 0 0 112px rgba(0, 180, 216, .018); pointer-events: none; }
-      .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); gap: 58px; align-items: center; }
-      .eyebrow { margin: 0 0 14px; color: var(--cyan); font: 700 12px var(--mono); letter-spacing: .1em; }
+      .top-meta { display: flex; align-items: center; gap: 13px; color: var(--muted); font: 10px var(--mono); }
+      .live-chip { display: inline-flex; align-items: center; gap: 7px; color: var(--green); }
+      .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(132, 231, 185, .12); }
+      .owner-link { color: var(--cyan); text-decoration: none; }
+
+      .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 82% 22%, rgba(0, 180, 216, .14), transparent 27%), var(--base); }
+      .hero::after { content: "F"; position: absolute; right: 3vw; bottom: -5vw; color: rgba(0, 180, 216, .055); font: 900 clamp(280px, 43vw, 620px)/.7 var(--mono); pointer-events: none; }
+      .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(370px, .8fr); gap: 56px; align-items: center; min-height: 455px; padding: 74px 0 64px; }
+      .eyebrow { margin: 0 0 14px; color: var(--cyan); font: 800 11px var(--mono); letter-spacing: .12em; }
       h1, h2, h3, p { margin-top: 0; }
-      h1 { max-width: 720px; margin-bottom: 18px; font: 700 clamp(40px, 5.8vw, 68px)/.98 var(--mono); letter-spacing: -.08em; }
-      .lede { max-width: 620px; margin-bottom: 27px; color: var(--muted); font-size: 17px; }
-      .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-      .button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; border: 1px solid var(--cyan); border-radius: 7px; background: var(--cyan); color: var(--base); font: 700 12px var(--mono); text-decoration: none; transition: background .14s ease, border-color .14s ease, color .14s ease; }
-      .button:hover { border-color: var(--cyan-soft); background: var(--cyan-soft); color: var(--base); }
-      .button.secondary { border-color: var(--line-bright); background: transparent; color: var(--ice); }
-      .button.secondary:hover { border-color: var(--cyan); background: transparent; color: var(--cyan); }
+      h1 { max-width: 780px; margin-bottom: 18px; font: 800 clamp(43px, 5.8vw, 74px)/.96 var(--mono); letter-spacing: -.08em; }
+      .lede { max-width: 660px; margin-bottom: 27px; color: var(--muted); font-size: 17px; }
+      .action-row { display: flex; flex-wrap: wrap; gap: 10px; }
+      .button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--cyan); border-radius: 7px; padding: 0 15px; background: var(--cyan); color: var(--ink); font: 800 12px var(--mono); text-decoration: none; transition: transform .14s ease, background .14s ease, color .14s ease, border-color .14s ease; }
+      .button:hover { transform: translateY(-1px); border-color: var(--cyan-soft); background: var(--cyan-soft); color: var(--ink); }
+      .button.secondary { border-color: var(--line-bright); background: transparent; color: var(--paper); }
+      .button.secondary:hover { border-color: var(--cyan); background: rgba(0, 180, 216, .07); color: var(--cyan-soft); }
       .button.warn { border-color: var(--amber); background: transparent; color: var(--amber); }
-      .button.warn:hover { background: var(--amber); color: var(--base); }
-      .button:disabled { cursor: not-allowed; opacity: .45; }
-      .hero-points { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
-      .point { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; color: var(--muted); background: rgba(15, 26, 55, .7); font: 11px var(--mono); }
-      .point b { color: var(--cyan); }
-      .relay-map { position: relative; min-height: 365px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(145deg, #101c3b, #0a1128 72%); overflow: hidden; }
-      .relay-map::before { content: ""; position: absolute; inset: 28px; border: 1px dashed rgba(138, 225, 241, .22); border-radius: 11px; }
-      .relay-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-      .map-node { position: absolute; display: grid; place-items: center; width: 80px; height: 80px; border: 1px solid var(--cyan); border-radius: 50%; background: rgba(10, 17, 40, .92); color: var(--cyan); font: 700 12px var(--mono); box-shadow: 0 0 0 8px rgba(0, 180, 216, .045); }
-      .map-node.did { left: 9%; top: 18%; }
-      .map-node.chat { right: 11%; top: 41%; }
-      .map-node.proof { left: 29%; bottom: 10%; }
-      .map-caption { position: absolute; right: 25px; bottom: 22px; max-width: 205px; color: var(--muted); font: 11px/1.6 var(--mono); }
-      .map-live { position: absolute; top: 23px; right: 23px; display: inline-flex; align-items: center; gap: 7px; color: var(--green); font: 10px var(--mono); }
-      .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(143, 231, 189, .14); }
-      .section { padding: 86px 0; }
-      .section + .section { border-top: 1px solid var(--line); }
-      .section-head { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 36px; }
-      .section-kicker { margin: 0 0 10px; color: var(--cyan); font: 700 11px var(--mono); letter-spacing: .1em; }
-      h2 { margin-bottom: 8px; font: 700 clamp(26px, 3.5vw, 38px)/1.08 var(--mono); letter-spacing: -.06em; }
-      .section-copy { max-width: 650px; margin: 0; color: var(--muted); font-size: 14px; }
-      .guide-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(310px, .75fr); gap: 22px; align-items: stretch; }
-      .guide-rail { position: relative; display: grid; gap: 0; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: var(--surface); }
-      .guide-rail::before { content: ""; position: absolute; left: 43px; top: 53px; bottom: 53px; width: 1px; background: var(--line-bright); }
-      .guide-step { position: relative; display: grid; grid-template-columns: 66px minmax(0, 1fr) 150px; align-items: center; gap: 16px; min-height: 142px; padding: 22px 24px; border-bottom: 1px solid var(--line); }
-      .guide-step:last-child { border-bottom: 0; }
-      .step-index { position: relative; z-index: 1; display: grid; width: 39px; height: 39px; place-items: center; border: 1px solid var(--cyan); border-radius: 50%; background: var(--surface); color: var(--cyan); font: 700 11px var(--mono); }
-      .step-main h3 { margin: 0 0 5px; font: 700 16px var(--mono); letter-spacing: -.04em; }
-      .step-main p { margin: 0; color: var(--muted); font-size: 13px; }
-      .step-keep { padding-left: 13px; border-left: 1px solid var(--line); color: var(--faint); font: 10px/1.55 var(--mono); }
-      .step-keep b { display: block; margin-bottom: 3px; color: var(--cyan-soft); font-size: 10px; }
-      .community-reference { position: relative; min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); overflow: hidden; }
-      .reference-head { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
-      .reference-head strong { font: 700 12px var(--mono); }
-      .reference-head span { color: var(--faint); font: 10px var(--mono); }
-      .embed-shell { display: grid; min-height: 370px; padding: 7px 10px 0; background: var(--deep); }
-      .embed-shell .twitter-tweet { margin: 12px auto !important; }
-      .embed-fallback { align-content: center; justify-items: center; gap: 17px; min-height: 352px; padding: 26px 20px; color: var(--muted); text-align: center; }
-      .embed-fallback p { max-width: 290px; margin: 0; font-size: 12px; }
-      .walkthrough-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: min(100%, 310px); }
-      .walkthrough-map span { display: grid; min-height: 84px; align-content: center; gap: 5px; border: 1px solid var(--line-bright); border-radius: 8px; background: var(--surface); color: var(--cyan-soft); font: 700 10px var(--mono); }
-      .walkthrough-map b { color: var(--cyan); font-size: 12px; }
-      .embed-shell:has(iframe) .embed-fallback { display: none; }
-      .embed-shell:not(:has(iframe)) .twitter-tweet { display: none; }
-      .relay-section { background: var(--deep); }
-      .console-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr); gap: 18px; }
-      .console-pane { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); overflow: hidden; }
-      .pane-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 21px 22px; border-bottom: 1px solid var(--line); }
-      .pane-title { margin: 0 0 4px; font: 700 16px var(--mono); letter-spacing: -.04em; }
-      .pane-copy { margin: 0; color: var(--muted); font-size: 12px; }
-      .status-chip { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-bright); border-radius: 999px; padding: 5px 8px; color: var(--muted); font: 10px var(--mono); }
-      .status-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
-      .status-chip.ok { border-color: rgba(143, 231, 189, .45); color: var(--green); }
-      .status-chip.ok .dot { background: var(--green); }
-      .status-chip.busy { border-color: rgba(255, 206, 118, .48); color: var(--amber); }
-      .status-chip.busy .dot { background: var(--amber); }
-      .status-chip.bad { border-color: rgba(255, 156, 145, .48); color: var(--danger); }
-      .status-chip.bad .dot { background: var(--danger); }
-      .pane-body { padding: 20px 22px 22px; }
-      .input-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; }
-      label { display: grid; gap: 7px; color: var(--muted); font: 700 10px var(--mono); letter-spacing: .03em; }
-      input, textarea { width: 100%; border: 1px solid var(--line-bright); border-radius: 7px; background: var(--deep); color: var(--ice); padding: 11px 12px; font: 12px var(--mono); }
+      .button.warn:hover { border-color: var(--amber); background: var(--amber); color: var(--ink); }
+      .button:disabled { cursor: not-allowed; transform: none; opacity: .42; }
+      .hero-notes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+      .hero-note { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; background: rgba(7, 16, 39, .55); color: var(--muted); font: 10px var(--mono); }
+      .hero-note b { color: var(--cyan); }
+      .proof-monument { position: relative; display: grid; min-height: 318px; align-content: center; gap: 0; border: 1px solid var(--line-bright); border-radius: 15px; padding: 24px; overflow: hidden; background: linear-gradient(145deg, rgba(19, 34, 71, .94), rgba(6, 11, 27, .94)); }
+      .proof-monument::before { content: ""; position: absolute; inset: 25px; border: 1px dashed rgba(136, 224, 241, .2); border-radius: 10px; }
+      .monument-top, .monument-foot { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font: 10px var(--mono); }
+      .monument-top strong { color: var(--cyan-soft); }
+      .proof-orbit { position: relative; height: 170px; margin: 4px 0; }
+      .orbit-ring { position: absolute; inset: 11px 14%; border: 1px solid rgba(0, 180, 216, .58); border-radius: 50%; }
+      .orbit-ring::before, .orbit-ring::after { content: ""; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 5px rgba(0, 180, 216, .12); }
+      .orbit-ring::before { top: 8%; left: 16%; }
+      .orbit-ring::after { right: 12%; bottom: 9%; background: var(--green); box-shadow: 0 0 0 5px rgba(132, 231, 185, .11); }
+      .proof-core { position: absolute; inset: 50% auto auto 50%; display: grid; width: 95px; height: 95px; place-items: center; transform: translate(-50%, -50%); border: 1px solid var(--cyan); border-radius: 50%; background: var(--ink); color: var(--cyan); font: 800 20px var(--mono); box-shadow: 0 0 0 10px rgba(0, 180, 216, .05); }
+      .orbit-label { position: absolute; padding: 4px 6px; color: var(--faint); font: 10px var(--mono); }
+      .orbit-label.left { left: 2%; top: 18%; }
+      .orbit-label.right { right: 1%; bottom: 20%; }
+      .monument-foot b { color: var(--green); }
+
+      .desk { padding: 44px 0 82px; }
+      .desk-head { display: flex; align-items: end; justify-content: space-between; gap: 25px; margin-bottom: 22px; }
+      .desk-kicker { margin: 0 0 8px; color: var(--cyan); font: 800 10px var(--mono); letter-spacing: .12em; }
+      h2 { margin-bottom: 0; font: 800 clamp(27px, 3.4vw, 43px)/1.06 var(--mono); letter-spacing: -.07em; }
+      .desk-copy { max-width: 430px; margin: 0; color: var(--muted); font-size: 13px; }
+      .tabs { display: flex; gap: 2px; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; padding: 5px; background: var(--surface-deep); scrollbar-width: thin; }
+      .tab { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 39px; border: 1px solid transparent; border-radius: 6px; padding: 0 12px; background: transparent; color: var(--muted); font: 800 11px var(--mono); }
+      .tab:hover { color: var(--cyan-soft); }
+      .tab[aria-selected="true"] { border-color: rgba(0, 180, 216, .42); background: rgba(0, 180, 216, .1); color: var(--cyan); }
+      .tab-index { color: var(--faint); font-size: 9px; }
+      .tab[aria-selected="true"] .tab-index { color: var(--cyan-soft); }
+      .tab-panel { border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: var(--surface); }
+      .panel-top { display: flex; align-items: start; justify-content: space-between; gap: 24px; padding: 26px 28px; border-bottom: 1px solid var(--line); background: rgba(19, 34, 71, .42); }
+      .panel-label { margin: 0 0 8px; color: var(--cyan); font: 800 10px var(--mono); letter-spacing: .11em; }
+      .panel-top h3 { margin: 0 0 5px; font: 800 21px/1.1 var(--mono); letter-spacing: -.05em; }
+      .panel-top p { max-width: 700px; margin: 0; color: var(--muted); font-size: 13px; }
+      .panel-body { padding: 26px 28px 28px; }
+      .status-chip { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line-bright); border-radius: 999px; padding: 6px 9px; color: var(--muted); font: 10px var(--mono); }
+      .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
+      .status-chip.ok { border-color: rgba(132, 231, 185, .46); color: var(--green); }
+      .status-chip.ok .status-dot { background: var(--green); }
+      .status-chip.busy { border-color: rgba(255, 208, 116, .48); color: var(--amber); }
+      .status-chip.busy .status-dot { background: var(--amber); }
+      .status-chip.bad { border-color: rgba(255, 155, 146, .5); color: var(--red); }
+      .status-chip.bad .status-dot { background: var(--red); }
+
+      .guide-grid { display: grid; grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr); gap: 25px; }
+      .route-board { position: relative; min-height: 470px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; padding: 23px; background: radial-gradient(circle at 80% 18%, rgba(0, 180, 216, .11), transparent 30%), var(--surface-deep); }
+      .route-board::before { content: ""; position: absolute; inset: 30px; border: 1px dashed rgba(136, 224, 241, .17); border-radius: 10px; }
+      .route-title { position: relative; margin: 0; color: var(--cyan-soft); font: 800 12px var(--mono); }
+      .route-track { position: relative; display: grid; gap: 15px; margin-top: 42px; }
+      .route-track::before { content: ""; position: absolute; left: 22px; top: 21px; bottom: 21px; width: 1px; background: linear-gradient(var(--cyan), var(--green)); }
+      .route-node { position: relative; display: grid; grid-template-columns: 45px minmax(0, 1fr); gap: 12px; align-items: center; }
+      .route-node b { position: relative; z-index: 1; display: grid; width: 45px; height: 45px; place-items: center; border: 1px solid var(--cyan); border-radius: 50%; background: var(--ink); color: var(--cyan); font: 800 11px var(--mono); }
+      .route-node:last-child b { border-color: var(--green); color: var(--green); }
+      .route-node span { color: var(--muted); font: 11px/1.45 var(--mono); }
+      .route-node span strong { display: block; color: var(--paper); font-size: 12px; }
+      .route-foot { position: absolute; right: 24px; bottom: 21px; left: 24px; color: var(--faint); font: 10px/1.55 var(--mono); }
+      .route-steps { display: grid; }
+      .route-step { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 16px; align-items: center; min-height: 104px; border-bottom: 1px solid var(--line); padding: 17px 0; }
+      .route-step:first-child { padding-top: 0; }
+      .route-step:last-child { border-bottom: 0; padding-bottom: 0; }
+      .step-number { color: var(--cyan); font: 800 20px var(--mono); letter-spacing: -.07em; }
+      .route-step h4 { margin: 0 0 4px; color: var(--paper); font: 800 15px var(--mono); letter-spacing: -.04em; }
+      .route-step p { max-width: 620px; margin: 0; color: var(--muted); font-size: 13px; }
+      .step-go { white-space: nowrap; border: 0; padding: 5px 0; background: transparent; color: var(--cyan); font: 800 10px var(--mono); }
+      .step-go:hover { color: var(--cyan-soft); text-decoration: underline; }
+      .source-line { grid-column: 1 / -1; margin: 0; border-top: 1px solid var(--line); padding-top: 18px; color: var(--faint); font: 10px/1.55 var(--mono); }
+
+      .identity-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 18px; }
+      .identity-main, .directory-card, .reader-card, .composer-card, .verifier-card, .signal-card { min-width: 0; border: 1px solid var(--line); border-radius: 11px; background: rgba(6, 11, 27, .42); }
+      .block-head { display: flex; align-items: start; justify-content: space-between; gap: 15px; padding: 18px 19px; border-bottom: 1px solid var(--line); }
+      .block-head h4 { margin: 0 0 4px; color: var(--paper); font: 800 15px var(--mono); letter-spacing: -.04em; }
+      .block-head p { margin: 0; color: var(--muted); font-size: 12px; }
+      .block-body { padding: 19px; }
+      .identity-summary { display: grid; gap: 11px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--ink); }
+      .summary-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .summary-state { color: var(--muted); font: 11px var(--mono); }
+      .summary-did { overflow-wrap: anywhere; color: var(--cyan-soft); font: 11px/1.6 var(--mono); }
+      .summary-fingerprint { color: var(--faint); font: 10px var(--mono); }
+      .summary-fingerprint b { color: var(--muted); }
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+      .form-grid .full { grid-column: 1 / -1; }
+      label { display: grid; gap: 7px; color: var(--muted); font: 800 10px var(--mono); letter-spacing: .03em; }
+      input, textarea { width: 100%; border: 1px solid var(--line-bright); border-radius: 7px; padding: 11px 12px; background: var(--surface-deep); color: var(--paper); font: 12px/1.45 var(--mono); }
       input::placeholder, textarea::placeholder { color: var(--faint); }
-      textarea { min-height: 114px; resize: vertical; line-height: 1.55; }
-      .message-list { display: grid; gap: 8px; min-height: 274px; margin-top: 15px; }
-      .empty-state { display: grid; place-items: center; min-height: 250px; padding: 24px; border: 1px dashed var(--line); border-radius: 9px; color: var(--faint); text-align: center; font: 11px/1.65 var(--mono); }
-      .message { padding: 12px 13px; border: 1px solid rgba(59, 82, 124, .72); border-radius: 8px; background: rgba(7, 12, 28, .55); }
-      .message-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
-      .message-from { overflow: hidden; color: var(--cyan-soft); text-overflow: ellipsis; white-space: nowrap; font: 700 10px var(--mono); }
-      .message-time { flex: 0 0 auto; color: var(--faint); font: 10px var(--mono); }
-      .message-text { overflow-wrap: anywhere; color: var(--ice); font: 12px/1.55 var(--mono); white-space: pre-wrap; }
-      .notice { min-height: 18px; margin: 11px 0 0; color: var(--muted); font: 11px/1.6 var(--mono); }
+      textarea { min-height: 112px; resize: vertical; }
+      .notice { min-height: 18px; margin: 12px 0 0; color: var(--muted); font: 10px/1.55 var(--mono); }
       .notice.ok { color: var(--green); }
       .notice.warn { color: var(--amber); }
-      .notice.bad { color: var(--danger); }
-      .identity-card { display: grid; gap: 13px; padding: 15px; border: 1px solid var(--line); border-radius: 9px; background: var(--deep); }
-      .identity-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-      .identity-state { color: var(--muted); font: 11px/1.5 var(--mono); }
-      .identity-did { display: block; overflow-wrap: anywhere; color: var(--cyan-soft); font: 11px/1.6 var(--mono); }
-      .identity-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-      .form-grid .wide { grid-column: 1 / -1; }
-      .stack { display: grid; gap: 12px; margin-top: 17px; }
-      .send-preview { display: none; margin-top: 14px; padding: 14px; border: 1px solid rgba(255, 206, 118, .48); border-radius: 8px; background: rgba(255, 206, 118, .06); }
-      .send-preview[data-ready="true"] { display: grid; gap: 11px; }
-      .preview-copy { margin: 0; color: var(--amber); font: 11px/1.6 var(--mono); }
-      .preview-meta { display: grid; gap: 4px; color: var(--muted); font: 10px/1.55 var(--mono); }
-      .preview-meta b { color: var(--ice); font-weight: 700; }
-      .signals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-      .signal-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); }
-      .signal-card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 19px; border-bottom: 1px solid var(--line); }
-      .signal-card-head strong { font: 700 13px var(--mono); }
-      .signal-card-head span { color: var(--faint); font: 10px var(--mono); }
-      .timeline { min-height: 500px; padding: 0 8px; background: var(--deep); }
-      .timeline .twitter-timeline { margin: 0 auto !important; }
-      .signal-foot { display: flex; justify-content: space-between; gap: 12px; padding: 12px 19px; color: var(--faint); font: 10px var(--mono); }
+      .notice.bad { color: var(--red); }
+      .directory-card { position: relative; overflow: hidden; background: linear-gradient(160deg, rgba(19, 34, 71, .88), rgba(6, 11, 27, .9)); }
+      .directory-card::after { content: "DID"; position: absolute; right: -14px; bottom: -15px; color: rgba(0, 180, 216, .06); font: 800 104px/.75 var(--mono); pointer-events: none; }
+      .directory-stack { position: relative; display: grid; gap: 13px; }
+      .registry-readout { padding: 14px; border: 1px dashed var(--line-bright); border-radius: 8px; color: var(--cyan-soft); font: 11px/1.55 var(--mono); overflow-wrap: anywhere; }
+      .registry-readout span { display: block; margin-bottom: 4px; color: var(--faint); font-size: 10px; }
+      .directory-path { display: grid; gap: 8px; padding-top: 5px; color: var(--muted); font: 11px/1.55 var(--mono); }
+      .directory-path b { color: var(--cyan); }
+      .mini-flow { display: grid; grid-template-columns: 1fr 16px 1fr 16px 1fr; align-items: center; padding: 17px 0 1px; color: var(--faint); text-align: center; font: 9px/1.35 var(--mono); }
+      .mini-flow strong { display: block; margin-bottom: 4px; color: var(--paper); font-size: 10px; }
+      .mini-arrow { color: var(--cyan); font-size: 15px; }
+
+      .lobby-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(310px, .88fr); gap: 18px; }
+      .reader-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+      .reader-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; }
+      .check-line { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font: 10px var(--mono); }
+      .check-line input { width: 14px; height: 14px; accent-color: var(--cyan); }
+      .message-list { display: grid; gap: 8px; min-height: 322px; margin-top: 15px; }
+      .empty-state { display: grid; min-height: 297px; place-items: center; border: 1px dashed var(--line); border-radius: 8px; padding: 24px; color: var(--faint); text-align: center; font: 11px/1.6 var(--mono); }
+      .message { padding: 12px 13px; border: 1px solid rgba(65, 91, 141, .72); border-radius: 8px; background: rgba(6, 11, 27, .55); }
+      .message-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+      .message-from { overflow: hidden; color: var(--cyan-soft); text-overflow: ellipsis; white-space: nowrap; font: 800 10px var(--mono); }
+      .message-time { flex: 0 0 auto; color: var(--faint); font: 10px var(--mono); }
+      .message-text { overflow-wrap: anywhere; color: var(--paper); font: 11px/1.58 var(--mono); white-space: pre-wrap; }
+      .compose-fields { display: grid; gap: 10px; }
+      .compose-divider { display: flex; align-items: center; gap: 11px; margin: 18px 0 15px; color: var(--faint); font: 10px var(--mono); }
+      .compose-divider::before, .compose-divider::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+      .signer-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--ink); font: 10px var(--mono); }
+      .signer-line b { overflow: hidden; color: var(--cyan-soft); text-overflow: ellipsis; white-space: nowrap; }
+      .send-preview { display: none; gap: 11px; margin-top: 14px; border: 1px solid rgba(255, 208, 116, .47); border-radius: 8px; padding: 14px; background: rgba(255, 208, 116, .06); }
+      .send-preview[data-ready="true"] { display: grid; }
+      .send-preview p { margin: 0; color: var(--amber); font: 10px/1.55 var(--mono); }
+      .preview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+      .preview-grid span { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font: 9px var(--mono); }
+      .preview-grid b { display: block; overflow: hidden; margin-top: 3px; color: var(--paper); text-overflow: ellipsis; }
+
+      .verify-layout { display: grid; grid-template-columns: minmax(0, .88fr) minmax(340px, 1.12fr); gap: 18px; }
+      .verify-copy { display: grid; align-content: start; gap: 18px; min-height: 372px; padding: 22px; background: radial-gradient(circle at 20% 12%, rgba(0, 180, 216, .1), transparent 34%), var(--surface-deep); }
+      .verify-copy h4 { margin: 0; font: 800 26px/1.06 var(--mono); letter-spacing: -.07em; }
+      .verify-copy p { margin: 0; color: var(--muted); font-size: 13px; }
+      .verify-principles { display: grid; gap: 9px; margin-top: auto; }
+      .verify-principle { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; color: var(--muted); font: 11px/1.5 var(--mono); }
+      .verify-principle b { color: var(--cyan); }
+      .verify-result { display: grid; gap: 13px; min-height: 246px; margin-top: 18px; border: 1px solid var(--line); border-radius: 9px; padding: 15px; background: var(--ink); }
+      .verify-result[data-state="valid"] { border-color: rgba(132, 231, 185, .55); }
+      .verify-result[data-state="invalid"] { border-color: rgba(255, 155, 146, .55); }
+      .verify-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+      .verify-head strong { display: block; margin-bottom: 3px; color: var(--paper); font: 800 14px var(--mono); }
+      .verify-head span { color: var(--muted); font: 10px/1.45 var(--mono); }
+      .verify-seal { display: grid; flex: 0 0 auto; width: 35px; height: 35px; place-items: center; border: 1px solid var(--line-bright); border-radius: 50%; color: var(--faint); font: 800 14px var(--mono); }
+      .verify-result[data-state="valid"] .verify-seal { border-color: var(--green); color: var(--green); }
+      .verify-result[data-state="invalid"] .verify-seal { border-color: var(--red); color: var(--red); }
+      .verify-rows { display: grid; gap: 7px; }
+      .verify-row { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 10px; border-top: 1px solid var(--line); padding-top: 7px; color: var(--muted); font: 10px/1.52 var(--mono); }
+      .verify-row b { overflow-wrap: anywhere; color: var(--paper); font-weight: 700; }
+
+      .signal-tools { display: flex; align-items: center; gap: 12px; }
+      .signal-status { color: var(--muted); font: 10px var(--mono); }
+      .signals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .signal-card { overflow: hidden; }
+      .signal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid var(--line); }
+      .signal-head h4 { margin: 0 0 3px; font: 800 14px var(--mono); letter-spacing: -.04em; }
+      .signal-head span { color: var(--faint); font: 10px var(--mono); }
+      .signal-badge { color: var(--green); font: 10px var(--mono); }
+      .timeline-slot { min-height: 502px; padding: 0 7px; background: var(--surface-deep); }
+      .timeline-slot .twitter-timeline { margin: 0 auto !important; }
+      .signal-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; color: var(--faint); font: 10px var(--mono); }
       .signal-foot a { text-decoration: none; }
-      .micro-strip { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 22px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: var(--surface); font: 11px/1.55 var(--mono); }
-      .micro-strip b { color: var(--cyan-soft); }
+      .signal-note { margin: 18px 0 0; color: var(--faint); font: 10px/1.55 var(--mono); }
+
       .footer { border-top: 1px solid var(--line); }
-      .footer > .wrap { display: flex; justify-content: space-between; gap: 18px; padding: 24px 0 33px; color: var(--faint); font: 10px/1.6 var(--mono); }
+      .footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 23px 0 30px; color: var(--faint); font: 10px var(--mono); }
       .footer p { margin: 0; }
       .footer a { text-decoration: none; }
 
-      @media (max-width: 940px) {
-        .hero-grid, .guide-layout, .console-grid { grid-template-columns: 1fr; }
-        .hero-grid { gap: 34px; }
-        .relay-map { min-height: 300px; }
-        .guide-layout { gap: 16px; }
+      @media (max-width: 980px) {
+        .hero-grid, .guide-grid, .identity-grid, .lobby-grid, .verify-layout { grid-template-columns: 1fr; }
+        .hero-grid { gap: 34px; min-height: 0; }
+        .proof-monument { min-height: 280px; }
+        .route-board { min-height: 355px; }
       }
 
       @media (max-width: 700px) {
-        .wrap { width: min(100% - 28px, 1180px); }
-        .site-header > .wrap { min-height: 64px; }
-        .brand-sub, .nav a:not(.owner) { display: none; }
-        .hero { padding: 54px 0 42px; }
-        .hero::before { right: -45vw; top: -18vw; width: 95vw; height: 95vw; }
-        .section { padding: 58px 0; }
-        .section-head { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-        .guide-rail::before { left: 35px; }
-        .guide-step { grid-template-columns: 46px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 19px; }
-        .step-keep { grid-column: 2; padding: 9px 0 0; border-top: 1px solid var(--line); border-left: 0; }
-        .signals-grid { grid-template-columns: 1fr; }
-        .footer > .wrap, .micro-strip { align-items: flex-start; flex-direction: column; }
+        .wrap { width: min(100% - 28px, 1240px); }
+        .topbar .wrap { min-height: 63px; }
+        .brand-sub, .top-meta .live-chip { display: none; }
+        .hero-grid { padding: 55px 0 46px; }
+        .hero::after { right: -11vw; bottom: -10vw; font-size: 350px; }
+        .lede { font-size: 15px; }
+        .desk { padding: 30px 0 58px; }
+        .desk-head { align-items: start; flex-direction: column; gap: 15px; }
+        .tabs { width: calc(100% + 1px); }
+        .panel-top, .panel-body { padding: 20px; }
+        .panel-top { align-items: start; flex-direction: column; }
+        .route-step { grid-template-columns: 45px minmax(0, 1fr); gap: 10px; }
+        .step-go { grid-column: 2; justify-self: start; }
+        .form-grid, .preview-grid, .signals-grid { grid-template-columns: 1fr; }
+        .form-grid .full { grid-column: auto; }
+        .reader-toolbar { grid-template-columns: 1fr; }
+        .reader-toolbar .button { width: 100%; }
+        .signal-tools { align-items: start; flex-direction: column; }
+        .footer .wrap { align-items: start; flex-direction: column; }
       }
 
-      @media (max-width: 480px) {
-        h1 { font-size: 39px; }
-        .actions .button { width: 100%; }
-        .input-row { grid-template-columns: 1fr; }
-        .input-row .button { width: 100%; }
-        .pane-head { align-items: flex-start; flex-direction: column; }
-        .form-grid { grid-template-columns: 1fr; }
-        .form-grid .wide { grid-column: auto; }
+      @media (max-width: 440px) {
+        h1 { font-size: 42px; }
+        .action-row .button { width: 100%; }
+        .route-board { min-height: 370px; }
+        .mini-flow { grid-template-columns: 1fr 12px 1fr 12px 1fr; font-size: 8px; }
       }
     </style>
+    <script>
+      window.twttr = window.twttr || {};
+      window.twttr.ready = window.twttr.ready || function (callback) {
+        window.twttr._e = window.twttr._e || [];
+        window.twttr._e.push(callback);
+      };
+    </script>
   </head>
   <body>
-    <header class="site-header">
+    <header class="topbar">
       <div class="wrap">
-        <a class="brand" href="#start" aria-label="FLOP Relay home">
-          <span class="brand-mark" aria-hidden="true">R</span>
-          <span class="brand-copy"><span class="brand-name">FLOP RELAY</span><span class="brand-sub">a practical Technocore client</span></span>
+        <a class="brand" href="#guide" aria-label="FLOP Relay home">
+          <span class="brand-mark" aria-hidden="true">F</span>
+          <span class="brand-copy"><span class="brand-name">FLOP RELAY</span><span class="brand-sub">Technocore proof desk</span></span>
         </a>
-        <nav class="nav" aria-label="Page navigation">
-          <a href="#guide">Guide</a>
-          <a href="#relay">Relay</a>
-          <a href="#signals">Signals</a>
-          <a class="owner" href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats ↗</a>
-        </nav>
+        <div class="top-meta"><span class="live-chip"><span class="live-dot"></span>browser-local tools</span><a class="owner-link" href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats ↗</a></div>
       </div>
     </header>
 
-    <main id="start">
+    <main>
       <section class="hero">
         <div class="wrap hero-grid">
           <div>
             <p class="eyebrow">FLOP × TECHNOCORE</p>
-            <h1>Make a key.<br />Leave a signal.</h1>
-            <p class="lede">A cleaner on-ramp for newcomers: understand the path, create a browser-local identity, read the live room, and send a signed public message only when you choose.</p>
-            <div class="actions">
-              <a class="button" href="#guide">See the four moves</a>
-              <a class="button secondary" href="#relay">Open Relay console</a>
+            <h1>A proper home for your proof.</h1>
+            <p class="lede">Build one portable DID, publish its public identity, speak in the live room, and independently verify every signed receipt — without giving a website your private key.</p>
+            <div class="action-row">
+              <button class="button" type="button" data-go-tab="guide">Follow the four steps</button>
+              <button class="button secondary" type="button" data-go-tab="verify">Verify a receipt</button>
             </div>
-            <div class="hero-points" aria-label="Product principles">
-              <span class="point"><b>01</b> local key handling</span>
-              <span class="point"><b>02</b> signed public posts</span>
-              <span class="point"><b>03</b> live official signals</span>
+            <div class="hero-notes">
+              <span class="hero-note"><b>LOCAL</b> Ed25519 signer</span>
+              <span class="hero-note"><b>LIVE</b> public room reader</span>
+              <span class="hero-note"><b>OPEN</b> receipt verifier</span>
             </div>
           </div>
-          <div class="relay-map" aria-label="Identity, chat, and proof relay diagram">
-            <span class="map-live"><span class="pulse"></span> HUMAN-IN-THE-LOOP</span>
-            <svg viewBox="0 0 520 365" aria-hidden="true">
-              <path d="M120 105 C260 36, 382 124, 420 185" fill="none" stroke="#00b4d8" stroke-opacity=".7" stroke-width="1.5" stroke-dasharray="5 7" />
-              <path d="M405 210 C355 302, 248 301, 178 267" fill="none" stroke="#8ae1f1" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="5 7" />
-              <path d="M143 242 C67 210, 67 144, 104 121" fill="none" stroke="#00b4d8" stroke-opacity=".38" stroke-width="1.5" stroke-dasharray="5 7" />
-              <circle cx="260" cy="182" r="11" fill="#00b4d8" fill-opacity=".2" stroke="#00b4d8" stroke-width="1" />
-              <circle cx="260" cy="182" r="3" fill="#00b4d8" />
-            </svg>
-            <span class="map-node did">DID</span>
-            <span class="map-node chat">CHAT</span>
-            <span class="map-node proof">PROOF</span>
-            <p class="map-caption">One identity, one useful public action, one thing others can inspect.</p>
-          </div>
+          <aside class="proof-monument" aria-label="Proof chain illustration">
+            <div class="monument-top"><strong>PROOF CHAIN</strong><span>one identity · inspectable actions</span></div>
+            <div class="proof-orbit" aria-hidden="true">
+              <div class="orbit-ring"></div>
+              <span class="orbit-label left">DID<br />key</span>
+              <span class="orbit-label right">signed<br />receipt</span>
+              <span class="proof-core">F</span>
+            </div>
+            <div class="monument-foot"><span>key → room → proof</span><b>VERIFY LOCALLY</b></div>
+          </aside>
         </div>
       </section>
 
-      <section class="section" id="guide">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <p class="section-kicker">THE ON-RAMP</p>
-              <h2>Four moves. Keep one identity.</h2>
-            </div>
-            <p class="section-copy">The visual route follows the community walkthrough shared by Tat Thang. The signing details below are checked against Technocore’s current public protocol.</p>
+      <section class="desk wrap" aria-labelledby="desk-title">
+        <div class="desk-head">
+          <div><p class="desk-kicker">OPERATOR CONSOLE</p><h2 id="desk-title">One workflow. Five useful tabs.</h2></div>
+          <p class="desk-copy">Start with the guide. Every other tab does a concrete part of the Technocore flow, rather than merely describing it.</p>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="FLOP Relay workspace">
+          <button class="tab" type="button" id="tab-guide" role="tab" aria-controls="panel-guide" aria-selected="true" data-tab="guide"><span class="tab-index">01</span> Guide</button>
+          <button class="tab" type="button" id="tab-identity" role="tab" aria-controls="panel-identity" aria-selected="false" data-tab="identity"><span class="tab-index">02</span> Identity</button>
+          <button class="tab" type="button" id="tab-lobby" role="tab" aria-controls="panel-lobby" aria-selected="false" data-tab="lobby"><span class="tab-index">03</span> Lobby</button>
+          <button class="tab" type="button" id="tab-verify" role="tab" aria-controls="panel-verify" aria-selected="false" data-tab="verify"><span class="tab-index">04</span> Verify</button>
+          <button class="tab" type="button" id="tab-signals" role="tab" aria-controls="panel-signals" aria-selected="false" data-tab="signals"><span class="tab-index">05</span> Signals</button>
+        </div>
+
+        <section class="tab-panel" id="panel-guide" role="tabpanel" aria-labelledby="tab-guide" data-panel="guide">
+          <div class="panel-top">
+            <div><p class="panel-label">START HERE</p><h3>The four-move setup, written for a first timer.</h3><p>Create an identity, protect it, publish its public reference, then make and verify one signed contribution.</p></div>
+            <span class="status-chip"><span class="status-dot"></span>community playbook</span>
           </div>
-
-          <div class="guide-layout">
-            <div class="guide-rail">
-              <article class="guide-step">
-                <span class="step-index">01</span>
-                <div class="step-main"><h3>Create one Ed25519 DID</h3><p>Open the Relay console, choose a passphrase twice, then create the local identity. You should see one public `did:key:z6Mk…` address.</p></div>
-                <p class="step-keep"><b>RESULT</b>Public DID<br />Local key only</p>
-              </article>
-              <article class="guide-step">
-                <span class="step-index">02</span>
-                <div class="step-main"><h3>Download the encrypted backup</h3><p>Keep that file and its passphrase somewhere you control. A Technocore directory note can be useful for discovery, but it is public; it does not prove key control on its own.</p></div>
-                <p class="step-keep"><b>KEEP</b>Backup file<br />Passphrase apart</p>
-              </article>
-              <article class="guide-step">
-                <span class="step-index">03</span>
-                <div class="step-main"><h3>Read first, then sign one useful check-in</h3><p>Load `lobby`, read the room, write something specific, then review it. Relay signs Technocore’s exact `room|nonce|text` payload and opens the post only after your click.</p></div>
-                <p class="step-keep"><b>SEND</b>Useful message<br />Fresh nonce</p>
-              </article>
-              <article class="guide-step">
-                <span class="step-index">04</span>
-                <div class="step-main"><h3>Verify it, then ship work people can inspect</h3><p>Re-open the same room after Technocore responds and look for your message. Keep one clear public link to a tool, integration, or write-up beside the same DID.</p></div>
-                <p class="step-keep"><b>SHOW</b>Receipt in room<br />Public work</p>
-              </article>
+          <div class="panel-body guide-grid">
+            <aside class="route-board" aria-label="Four-step route">
+              <p class="route-title">YOUR ROUTE</p>
+              <div class="route-track">
+                <div class="route-node"><b>01</b><span><strong>Create DID</strong>one public address</span></div>
+                <div class="route-node"><b>02</b><span><strong>Publish identity</strong>one public registry note</span></div>
+                <div class="route-node"><b>03</b><span><strong>Sign a signal</strong>one useful lobby update</span></div>
+                <div class="route-node"><b>04</b><span><strong>Verify proof</strong>check the signature yourself</span></div>
+              </div>
+              <p class="route-foot">Keep the same DID and backup throughout. Public information can be inspected; private key material cannot leave this browser.</p>
+            </aside>
+            <div class="route-steps">
+              <article class="route-step"><span class="step-number">01</span><div><h4>Create your Ed25519 DID</h4><p>Open Identity, choose a passphrase, create the key, and read the did:key address that appears. It is your public identity, not a wallet address.</p></div><button class="step-go" type="button" data-go-tab="identity">OPEN IDENTITY ↗</button></article>
+              <article class="route-step"><span class="step-number">02</span><div><h4>Download the encrypted backup, then publish the public identity</h4><p>Store the backup file and passphrase separately. The same tab calculates the DID fingerprint and opens Technocore’s public directory action only when you click it.</p></div><button class="step-go" type="button" data-go-tab="identity">PUBLISH DID ↗</button></article>
+              <article class="route-step"><span class="step-number">03</span><div><h4>Read the lobby before leaving a useful message</h4><p>Use Lobby to see the current room, shape a concise contribution note, review the room and nonce, then open a signed post yourself.</p></div><button class="step-go" type="button" data-go-tab="lobby">OPEN LOBBY ↗</button></article>
+              <article class="route-step"><span class="step-number">04</span><div><h4>Check the receipt instead of trusting a screenshot</h4><p>Paste any Technocore signed URL into Verify. Relay recreates the server’s canonical message and verifies the Ed25519 signature locally.</p></div><button class="step-go" type="button" data-go-tab="verify">VERIFY RECEIPT ↗</button></article>
+              <p class="source-line">Built from the community onboarding flow in <a href="https://x.com/tatthang/status/2091894656191864981" target="_blank" rel="noreferrer">Tat Thang’s playbook ↗</a>, with signing behavior checked against Technocore. FLOP’s own channels determine any eligibility rules.</p>
             </div>
+          </div>
+        </section>
 
-            <aside class="community-reference" aria-label="Community walkthrough reference">
-              <div class="reference-head"><strong>Community walkthrough</strong><span>Tat Thang on X</span></div>
-              <div class="embed-shell">
-                <div class="embed-fallback">
-                  <div class="walkthrough-map" aria-hidden="true"><span><b>01</b>KEY</span><span><b>02</b>BACKUP</span><span><b>03</b>SIGN</span><span><b>04</b>SHIP</span></div>
-                  <p>The original community post includes the visual four-step walkthrough. Open it directly if X does not render inside this page.</p>
-                  <a class="button secondary" href="https://x.com/tatthang/status/2091866440551002448" target="_blank" rel="noreferrer">Open visual walkthrough ↗</a>
+        <section class="tab-panel" id="panel-identity" role="tabpanel" aria-labelledby="tab-identity" data-panel="identity" hidden>
+          <div class="panel-top">
+            <div><p class="panel-label">YOUR LOCAL IDENTITY</p><h3>Create a DID, keep the key, publish only the DID.</h3><p>The key is generated in this tab. Before signing or publishing, Relay requires that you start an encrypted backup download.</p></div>
+            <span class="status-chip" id="identity-chip"><span class="status-dot"></span>no identity</span>
+          </div>
+          <div class="panel-body identity-grid">
+            <section class="identity-main" aria-labelledby="identity-title">
+              <div class="block-head"><div><h4 id="identity-title">Local key ceremony</h4><p>Create once, restore later with your encrypted JSON backup.</p></div><button class="button secondary" id="copy-did" type="button" disabled>Copy DID</button></div>
+              <div class="block-body">
+                <div class="identity-summary">
+                  <div class="summary-top"><span class="summary-state" id="identity-state">No local identity loaded.</span><button class="button secondary" id="identity-forget" type="button" disabled>Forget this tab</button></div>
+                  <output class="summary-did" id="identity-did">Create an identity or restore your encrypted backup.</output>
+                  <span class="summary-fingerprint">DID fingerprint: <b id="identity-fingerprint">—</b></span>
                 </div>
-                <blockquote class="twitter-tweet" data-theme="dark" data-dnt="true">
-                  <a href="https://x.com/tatthang/status/2091866440551002448">View Tat Thang’s four-step walkthrough on X</a>
-                </blockquote>
+                <div class="form-grid" aria-label="Create or restore DID">
+                  <label>Backup passphrase<input id="create-passphrase" type="password" autocomplete="new-password" placeholder="At least 12 characters" /></label>
+                  <label>Confirm passphrase<input id="create-confirm" type="password" autocomplete="new-password" placeholder="Repeat it" /></label>
+                  <div class="full action-row"><button class="button" id="identity-create" type="button">Create local identity</button><button class="button secondary" id="backup-download" type="button" disabled>Download encrypted backup</button></div>
+                  <label class="full">Restore encrypted backup<input id="backup-file" type="file" accept="application/json,.json" /></label>
+                  <label class="full">Backup passphrase<input id="restore-passphrase" type="password" autocomplete="current-password" placeholder="Passphrase for the selected backup" /></label>
+                  <div class="full action-row"><button class="button secondary" id="identity-restore" type="button">Restore into this tab</button></div>
+                </div>
+                <p class="notice" id="identity-notice" aria-live="polite">Relay never displays or uploads the private key.</p>
+              </div>
+            </section>
+
+            <aside class="directory-card" aria-labelledby="directory-title">
+              <div class="block-head"><div><h4 id="directory-title">Public identity publisher</h4><p>Writes only a DID reference to Technocore’s public directory.</p></div><span class="status-chip" id="directory-chip"><span class="status-dot"></span>backup first</span></div>
+              <div class="block-body directory-stack">
+                <div class="registry-readout"><span>REGISTRY FINGERPRINT</span><output id="directory-fingerprint">Create or restore an identity first.</output></div>
+                <div class="directory-path"><b>What happens next</b><span>Relay opens the public Technocore directory URL in a new tab. It never proxies the write or posts it silently.</span></div>
+                <button class="button" id="directory-open" type="button" disabled>Open directory publish ↗</button>
+                <p class="notice" id="directory-notice" aria-live="polite">Public identity publishing is unavailable until the encrypted backup download begins.</p>
+                <div class="mini-flow" aria-hidden="true"><span><strong>LOCAL</strong>private key</span><b class="mini-arrow">→</b><span><strong>BACKUP</strong>encrypted JSON</span><b class="mini-arrow">→</b><span><strong>PUBLIC</strong>DID only</span></div>
               </div>
             </aside>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="section relay-section" id="relay">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <p class="section-kicker">THE ACTUAL TOOL</p>
-              <h2>Read the room. Sign from your device.</h2>
-            </div>
-            <p class="section-copy">Room data is public and untrusted. Relay renders it as text, never as links. It does not proxy any write; a signed post is opened directly from your own click.</p>
+        <section class="tab-panel" id="panel-lobby" role="tabpanel" aria-labelledby="tab-lobby" data-panel="lobby" hidden>
+          <div class="panel-top">
+            <div><p class="panel-label">LIVE TECHNOCORE ROOM</p><h3>Read a public room, then leave something worth reading.</h3><p>Room content is treated as untrusted text. You can follow the reader or construct one concise, signed contribution message.</p></div>
+            <span class="status-chip" id="room-chip"><span class="status-dot"></span>manual read</span>
           </div>
-
-          <div class="console-grid">
-            <section class="console-pane" aria-labelledby="room-heading">
-              <div class="pane-head">
-                <div><h3 class="pane-title" id="room-heading">Public room reader</h3><p class="pane-copy">Start at `lobby`, or enter a public room name.</p></div>
-                <span class="status-chip" id="room-chip"><span class="dot"></span>manual read</span>
-              </div>
-              <div class="pane-body">
-                <div class="input-row">
-                  <label>Room name<input id="room-name" autocomplete="off" spellcheck="false" value="lobby" maxlength="48" aria-label="Technocore room name" /></label>
-                  <button class="button" id="room-load" type="button">Load room</button>
-                </div>
-                <div class="message-list" id="message-list" aria-live="polite"><div class="empty-state">Load a public room to read its current messages.<br />No background polling. No automatic writes.</div></div>
+          <div class="panel-body lobby-grid">
+            <section class="reader-card" aria-labelledby="reader-title">
+              <div class="block-head"><div><h4 id="reader-title">Public room reader</h4><p>Start at lobby or enter another public room.</p></div></div>
+              <div class="block-body">
+                <div class="reader-toolbar"><label>Room name<input id="room-name" autocomplete="off" spellcheck="false" value="lobby" maxlength="48" aria-label="Technocore room name" /></label><button class="button" id="room-load" type="button">Load room</button></div>
+                <div class="reader-actions"><label class="check-line"><input id="room-follow" type="checkbox" /> Follow this room every 15s</label><span class="signal-status" id="room-read-time">not loaded</span></div>
+                <div class="message-list" id="message-list" aria-live="polite"><div class="empty-state">Load a public room to read its current messages.<br />There are no automatic writes.</div></div>
                 <p class="notice" id="room-notice" aria-live="polite"></p>
               </div>
             </section>
 
-            <section class="console-pane" aria-labelledby="signer-heading">
-              <div class="pane-head">
-                <div><h3 class="pane-title" id="signer-heading">Local signed post</h3><p class="pane-copy">Create or restore an identity locally, then prepare one public message.</p></div>
-                <span class="status-chip" id="identity-chip"><span class="dot"></span>no identity</span>
-              </div>
-              <div class="pane-body">
-                <div class="identity-card">
-                  <div class="identity-line"><span class="identity-state" id="identity-state">No local identity loaded.</span><button class="button secondary" id="copy-did" type="button" disabled>Copy DID</button></div>
-                  <output class="identity-did" id="identity-did">Create an identity or restore your encrypted backup.</output>
-                  <div class="identity-actions"><button class="button secondary" id="identity-forget" type="button" disabled>Forget this tab</button></div>
+            <section class="composer-card" aria-labelledby="composer-title">
+              <div class="block-head"><div><h4 id="composer-title">Contribution composer</h4><p>Turn a real deliverable into a clean public note.</p></div></div>
+              <div class="block-body">
+                <div class="compose-fields">
+                  <label>What did you build?<input id="contribution-title" maxlength="140" placeholder="A useful tool, integration, or write-up" /></label>
+                  <label>Public proof URL<input id="contribution-url" inputmode="url" placeholder="https://…" /></label>
+                  <label>Why does it matter?<textarea id="contribution-note" maxlength="220" placeholder="One plain sentence about the result."></textarea></label>
+                  <button class="button secondary" id="contribution-draft" type="button">Build contribution note</button>
                 </div>
-
-                <div class="form-grid" aria-label="Create or restore identity">
-                  <label>Backup passphrase<input id="create-passphrase" type="password" autocomplete="new-password" placeholder="Create a strong passphrase" /></label>
-                  <label>Confirm passphrase<input id="create-confirm" type="password" autocomplete="new-password" placeholder="Repeat it" /></label>
-                  <div class="wide actions"><button class="button" id="identity-create" type="button">Create local identity</button><button class="button secondary" id="backup-download" type="button" disabled>Download encrypted backup</button></div>
-                  <label class="wide">Restore encrypted backup<input id="backup-file" type="file" accept="application/json,.json" /></label>
-                  <label class="wide">Backup passphrase<input id="restore-passphrase" type="password" autocomplete="current-password" placeholder="Passphrase for the selected backup" /></label>
-                  <div class="wide actions"><button class="button secondary" id="identity-restore" type="button">Restore into this tab</button></div>
-                </div>
-                <p class="notice" id="identity-notice" aria-live="polite">Relay never displays or uploads the private key.</p>
-
-                <div class="stack">
-                  <label>Public message<textarea id="post-text" maxlength="500" placeholder="Write something useful for the room. Keep it short and specific." disabled></textarea></label>
-                  <div class="actions"><button class="button" id="post-prepare" type="button" disabled>Review signed post</button></div>
-                </div>
+                <div class="compose-divider">SIGNED POST</div>
+                <div class="signer-line"><span>LOCAL SIGNER</span><b id="lobby-signer">identity not ready</b></div>
+                <label style="margin-top: 13px;">Public message<textarea id="post-text" maxlength="500" placeholder="Write something useful for the room." disabled></textarea></label>
+                <div class="action-row" style="margin-top: 12px;"><button class="button" id="post-prepare" type="button" disabled>Review signed post</button></div>
                 <div class="send-preview" id="send-preview" data-ready="false" aria-live="polite">
-                  <p class="preview-copy">This next click opens a Technocore URL that writes a public signed message.</p>
-                  <div class="preview-meta"><span>ROOM <b id="preview-room">—</b></span><span>NONCE <b id="preview-nonce">—</b></span><span>WRITER <b id="preview-did">—</b></span></div>
-                  <div class="actions"><button class="button warn" id="post-open" type="button">Open signed post ↗</button><button class="button secondary" id="post-cancel" type="button">Cancel</button></div>
+                  <p>This next click opens a Technocore URL that writes one public signed message.</p>
+                  <div class="preview-grid"><span>ROOM<b id="preview-room">—</b></span><span>NONCE<b id="preview-nonce">—</b></span><span>WRITER<b id="preview-did">—</b></span></div>
+                  <div class="action-row"><button class="button warn" id="post-open" type="button">Open signed post ↗</button><button class="button secondary" id="post-cancel" type="button">Cancel</button></div>
                 </div>
                 <p class="notice" id="post-notice" aria-live="polite"></p>
               </div>
             </section>
           </div>
-          <div class="micro-strip"><span><b>Why no write proxy?</b> A signed Technocore URL is itself a public write. Relay keeps the signing in your browser and opens it only from your deliberate click.</span><a href="https://technocore.chat/llms.txt" target="_blank" rel="noreferrer">Read the protocol ↗</a></div>
-        </div>
-      </section>
+        </section>
 
-      <section class="section" id="signals">
-        <div class="wrap">
-          <div class="section-head">
-            <div><p class="section-kicker">SIGNAL DESK</p><h2>Watch the sources, not screenshots.</h2></div>
-            <p class="section-copy">These are official X timelines rendered by X. They update on their side; Relay does not scrape, rewrite, or rank the posts.</p>
+        <section class="tab-panel" id="panel-verify" role="tabpanel" aria-labelledby="tab-verify" data-panel="verify" hidden>
+          <div class="panel-top">
+            <div><p class="panel-label">INDEPENDENT PROOF CHECK</p><h3>Verify a signed Technocore receipt in your browser.</h3><p>Paste a public say-signed URL. Relay decodes the DID, recreates the canonical payload, and checks the Ed25519 signature without sending the URL anywhere.</p></div>
+            <span class="status-chip" id="verify-chip"><span class="status-dot"></span>offline check</span>
           </div>
-          <div class="signals-grid">
-            <article class="signal-card">
-              <div class="signal-card-head"><strong>FLOP Labs</strong><span>official feed</span></div>
-              <div class="timeline"><a class="twitter-timeline" data-theme="dark" data-dnt="true" data-chrome="noheader nofooter noborders" data-height="500" href="https://x.com/flop_labs">Posts from @flop_labs</a></div>
-              <div class="signal-foot"><span>Rendered by X · DNT enabled</span><a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">Open X ↗</a></div>
-            </article>
-            <article class="signal-card">
-              <div class="signal-card-head"><strong>Arthur Hayes</strong><span>@CryptoHayes</span></div>
-              <div class="timeline"><a class="twitter-timeline" data-theme="dark" data-dnt="true" data-chrome="noheader nofooter noborders" data-height="500" href="https://x.com/CryptoHayes">Posts from @CryptoHayes</a></div>
-              <div class="signal-foot"><span>Rendered by X · DNT enabled</span><a href="https://x.com/CryptoHayes" target="_blank" rel="noreferrer">Open X ↗</a></div>
-            </article>
+          <div class="panel-body verify-layout">
+            <aside class="verify-copy">
+              <h4>Don’t trust the green badge alone.</h4>
+              <p>The verifier checks the same relationship a recipient needs: public DID → public key → signature → cleaned room, nonce, and text.</p>
+              <div class="verify-principles">
+                <div class="verify-principle"><b>01</b><span>No account, key, or network request is needed for the signature check.</span></div>
+                <div class="verify-principle"><b>02</b><span>It catches altered text, altered nonce, an invalid DID, or a broken signature.</span></div>
+                <div class="verify-principle"><b>03</b><span>A valid signature proves key control; it does not make a claim about airdrop eligibility.</span></div>
+              </div>
+            </aside>
+            <section class="verifier-card" aria-labelledby="verify-title">
+              <div class="block-head"><div><h4 id="verify-title">Receipt verifier</h4><p>Only Technocore say-signed URLs are accepted.</p></div></div>
+              <div class="block-body">
+                <label>Signed Technocore URL<textarea id="verify-url" maxlength="3000" placeholder="https://technocore.chat/r/lobby/say-signed/did%3Akey%3A…"></textarea></label>
+                <div class="action-row" style="margin-top: 12px;"><button class="button" id="verify-run" type="button">Verify locally</button><button class="button secondary" id="verify-clear" type="button">Clear</button></div>
+                <div class="verify-result" id="verify-result" data-state="idle" aria-live="polite">
+                  <div class="verify-head"><div><strong id="verify-title-text">Waiting for a receipt</strong><span id="verify-summary">Nothing has been sent from this page.</span></div><span class="verify-seal" id="verify-seal">?</span></div>
+                  <div class="verify-rows">
+                    <div class="verify-row"><span>ROOM</span><b id="verify-room">—</b></div>
+                    <div class="verify-row"><span>NONCE</span><b id="verify-nonce">—</b></div>
+                    <div class="verify-row"><span>WRITER</span><b id="verify-did">—</b></div>
+                    <div class="verify-row"><span>TEXT</span><b id="verify-text">—</b></div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
-        </div>
+        </section>
+
+        <section class="tab-panel" id="panel-signals" role="tabpanel" aria-labelledby="tab-signals" data-panel="signals" hidden>
+          <div class="panel-top">
+            <div><p class="panel-label">LIVE SOURCE DESK</p><h3>Official signals, kept near-live.</h3><p>These are official X timelines — not scraped copies. Relay asks X to refresh the embeds every minute while this page is open.</p></div>
+            <div class="signal-tools"><span class="signal-status" id="signals-status">Loading official X embeds…</span><button class="button secondary" id="signals-refresh" type="button">Refresh feeds</button></div>
+          </div>
+          <div class="panel-body">
+            <div class="signals-grid">
+              <article class="signal-card">
+                <div class="signal-head"><div><h4>FLOP Labs</h4><span>@flop_labs · official project feed</span></div><b class="signal-badge">LIVE</b></div>
+                <div class="timeline-slot" id="signal-flop"><a class="twitter-timeline" data-theme="dark" data-dnt="true" data-chrome="noheader nofooter noborders" data-height="500" href="https://x.com/flop_labs">Posts from @flop_labs</a></div>
+                <div class="signal-foot"><span>Official X widget · DNT enabled</span><a href="https://x.com/flop_labs" target="_blank" rel="noreferrer">Open X ↗</a></div>
+              </article>
+              <article class="signal-card">
+                <div class="signal-head"><div><h4>Arthur Hayes</h4><span>@CryptoHayes · official feed</span></div><b class="signal-badge">LIVE</b></div>
+                <div class="timeline-slot" id="signal-arthur"><a class="twitter-timeline" data-theme="dark" data-dnt="true" data-chrome="noheader nofooter noborders" data-height="500" href="https://x.com/CryptoHayes">Posts from @CryptoHayes</a></div>
+                <div class="signal-foot"><span>Official X widget · DNT enabled</span><a href="https://x.com/CryptoHayes" target="_blank" rel="noreferrer">Open X ↗</a></div>
+              </article>
+            </div>
+            <p class="signal-note">The public X widget is the closest safe live source available without embedding an X API credential in a public site. Open X for its instantaneous stream.</p>
+          </div>
+        </section>
       </section>
     </main>
 
     <footer class="footer"><div class="wrap"><p>Built independently by <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a></p><p>Sources: <a href="https://flop.finance/" target="_blank" rel="noreferrer">FLOP</a> · <a href="https://technocore.chat/" target="_blank" rel="noreferrer">Technocore</a> · official X embeds</p></div></footer>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
     <script>
-      (() => {
+      (function () {
         "use strict";
 
-        const encoder = new TextEncoder();
-        const didCodec = new Uint8Array([0xed, 0x01]);
-        const base58Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-        const roomPattern = /^[a-z0-9][a-z0-9_-]{0,47}$/;
-        const backupIterations = 600000;
-        const cryptoReady = Boolean(window.isSecureContext && window.crypto && window.crypto.subtle);
-        const state = {
+        var encoder = new TextEncoder();
+        var didCodec = new Uint8Array([0xed, 0x01]);
+        var base58Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+        var roomPattern = /^[a-z0-9][a-z0-9_-]{0,47}$/;
+        var backupIterations = 600000;
+        var cryptoReady = Boolean(window.isSecureContext && window.crypto && window.crypto.subtle);
+        var state = {
           backupPayload: null,
           backupStarted: false,
           identity: null,
           lastNonceByRoom: new Map(),
           preparedPost: null,
+          roomReading: false,
+          roomTimer: null,
+          signalTimer: null
         };
 
-        const ui = {
+        var ui = {
           backupDownload: document.getElementById("backup-download"),
           backupFile: document.getElementById("backup-file"),
+          contributionDraft: document.getElementById("contribution-draft"),
+          contributionNote: document.getElementById("contribution-note"),
+          contributionTitle: document.getElementById("contribution-title"),
+          contributionUrl: document.getElementById("contribution-url"),
           copyDid: document.getElementById("copy-did"),
           createConfirm: document.getElementById("create-confirm"),
           createIdentity: document.getElementById("identity-create"),
           createPassphrase: document.getElementById("create-passphrase"),
+          directoryChip: document.getElementById("directory-chip"),
+          directoryFingerprint: document.getElementById("directory-fingerprint"),
+          directoryNotice: document.getElementById("directory-notice"),
+          directoryOpen: document.getElementById("directory-open"),
           identityChip: document.getElementById("identity-chip"),
           identityDid: document.getElementById("identity-did"),
+          identityFingerprint: document.getElementById("identity-fingerprint"),
           identityForget: document.getElementById("identity-forget"),
           identityNotice: document.getElementById("identity-notice"),
           identityRestore: document.getElementById("identity-restore"),
           identityState: document.getElementById("identity-state"),
+          lobbySigner: document.getElementById("lobby-signer"),
           messageList: document.getElementById("message-list"),
           postCancel: document.getElementById("post-cancel"),
           postNotice: document.getElementById("post-notice"),
@@ -430,45 +548,61 @@
           previewRoom: document.getElementById("preview-room"),
           restorePassphrase: document.getElementById("restore-passphrase"),
           roomChip: document.getElementById("room-chip"),
+          roomFollow: document.getElementById("room-follow"),
           roomLoad: document.getElementById("room-load"),
           roomName: document.getElementById("room-name"),
           roomNotice: document.getElementById("room-notice"),
+          roomReadTime: document.getElementById("room-read-time"),
           sendPreview: document.getElementById("send-preview"),
+          signalsRefresh: document.getElementById("signals-refresh"),
+          signalsStatus: document.getElementById("signals-status"),
+          verifyChip: document.getElementById("verify-chip"),
+          verifyClear: document.getElementById("verify-clear"),
+          verifyDid: document.getElementById("verify-did"),
+          verifyNonce: document.getElementById("verify-nonce"),
+          verifyResult: document.getElementById("verify-result"),
+          verifyRoom: document.getElementById("verify-room"),
+          verifyRun: document.getElementById("verify-run"),
+          verifySeal: document.getElementById("verify-seal"),
+          verifySummary: document.getElementById("verify-summary"),
+          verifyText: document.getElementById("verify-text"),
+          verifyTitleText: document.getElementById("verify-title-text"),
+          verifyUrl: document.getElementById("verify-url")
         };
 
-        function setNotice(element, message, tone = "") {
+        function setNotice(element, message, tone) {
           element.textContent = message;
-          element.className = `notice${tone ? ` ${tone}` : ""}`;
+          element.className = "notice" + (tone ? " " + tone : "");
         }
 
-        function setChip(element, label, tone = "") {
-          element.className = `status-chip${tone ? ` ${tone}` : ""}`;
-          const dot = document.createElement("span");
-          dot.className = "dot";
+        function setChip(element, label, tone) {
+          element.className = "status-chip" + (tone ? " " + tone : "");
+          var dot = document.createElement("span");
+          dot.className = "status-dot";
           element.replaceChildren(dot, document.createTextNode(label));
         }
 
         function toBase64Url(bytes) {
-          let binary = "";
-          for (const byte of bytes) binary += String.fromCharCode(byte);
+          var binary = "";
+          for (var index = 0; index < bytes.length; index += 1) binary += String.fromCharCode(bytes[index]);
           return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/u, "");
         }
 
         function fromBase64Url(value) {
           if (typeof value !== "string" || !/^[A-Za-z0-9_-]+$/u.test(value)) throw new Error("Invalid base64url data.");
-          const padded = `${value.replace(/-/g, "+").replace(/_/g, "/")}${"=".repeat((4 - (value.length % 4)) % 4)}`;
-          const binary = atob(padded);
-          return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+          var padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (value.length % 4)) % 4);
+          var binary = atob(padded);
+          return Uint8Array.from(binary, function (character) { return character.charCodeAt(0); });
         }
 
         function base58Encode(bytes) {
           if (!bytes.length) return "";
-          const digits = [0];
-          for (const byte of bytes) {
-            let carry = byte;
-            for (let index = 0; index < digits.length; index += 1) {
-              carry += digits[index] << 8;
-              digits[index] = carry % 58;
+          var digits = [0];
+          for (var byteIndex = 0; byteIndex < bytes.length; byteIndex += 1) {
+            var carry = bytes[byteIndex];
+            for (var digitIndex = 0; digitIndex < digits.length; digitIndex += 1) {
+              carry += digits[digitIndex] << 8;
+              digits[digitIndex] = carry % 58;
               carry = Math.floor(carry / 58);
             }
             while (carry > 0) {
@@ -476,25 +610,22 @@
               carry = Math.floor(carry / 58);
             }
           }
-          let output = "";
-          for (const byte of bytes) {
-            if (byte !== 0) break;
-            output += "1";
-          }
-          for (let index = digits.length - 1; index >= 0; index -= 1) output += base58Alphabet[digits[index]];
+          var output = "";
+          for (var zeroIndex = 0; zeroIndex < bytes.length && bytes[zeroIndex] === 0; zeroIndex += 1) output += "1";
+          for (var reverseIndex = digits.length - 1; reverseIndex >= 0; reverseIndex -= 1) output += base58Alphabet[digits[reverseIndex]];
           return output;
         }
 
         function base58Decode(value) {
           if (typeof value !== "string" || !value) throw new Error("Invalid base58 data.");
-          const bytes = [0];
-          for (const character of value) {
-            const alphabetIndex = base58Alphabet.indexOf(character);
+          var bytes = [0];
+          for (var charIndex = 0; charIndex < value.length; charIndex += 1) {
+            var alphabetIndex = base58Alphabet.indexOf(value[charIndex]);
             if (alphabetIndex < 0) throw new Error("Invalid base58 character.");
-            let carry = alphabetIndex;
-            for (let index = 0; index < bytes.length; index += 1) {
-              carry += bytes[index] * 58;
-              bytes[index] = carry & 255;
+            var carry = alphabetIndex;
+            for (var byteIndex = 0; byteIndex < bytes.length; byteIndex += 1) {
+              carry += bytes[byteIndex] * 58;
+              bytes[byteIndex] = carry & 255;
               carry >>= 8;
             }
             while (carry > 0) {
@@ -502,37 +633,34 @@
               carry >>= 8;
             }
           }
-          let leadingZeroes = 0;
-          for (const character of value) {
-            if (character !== "1") break;
-            leadingZeroes += 1;
-          }
-          const output = new Uint8Array(leadingZeroes + bytes.length);
-          for (let index = 0; index < bytes.length; index += 1) output[output.length - 1 - index] = bytes[index];
+          var leadingZeroes = 0;
+          while (leadingZeroes < value.length && value[leadingZeroes] === "1") leadingZeroes += 1;
+          var output = new Uint8Array(leadingZeroes + bytes.length);
+          for (var outputIndex = 0; outputIndex < bytes.length; outputIndex += 1) output[output.length - 1 - outputIndex] = bytes[outputIndex];
           return output;
         }
 
         function makeDid(rawPublicKey) {
           if (!(rawPublicKey instanceof Uint8Array) || rawPublicKey.length !== 32) throw new Error("Ed25519 public key is invalid.");
-          const multicodec = new Uint8Array(didCodec.length + rawPublicKey.length);
+          var multicodec = new Uint8Array(didCodec.length + rawPublicKey.length);
           multicodec.set(didCodec);
           multicodec.set(rawPublicKey, didCodec.length);
-          return `did:key:z${base58Encode(multicodec)}`;
+          return "did:key:z" + base58Encode(multicodec);
         }
 
         function publicKeyFromDid(did) {
-          const prefix = "did:key:z";
-          if (typeof did !== "string" || !did.startsWith(prefix)) throw new Error("Backup DID is not an Ed25519 did:key.");
-          const bytes = base58Decode(did.slice(prefix.length));
-          if (bytes.length !== 34 || bytes[0] !== didCodec[0] || bytes[1] !== didCodec[1]) throw new Error("Backup DID uses an unsupported key type.");
+          var prefix = "did:key:z";
+          if (typeof did !== "string" || !did.startsWith(prefix)) throw new Error("Receipt DID is not an Ed25519 did:key.");
+          var bytes = base58Decode(did.slice(prefix.length));
+          if (bytes.length !== 34 || bytes[0] !== didCodec[0] || bytes[1] !== didCodec[1]) throw new Error("Receipt DID uses an unsupported key type.");
           return bytes.slice(2);
         }
 
         function sameBytes(left, right) {
           if (left.length !== right.length) return false;
-          let result = 0;
-          for (let index = 0; index < left.length; index += 1) result |= left[index] ^ right[index];
-          return result === 0;
+          var difference = 0;
+          for (var index = 0; index < left.length; index += 1) difference |= left[index] ^ right[index];
+          return difference === 0;
         }
 
         function cleanText(value) {
@@ -540,15 +668,24 @@
         }
 
         function normalizeRoom(value) {
-          const room = String(value).trim().toLowerCase();
+          var room = String(value).trim().toLowerCase();
           if (!roomPattern.test(room)) throw new Error("Use 1–48 lowercase letters, numbers, _ or - for the room name.");
           return room;
         }
 
         function formatTimestamp(value) {
-          const date = new Date(value);
+          var date = new Date(value);
           if (Number.isNaN(date.getTime())) return "undated";
           return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+        }
+
+        function formatShortTime(date) {
+          return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(date);
+        }
+
+        async function fingerprintForDid(did) {
+          var digest = new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(did)));
+          return Array.from(digest.slice(0, 8), function (byte) { return byte.toString(16).padStart(2, "0"); }).join("");
         }
 
         function clearPreparedPost() {
@@ -560,25 +697,28 @@
         }
 
         function updateIdentityUi() {
-          const hasIdentity = Boolean(state.identity);
-          const canSign = hasIdentity && state.backupStarted;
+          var hasIdentity = Boolean(state.identity);
+          var canAct = hasIdentity && state.backupStarted;
           ui.identityDid.textContent = hasIdentity ? state.identity.did : "Create an identity or restore your encrypted backup.";
-          ui.identityState.textContent = hasIdentity
-            ? (state.backupStarted ? "Local identity ready in this tab." : "Identity created. Start the encrypted backup download before signing.")
-            : "No local identity loaded.";
-          setChip(ui.identityChip, hasIdentity ? (state.backupStarted ? "local identity ready" : "backup needed") : "no identity", hasIdentity && state.backupStarted ? "ok" : hasIdentity ? "busy" : "");
+          ui.identityFingerprint.textContent = hasIdentity ? state.identity.fingerprint : "—";
+          ui.directoryFingerprint.textContent = hasIdentity ? state.identity.fingerprint : "Create or restore an identity first.";
+          ui.identityState.textContent = hasIdentity ? (state.backupStarted ? "Local identity ready in this tab." : "Identity created. Start encrypted backup before any public action.") : "No local identity loaded.";
+          ui.lobbySigner.textContent = hasIdentity ? (state.backupStarted ? state.identity.did : "backup required before signing") : "identity not ready";
+          setChip(ui.identityChip, hasIdentity ? (state.backupStarted ? "identity ready" : "backup needed") : "no identity", hasIdentity && state.backupStarted ? "ok" : hasIdentity ? "busy" : "");
+          setChip(ui.directoryChip, canAct ? "ready to publish" : hasIdentity ? "backup first" : "backup first", canAct ? "ok" : hasIdentity ? "busy" : "");
           ui.copyDid.disabled = !hasIdentity;
           ui.identityForget.disabled = !hasIdentity;
           ui.backupDownload.disabled = !state.backupPayload;
           ui.createIdentity.disabled = !cryptoReady || hasIdentity;
           ui.identityRestore.disabled = !cryptoReady || hasIdentity;
-          ui.postText.disabled = !canSign;
-          ui.postPrepare.disabled = !canSign;
-          if (!canSign) clearPreparedPost();
+          ui.directoryOpen.disabled = !canAct;
+          ui.postText.disabled = !canAct;
+          ui.postPrepare.disabled = !canAct;
+          if (!canAct) clearPreparedPost();
         }
 
         function renderEmpty(message) {
-          const empty = document.createElement("div");
+          var empty = document.createElement("div");
           empty.className = "empty-state";
           empty.textContent = message;
           ui.messageList.replaceChildren(empty);
@@ -589,30 +729,31 @@
             renderEmpty("This room returned no messages right now.\nTry another public room or load it again later.");
             return;
           }
-          const fragment = document.createDocumentFragment();
-          for (const message of messages) {
-            const card = document.createElement("article");
+          var fragment = document.createDocumentFragment();
+          messages.forEach(function (message) {
+            var card = document.createElement("article");
             card.className = "message";
-            const top = document.createElement("div");
+            var top = document.createElement("div");
             top.className = "message-top";
-            const author = document.createElement("span");
+            var author = document.createElement("span");
             author.className = "message-from";
             author.textContent = typeof message.from === "string" ? message.from : typeof message.did === "string" ? message.did : "unknown writer";
-            const time = document.createElement("span");
+            var time = document.createElement("span");
             time.className = "message-time";
-            time.textContent = formatTimestamp(message.ts ?? message.time ?? message.created_at);
-            const text = document.createElement("div");
+            time.textContent = formatTimestamp(message.ts || message.time || message.created_at);
+            var text = document.createElement("div");
             text.className = "message-text";
             text.textContent = typeof message.text === "string" ? message.text : typeof message.body === "string" ? message.body : "(no message text)";
             top.append(author, time);
             card.append(top, text);
             fragment.append(card);
-          }
+          });
           ui.messageList.replaceChildren(fragment);
         }
 
         async function fetchRoom() {
-          let room;
+          if (state.roomReading) return;
+          var room;
           try {
             room = normalizeRoom(ui.roomName.value);
           } catch (error) {
@@ -620,63 +761,69 @@
             setChip(ui.roomChip, "invalid room", "bad");
             return;
           }
+          state.roomReading = true;
           ui.roomName.value = room;
           ui.roomLoad.disabled = true;
-          setChip(ui.roomChip, "loading", "busy");
-          setNotice(ui.roomNotice, "Reading the public room…");
+          setChip(ui.roomChip, "reading", "busy");
+          setNotice(ui.roomNotice, "Reading public room data…");
           try {
-            const response = await fetch(`/api/tc/room/${encodeURIComponent(room)}`, {
-              cache: "no-store",
-              headers: { Accept: "application/json" },
-            });
-            if (!response.ok) throw new Error(`Room reader returned HTTP ${response.status}.`);
-            const payload = await response.json();
-            const messages = Array.isArray(payload) ? payload : Array.isArray(payload.messages) ? payload.messages : [];
+            var response = await fetch("/api/tc/room/" + encodeURIComponent(room), { cache: "no-store", headers: { Accept: "application/json" } });
+            if (!response.ok) throw new Error("Room reader returned HTTP " + response.status + ".");
+            var payload = await response.json();
+            var messages = Array.isArray(payload) ? payload : Array.isArray(payload.messages) ? payload.messages : [];
             renderMessages(messages);
-            setChip(ui.roomChip, `${messages.length} loaded`, "ok");
-            setNotice(ui.roomNotice, `Loaded /r/${room}. Messages are rendered as text only.`, "ok");
+            setChip(ui.roomChip, messages.length + " loaded", "ok");
+            ui.roomReadTime.textContent = "read " + formatShortTime(new Date());
+            setNotice(ui.roomNotice, "Loaded /r/" + room + ". Messages are rendered as text only.", "ok");
           } catch (error) {
             renderEmpty("The room could not be read right now.\nNothing was sent.");
             setChip(ui.roomChip, "read failed", "bad");
             setNotice(ui.roomNotice, error instanceof Error ? error.message : "Room reader failed.", "bad");
           } finally {
+            state.roomReading = false;
             ui.roomLoad.disabled = false;
           }
         }
 
+        function applyRoomFollow() {
+          if (state.roomTimer) {
+            window.clearInterval(state.roomTimer);
+            state.roomTimer = null;
+          }
+          if (ui.roomFollow.checked) {
+            fetchRoom();
+            state.roomTimer = window.setInterval(fetchRoom, 15000);
+            setNotice(ui.roomNotice, "Following this public room every 15 seconds. No messages will be sent.", "ok");
+          }
+        }
+
         async function deriveAesKey(passphrase, salt, usages) {
-          const material = await crypto.subtle.importKey("raw", encoder.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
-          return crypto.subtle.deriveKey(
-            { name: "PBKDF2", hash: "SHA-256", iterations: backupIterations, salt },
-            material,
-            { name: "AES-GCM", length: 256 },
-            false,
-            usages,
-          );
+          var material = await crypto.subtle.importKey("raw", encoder.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+          return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", iterations: backupIterations, salt: salt }, material, { name: "AES-GCM", length: 256 }, false, usages);
         }
 
         async function encryptBackup(pkcs8, did, rawPublicKey, passphrase) {
-          const salt = crypto.getRandomValues(new Uint8Array(16));
-          const iv = crypto.getRandomValues(new Uint8Array(12));
-          const key = await deriveAesKey(passphrase, salt, ["encrypt"]);
-          const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, pkcs8));
+          var salt = crypto.getRandomValues(new Uint8Array(16));
+          var iv = crypto.getRandomValues(new Uint8Array(12));
+          var key = await deriveAesKey(passphrase, salt, ["encrypt"]);
+          var ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, pkcs8));
           return {
             format: "flop-relay-ed25519",
             version: 1,
             createdAt: new Date().toISOString(),
-            did,
+            did: did,
             publicKey: toBase64Url(rawPublicKey),
             kdf: { name: "PBKDF2", hash: "SHA-256", iterations: backupIterations, salt: toBase64Url(salt) },
-            cipher: { name: "AES-GCM", iv: toBase64Url(iv), ciphertext: toBase64Url(ciphertext) },
+            cipher: { name: "AES-GCM", iv: toBase64Url(iv), ciphertext: toBase64Url(ciphertext) }
           };
         }
 
         async function createIdentity() {
           if (!cryptoReady) {
-            setNotice(ui.identityNotice, "Your browser does not expose the secure Web Crypto APIs Relay needs.", "bad");
+            setNotice(ui.identityNotice, "This browser does not expose the secure Web Crypto APIs Relay needs.", "bad");
             return;
           }
-          const passphrase = ui.createPassphrase.value;
+          var passphrase = ui.createPassphrase.value;
           if (passphrase.length < 12) {
             setNotice(ui.identityNotice, "Use a backup passphrase with at least 12 characters.", "warn");
             return;
@@ -689,19 +836,20 @@
           setChip(ui.identityChip, "creating locally", "busy");
           setNotice(ui.identityNotice, "Creating the key and encrypting its backup locally…");
           try {
-            const pair = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-            const rawPublicKey = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
-            const pkcs8 = new Uint8Array(await crypto.subtle.exportKey("pkcs8", pair.privateKey));
-            const privateKey = await crypto.subtle.importKey("pkcs8", pkcs8, { name: "Ed25519" }, false, ["sign"]);
-            const did = makeDid(rawPublicKey);
-            const backupPayload = await encryptBackup(pkcs8, did, rawPublicKey, passphrase);
+            var pair = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+            var rawPublicKey = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
+            var pkcs8 = new Uint8Array(await crypto.subtle.exportKey("pkcs8", pair.privateKey));
+            var privateKey = await crypto.subtle.importKey("pkcs8", pkcs8, { name: "Ed25519" }, false, ["sign"]);
+            var did = makeDid(rawPublicKey);
+            var fingerprint = await fingerprintForDid(did);
+            var backupPayload = await encryptBackup(pkcs8, did, rawPublicKey, passphrase);
             pkcs8.fill(0);
-            state.identity = { did, privateKey, publicKey: pair.publicKey, rawPublicKey };
+            state.identity = { did: did, fingerprint: fingerprint, privateKey: privateKey, publicKey: pair.publicKey, rawPublicKey: rawPublicKey };
             state.backupPayload = backupPayload;
             state.backupStarted = false;
             ui.createPassphrase.value = "";
             ui.createConfirm.value = "";
-            setNotice(ui.identityNotice, "Identity created locally. Start the encrypted backup download before you can sign.", "ok");
+            setNotice(ui.identityNotice, "Identity created locally. Start the encrypted backup download before any public action.", "ok");
           } catch (error) {
             state.identity = null;
             state.backupPayload = null;
@@ -714,16 +862,16 @@
 
         function startBackupDownload() {
           if (!state.backupPayload) return;
-          const blob = new Blob([JSON.stringify(state.backupPayload, null, 2)], { type: "application/json" });
-          const objectUrl = URL.createObjectURL(blob);
-          const anchor = document.createElement("a");
+          var blob = new Blob([JSON.stringify(state.backupPayload, null, 2)], { type: "application/json" });
+          var objectUrl = URL.createObjectURL(blob);
+          var anchor = document.createElement("a");
           anchor.href = objectUrl;
           anchor.download = "flop-relay-ed25519-backup.json";
           anchor.hidden = true;
           document.body.append(anchor);
           anchor.click();
           anchor.remove();
-          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+          window.setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000);
           state.backupStarted = true;
           setNotice(ui.identityNotice, "Encrypted backup download started. Confirm you have the file and passphrase before relying on this identity.", "ok");
           updateIdentityUi();
@@ -733,22 +881,22 @@
           if (!payload || payload.format !== "flop-relay-ed25519" || payload.version !== 1) throw new Error("This is not a FLOP Relay Ed25519 backup.");
           if (!payload.kdf || payload.kdf.name !== "PBKDF2" || payload.kdf.hash !== "SHA-256" || payload.kdf.iterations !== backupIterations) throw new Error("Backup key derivation settings are not supported.");
           if (!payload.cipher || payload.cipher.name !== "AES-GCM") throw new Error("Backup cipher settings are not supported.");
-          const didPublicKey = publicKeyFromDid(payload.did);
-          const backupPublicKey = fromBase64Url(payload.publicKey);
-          const salt = fromBase64Url(payload.kdf.salt);
-          const iv = fromBase64Url(payload.cipher.iv);
-          const ciphertext = fromBase64Url(payload.cipher.ciphertext);
+          var didPublicKey = publicKeyFromDid(payload.did);
+          var backupPublicKey = fromBase64Url(payload.publicKey);
+          var salt = fromBase64Url(payload.kdf.salt);
+          var iv = fromBase64Url(payload.cipher.iv);
+          var ciphertext = fromBase64Url(payload.cipher.ciphertext);
           if (!sameBytes(didPublicKey, backupPublicKey) || salt.length !== 16 || iv.length !== 12 || ciphertext.length < 17 || ciphertext.length > 10000) throw new Error("Backup data is malformed.");
-          return { did: payload.did, rawPublicKey: didPublicKey, salt, iv, ciphertext };
+          return { did: payload.did, rawPublicKey: didPublicKey, salt: salt, iv: iv, ciphertext: ciphertext };
         }
 
         async function restoreIdentity() {
           if (!cryptoReady) {
-            setNotice(ui.identityNotice, "Your browser does not expose the secure Web Crypto APIs Relay needs.", "bad");
+            setNotice(ui.identityNotice, "This browser does not expose the secure Web Crypto APIs Relay needs.", "bad");
             return;
           }
-          const file = ui.backupFile.files && ui.backupFile.files[0];
-          const passphrase = ui.restorePassphrase.value;
+          var file = ui.backupFile.files && ui.backupFile.files[0];
+          var passphrase = ui.restorePassphrase.value;
           if (!file) {
             setNotice(ui.identityNotice, "Choose your encrypted backup file first.", "warn");
             return;
@@ -764,17 +912,17 @@
           ui.identityRestore.disabled = true;
           setChip(ui.identityChip, "restoring locally", "busy");
           setNotice(ui.identityNotice, "Decrypting and checking the key locally…");
-          let pkcs8;
+          var pkcs8;
           try {
-            const payload = validBackup(JSON.parse(await file.text()));
-            const key = await deriveAesKey(passphrase, payload.salt, ["decrypt"]);
+            var payload = validBackup(JSON.parse(await file.text()));
+            var key = await deriveAesKey(passphrase, payload.salt, ["decrypt"]);
             pkcs8 = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: payload.iv }, key, payload.ciphertext));
-            const privateKey = await crypto.subtle.importKey("pkcs8", pkcs8, { name: "Ed25519" }, false, ["sign"]);
-            const publicKey = await crypto.subtle.importKey("raw", payload.rawPublicKey, { name: "Ed25519" }, true, ["verify"]);
-            const challenge = crypto.getRandomValues(new Uint8Array(32));
-            const signature = await crypto.subtle.sign("Ed25519", privateKey, challenge);
+            var privateKey = await crypto.subtle.importKey("pkcs8", pkcs8, { name: "Ed25519" }, false, ["sign"]);
+            var publicKey = await crypto.subtle.importKey("raw", payload.rawPublicKey, { name: "Ed25519" }, true, ["verify"]);
+            var challenge = crypto.getRandomValues(new Uint8Array(32));
+            var signature = await crypto.subtle.sign("Ed25519", privateKey, challenge);
             if (!(await crypto.subtle.verify("Ed25519", publicKey, signature, challenge))) throw new Error("Backup key check failed.");
-            state.identity = { did: payload.did, privateKey, publicKey, rawPublicKey: payload.rawPublicKey };
+            state.identity = { did: payload.did, fingerprint: await fingerprintForDid(payload.did), privateKey: privateKey, publicKey: publicKey, rawPublicKey: payload.rawPublicKey };
             state.backupPayload = null;
             state.backupStarted = true;
             ui.backupFile.value = "";
@@ -811,26 +959,57 @@
           ui.postText.value = "";
           setNotice(ui.identityNotice, "This tab has forgotten the local identity. Your downloaded backup was not touched.", "ok");
           setNotice(ui.postNotice, "");
+          setNotice(ui.directoryNotice, "Public identity publishing is unavailable until the encrypted backup download begins.");
           updateIdentityUi();
         }
 
+        function openDirectoryPublish() {
+          if (!state.identity || !state.backupStarted) return;
+          var publicUrl = "https://technocore.chat/kv/did/" + state.identity.fingerprint + "/set/" + encodeURIComponent(state.identity.did);
+          var opened = window.open(publicUrl, "_blank", "noopener,noreferrer");
+          if (opened) {
+            setNotice(ui.directoryNotice, "The public directory page opened in a new tab. Technocore’s response there is the result of record.", "ok");
+          } else {
+            setNotice(ui.directoryNotice, "Your browser blocked the new tab. Allow popups for Technocore and try again.", "warn");
+          }
+        }
+
         function nextNonce(room) {
-          const previous = state.lastNonceByRoom.get(room) ?? 0;
-          const nonce = Math.max(Date.now(), previous + 1);
+          var previous = state.lastNonceByRoom.get(room) || 0;
+          var nonce = Math.max(Date.now(), previous + 1);
           state.lastNonceByRoom.set(room, nonce);
           return nonce;
         }
 
+        function draftContribution() {
+          var title = cleanText(ui.contributionTitle.value);
+          var note = cleanText(ui.contributionNote.value);
+          var proofUrl = ui.contributionUrl.value.trim();
+          if (!title || !note || !proofUrl) {
+            setNotice(ui.postNotice, "Add the deliverable, a public proof URL, and one sentence about why it matters.", "warn");
+            return;
+          }
+          try {
+            var parsed = new URL(proofUrl);
+            if (parsed.protocol !== "https:") throw new Error("Use a public https:// proof URL.");
+            ui.postText.value = "Built: " + title + "\nProof: " + parsed.href + "\nWhy it matters: " + note;
+            clearPreparedPost();
+            setNotice(ui.postNotice, "Contribution note drafted. Review and edit it before signing.", "ok");
+          } catch (error) {
+            setNotice(ui.postNotice, error instanceof Error ? error.message : "Use a valid public proof URL.", "warn");
+          }
+        }
+
         async function preparePost() {
           if (!state.identity || !state.backupStarted) return;
-          let room;
+          var room;
           try {
             room = normalizeRoom(ui.roomName.value);
           } catch (error) {
             setNotice(ui.postNotice, error.message, "bad");
             return;
           }
-          const text = cleanText(ui.postText.value);
+          var text = cleanText(ui.postText.value);
           if (!text) {
             setNotice(ui.postNotice, "Write a useful public message before preparing a signature.", "warn");
             return;
@@ -844,11 +1023,11 @@
           try {
             ui.roomName.value = room;
             ui.postText.value = text;
-            const nonce = nextNonce(room);
-            const canonical = `${room}|${nonce}|${text}`;
-            const signature = new Uint8Array(await crypto.subtle.sign("Ed25519", state.identity.privateKey, encoder.encode(canonical)));
-            const signedUrl = `https://technocore.chat/r/${encodeURIComponent(room)}/say-signed/${encodeURIComponent(state.identity.did)}/${toBase64Url(signature)}/${nonce}/${encodeURIComponent(text)}`;
-            state.preparedPost = { did: state.identity.did, nonce, room, signedUrl };
+            var nonce = nextNonce(room);
+            var canonical = room + "|" + nonce + "|" + text;
+            var signature = new Uint8Array(await crypto.subtle.sign("Ed25519", state.identity.privateKey, encoder.encode(canonical)));
+            var signedUrl = "https://technocore.chat/r/" + encodeURIComponent(room) + "/say-signed/" + encodeURIComponent(state.identity.did) + "/" + toBase64Url(signature) + "/" + nonce + "/" + encodeURIComponent(text);
+            state.preparedPost = { did: state.identity.did, nonce: nonce, room: room, signedUrl: signedUrl };
             ui.previewRoom.textContent = room;
             ui.previewNonce.textContent = String(nonce);
             ui.previewDid.textContent = state.identity.did;
@@ -864,8 +1043,8 @@
 
         function openSignedPost() {
           if (!state.preparedPost) return;
-          const post = state.preparedPost;
-          const opened = window.open(post.signedUrl, "_blank", "noopener,noreferrer");
+          var post = state.preparedPost;
+          var opened = window.open(post.signedUrl, "_blank", "noopener,noreferrer");
           clearPreparedPost();
           if (opened) {
             setNotice(ui.postNotice, "The signed post opened in a new tab. Technocore’s response there is the result of record.", "ok");
@@ -874,26 +1053,177 @@
           }
         }
 
+        function resetVerification() {
+          ui.verifyResult.dataset.state = "idle";
+          ui.verifyTitleText.textContent = "Waiting for a receipt";
+          ui.verifySummary.textContent = "Nothing has been sent from this page.";
+          ui.verifySeal.textContent = "?";
+          ui.verifyRoom.textContent = "—";
+          ui.verifyNonce.textContent = "—";
+          ui.verifyDid.textContent = "—";
+          ui.verifyText.textContent = "—";
+          setChip(ui.verifyChip, "offline check", "");
+        }
+
+        function parseSignedReceipt(value) {
+          var url = new URL(value.trim());
+          if (url.protocol !== "https:" || url.hostname !== "technocore.chat") throw new Error("Use an https://technocore.chat signed URL.");
+          var rawParts = url.pathname.split("/").filter(Boolean);
+          if (rawParts.length < 7 || rawParts[0] !== "r" || rawParts[2] !== "say-signed") throw new Error("This is not a Technocore say-signed URL.");
+          var parts = rawParts.map(function (part) { return decodeURIComponent(part); });
+          var room = normalizeRoom(parts[1]);
+          if (parts[1] !== room) throw new Error("Receipt room is not in the supported public-room format.");
+          var did = parts[3];
+          var signature = parts[4];
+          var nonce = parts[5];
+          var text = parts.slice(6).join("/");
+          if (!/^[1-9][0-9]{0,18}$/u.test(nonce)) throw new Error("Receipt nonce is invalid.");
+          if (!text) throw new Error("Receipt text is empty.");
+          return { did: did, nonce: nonce, room: room, signature: signature, text: text };
+        }
+
+        async function verifyReceipt() {
+          resetVerification();
+          if (!cryptoReady) {
+            ui.verifyResult.dataset.state = "invalid";
+            ui.verifyTitleText.textContent = "Web Crypto is unavailable";
+            ui.verifySummary.textContent = "This browser cannot run the local Ed25519 check.";
+            ui.verifySeal.textContent = "!";
+            setChip(ui.verifyChip, "cannot verify", "bad");
+            return;
+          }
+          ui.verifyRun.disabled = true;
+          ui.verifyResult.dataset.state = "checking";
+          ui.verifyTitleText.textContent = "Checking locally…";
+          ui.verifySummary.textContent = "Decoding the public DID and canonical message.";
+          ui.verifySeal.textContent = "…";
+          setChip(ui.verifyChip, "checking", "busy");
+          try {
+            var receipt = parseSignedReceipt(ui.verifyUrl.value);
+            var cleaned = cleanText(receipt.text);
+            var rawPublicKey = publicKeyFromDid(receipt.did);
+            var publicKey = await crypto.subtle.importKey("raw", rawPublicKey, { name: "Ed25519" }, false, ["verify"]);
+            var signature = fromBase64Url(receipt.signature);
+            if (signature.length !== 64) throw new Error("Receipt signature has the wrong Ed25519 length.");
+            var canonical = receipt.room + "|" + receipt.nonce + "|" + cleaned;
+            var valid = await crypto.subtle.verify("Ed25519", publicKey, signature, encoder.encode(canonical));
+            ui.verifyRoom.textContent = receipt.room;
+            ui.verifyNonce.textContent = receipt.nonce;
+            ui.verifyDid.textContent = receipt.did;
+            ui.verifyText.textContent = cleaned;
+            if (valid) {
+              ui.verifyResult.dataset.state = "valid";
+              ui.verifyTitleText.textContent = "Signature is valid";
+              ui.verifySummary.textContent = "The DID key verifies this room, nonce, and cleaned message locally.";
+              ui.verifySeal.textContent = "✓";
+              setChip(ui.verifyChip, "valid receipt", "ok");
+            } else {
+              ui.verifyResult.dataset.state = "invalid";
+              ui.verifyTitleText.textContent = "Signature does not match";
+              ui.verifySummary.textContent = "The public DID does not verify this room, nonce, and cleaned message.";
+              ui.verifySeal.textContent = "×";
+              setChip(ui.verifyChip, "invalid receipt", "bad");
+            }
+          } catch (error) {
+            ui.verifyResult.dataset.state = "invalid";
+            ui.verifyTitleText.textContent = "Could not verify this receipt";
+            ui.verifySummary.textContent = error instanceof Error ? error.message : "The receipt format is invalid.";
+            ui.verifySeal.textContent = "×";
+            setChip(ui.verifyChip, "invalid input", "bad");
+          } finally {
+            ui.verifyRun.disabled = false;
+          }
+        }
+
+        function clearVerification() {
+          ui.verifyUrl.value = "";
+          resetVerification();
+        }
+
+        function loadXWidgets(container) {
+          if (window.twttr && window.twttr.widgets && window.twttr.widgets.load) {
+            window.twttr.widgets.load(container);
+            return;
+          }
+          window.twttr.ready(function () {
+            if (window.twttr.widgets && window.twttr.widgets.load) window.twttr.widgets.load(container);
+          });
+        }
+
+        function renderTimeline(slotId, handle) {
+          var slot = document.getElementById(slotId);
+          var anchor = document.createElement("a");
+          anchor.className = "twitter-timeline";
+          anchor.href = "https://x.com/" + handle;
+          anchor.textContent = "Posts from @" + handle;
+          anchor.setAttribute("data-theme", "dark");
+          anchor.setAttribute("data-dnt", "true");
+          anchor.setAttribute("data-chrome", "noheader nofooter noborders");
+          anchor.setAttribute("data-height", "500");
+          slot.replaceChildren(anchor);
+          loadXWidgets(slot);
+        }
+
+        function refreshSignals(manual) {
+          ui.signalsRefresh.disabled = true;
+          renderTimeline("signal-flop", "flop_labs");
+          renderTimeline("signal-arthur", "CryptoHayes");
+          ui.signalsStatus.textContent = (manual ? "Refresh requested " : "Auto-refreshed ") + formatShortTime(new Date()) + " · official X widgets";
+          window.setTimeout(function () { ui.signalsRefresh.disabled = false; }, 500);
+        }
+
+        function activateTab(name, updateHash) {
+          var validTabs = ["guide", "identity", "lobby", "verify", "signals"];
+          var target = validTabs.includes(name) ? name : "guide";
+          document.querySelectorAll("[data-tab]").forEach(function (button) {
+            var selected = button.dataset.tab === target;
+            button.setAttribute("aria-selected", String(selected));
+            button.tabIndex = selected ? 0 : -1;
+          });
+          document.querySelectorAll("[data-panel]").forEach(function (panel) {
+            panel.hidden = panel.dataset.panel !== target;
+          });
+          if (updateHash) history.replaceState(null, "", "#" + target);
+          if (target === "signals") refreshSignals(false);
+        }
+
+        document.querySelectorAll("[data-tab]").forEach(function (button) {
+          button.addEventListener("click", function () { activateTab(button.dataset.tab, true); });
+        });
+        document.querySelectorAll("[data-go-tab]").forEach(function (button) {
+          button.addEventListener("click", function () { activateTab(button.dataset.goTab, true); });
+        });
+        window.addEventListener("hashchange", function () { activateTab(window.location.hash.slice(1), false); });
         ui.roomLoad.addEventListener("click", fetchRoom);
+        ui.roomFollow.addEventListener("change", applyRoomFollow);
         ui.createIdentity.addEventListener("click", createIdentity);
         ui.backupDownload.addEventListener("click", startBackupDownload);
         ui.identityRestore.addEventListener("click", restoreIdentity);
         ui.copyDid.addEventListener("click", copyDid);
         ui.identityForget.addEventListener("click", forgetIdentity);
+        ui.directoryOpen.addEventListener("click", openDirectoryPublish);
+        ui.contributionDraft.addEventListener("click", draftContribution);
         ui.postPrepare.addEventListener("click", preparePost);
         ui.postOpen.addEventListener("click", openSignedPost);
-        ui.postCancel.addEventListener("click", () => {
+        ui.postCancel.addEventListener("click", function () {
           clearPreparedPost();
           setNotice(ui.postNotice, "Signed post preview cancelled.");
         });
         ui.roomName.addEventListener("input", clearPreparedPost);
         ui.postText.addEventListener("input", clearPreparedPost);
+        ui.verifyRun.addEventListener("click", verifyReceipt);
+        ui.verifyClear.addEventListener("click", clearVerification);
+        ui.signalsRefresh.addEventListener("click", function () { refreshSignals(true); });
 
         if (!cryptoReady) {
           setNotice(ui.identityNotice, "This browser cannot create or restore an identity here because secure Web Crypto is unavailable.", "bad");
         }
         updateIdentityUi();
-      })();
+        resetVerification();
+        refreshSignals(false);
+        state.signalTimer = window.setInterval(function () { refreshSignals(false); }, 60000);
+        activateTab(window.location.hash.slice(1) || "guide", false);
+      }());
     </script>
   </body>
 </html>
