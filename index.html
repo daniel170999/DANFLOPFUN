@@ -235,6 +235,16 @@
       .pulse-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 7px; padding: 10px 11px; background: rgba(19, 34, 71, .42); color: var(--paper); font: 800 10px var(--mono); text-decoration: none; }
       .pulse-link:hover { border-color: var(--cyan); background: rgba(0, 180, 216, .08); color: var(--cyan-soft); }
       .pulse-link span { color: var(--faint); font-weight: 400; }
+      .agent-pulse { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(270px, .82fr); gap: 22px; margin-bottom: 22px; border: 1px solid rgba(132, 231, 185, .38); border-radius: 11px; padding: 21px 22px; background: linear-gradient(120deg, rgba(132, 231, 185, .08), rgba(6, 11, 27, .72) 54%), var(--surface-deep); }
+      .agent-pulse h4 { margin: 0 0 7px; font: 800 18px/1.1 var(--mono); letter-spacing: -.05em; }
+      .agent-pulse p { max-width: 610px; margin: 0; color: var(--muted); font-size: 12px; }
+      .agent-pulse-links { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+      .agent-pulse-links a { color: var(--green); font: 800 10px var(--mono); text-decoration: none; }
+      .agent-pulse-links a:hover { color: var(--paper); text-decoration: underline; }
+      .agent-pulse-readout { min-width: 0; align-self: center; border: 1px solid rgba(132, 231, 185, .28); border-radius: 8px; padding: 14px; background: rgba(6, 11, 27, .58); }
+      .agent-pulse-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: var(--faint); font: 800 9px var(--mono); letter-spacing: .08em; }
+      .agent-pulse-head span:last-child { color: var(--green); letter-spacing: 0; }
+      .agent-pulse-report { min-height: 64px; color: var(--paper) !important; font: 11px/1.6 var(--mono) !important; overflow-wrap: anywhere; }
 
       .footer { border-top: 1px solid var(--line); }
       .footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 23px 0 30px; color: var(--faint); font: 10px var(--mono); }
@@ -263,7 +273,7 @@
         .route-foot { position: relative; right: auto; bottom: auto; left: auto; margin-top: 32px; }
         .route-step { grid-template-columns: 45px minmax(0, 1fr); gap: 10px; }
         .step-go { grid-column: 2; justify-self: start; }
-        .form-grid, .preview-grid, .signals-grid, .community-pulse { grid-template-columns: 1fr; }
+        .form-grid, .preview-grid, .signals-grid, .community-pulse, .agent-pulse { grid-template-columns: 1fr; }
         .form-grid .full { grid-column: auto; }
         .reader-toolbar { grid-template-columns: 1fr; }
         .reader-toolbar .button { width: 100%; }
@@ -497,6 +507,15 @@
                 <a class="pulse-link" href="https://x.com/search?q=%24FLOP&amp;src=typed_query&amp;f=top" target="_blank" rel="noreferrer"><span>$FLOP discussion</span><b>Open X ↗</b></a>
               </div>
             </section>
+            <section class="agent-pulse" aria-labelledby="agent-pulse-title">
+              <div>
+                <p class="pulse-kicker">COMMUNITY AGENT · EVERY 5 HOURS</p>
+                <h4 id="agent-pulse-title">One agent, one useful reply when the room moves.</h4>
+                <p>FLOP Relay reads the public lobby, uses a low-cost model to decide whether there is something worth adding, and stays quiet when the answer would be generic or repetitive.</p>
+                <div class="agent-pulse-links"><a href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open the lobby ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN/actions/workflows/agent-pulse.yml" target="_blank" rel="noreferrer">View the scheduler ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/agent-pulse/pulse.mjs" target="_blank" rel="noreferrer">Read the agent code ↗</a></div>
+              </div>
+              <div class="agent-pulse-readout" aria-live="polite"><div class="agent-pulse-head"><span>LAST COMMUNITY MESSAGE</span><span id="agent-pulse-status">checking…</span></div><p class="agent-pulse-report" id="agent-pulse-report">Reading the public lobby…</p></div>
+            </section>
             <div class="signals-grid">
               <article class="signal-card">
                 <div class="signal-head"><div><h4>FLOP Labs</h4><span>@flop_labs · official project feed</span></div><b class="signal-badge">LIVE</b></div>
@@ -535,7 +554,8 @@
           preparedPost: null,
           roomReading: false,
           roomTimer: null,
-          signalTimer: null
+          signalTimer: null,
+          agentPulseTimer: null
         };
 
         var ui = {
@@ -560,6 +580,8 @@
           identityNotice: document.getElementById("identity-notice"),
           identityRestore: document.getElementById("identity-restore"),
           identityState: document.getElementById("identity-state"),
+          agentPulseReport: document.getElementById("agent-pulse-report"),
+          agentPulseStatus: document.getElementById("agent-pulse-status"),
           lobbySigner: document.getElementById("lobby-signer"),
           messageList: document.getElementById("message-list"),
           postCancel: document.getElementById("post-cancel"),
@@ -1196,6 +1218,31 @@
           window.setTimeout(function () { ui.signalsRefresh.disabled = false; }, 500);
         }
 
+        async function refreshAgentPulse() {
+          ui.agentPulseStatus.textContent = "reading…";
+          try {
+            var response = await fetch("/api/tc/room/lobby", { cache: "no-store", headers: { Accept: "application/json" } });
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            var payload = await response.json();
+            var messages = Array.isArray(payload) ? payload : Array.isArray(payload.messages) ? payload.messages : [];
+            var agentMessages = messages.filter(function (message) {
+              var author = typeof message.from === "string" ? message.from : typeof message.nick === "string" ? message.nick : "";
+              return author.indexOf("flop-relay-agent") !== -1 && typeof message.text === "string";
+            });
+            var latest = agentMessages[agentMessages.length - 1];
+            if (!latest) {
+              ui.agentPulseStatus.textContent = "waiting for first reply";
+              ui.agentPulseReport.textContent = "No FLOP Relay message in the latest lobby window yet.";
+              return;
+            }
+            ui.agentPulseStatus.textContent = formatTimestamp(latest.ts || latest.time || latest.created_at);
+            ui.agentPulseReport.textContent = latest.text;
+          } catch (error) {
+            ui.agentPulseStatus.textContent = "read unavailable";
+            ui.agentPulseReport.textContent = "The live lobby read is unavailable right now. Open the official room to check it directly.";
+          }
+        }
+
         function activateTab(name, updateHash) {
           var validTabs = ["guide", "signals"];
           var target = validTabs.includes(name) ? name : "guide";
@@ -1290,6 +1337,8 @@
         resetVerification();
         refreshSignals(false);
         state.signalTimer = window.setInterval(function () { refreshSignals(false); }, 60000);
+        refreshAgentPulse();
+        state.agentPulseTimer = window.setInterval(refreshAgentPulse, 300000);
         activateTab(window.location.hash.slice(1) || "guide", false);
       }());
     </script>

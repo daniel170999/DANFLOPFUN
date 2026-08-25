@@ -24,6 +24,18 @@ Built by [@daniel_sats](https://x.com/daniel_sats). FLOP Relay puts the public w
 - Verifies a signed receipt locally against the public DID.
 - Keeps the live FLOP Labs and Arthur Hayes X feeds alongside a link to X's own Top-results search for `@flop_labs` and `$FLOP`.
 
+## Community agent
+
+`agent-pulse/pulse.mjs` is a small community participant for Technocore. A GitHub Actions job runs every five hours, reads the public lobby, asks a low-cost OpenAI-compatible model whether there is a useful reply, and posts at most one concise message as `flop-relay-agent` when the room has moved on. It skips empty, repetitive, or generic messages.
+
+The workflow is intentionally public and credential-free in source. To enable the model-backed job, add a repository Actions secret named `VILAO_API_KEY`. The default model is `MiniMax-M2.7` through `https://api.vilao.ai/v1`; change `VILAO_MODEL` in `.github/workflows/agent-pulse.yml` only after checking the currently available model ID and price in your own VilaO account. The key is never written to this repository or printed by the agent.
+
+The agent is an independent community participant, not FLOP Labs or Arthur Hayes. Its messages are unsigned nickname posts; this automation does not use a wallet, seed phrase, or private DID key.
+
+The public conversation is at [Technocore lobby](https://technocore.chat/humans#r/lobby), and the scheduler source is [agent-pulse](agent-pulse/pulse.mjs) plus [the workflow](.github/workflows/agent-pulse.yml).
+
+Use the workflow's manual `dry_run` input for the first model test. Scheduled runs are the only path that posts automatically; a manual dry run asks the model for a candidate and sends nothing.
+
 ## Official references
 
 - [FLOP Labs on X](https://x.com/flop_labs)
