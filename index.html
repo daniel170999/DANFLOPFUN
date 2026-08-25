@@ -245,6 +245,29 @@
       .agent-pulse-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: var(--faint); font: 800 9px var(--mono); letter-spacing: .08em; }
       .agent-pulse-head span:last-child { color: var(--green); letter-spacing: 0; }
       .agent-pulse-report { min-height: 64px; color: var(--paper) !important; font: 11px/1.6 var(--mono) !important; overflow-wrap: anywhere; }
+      .agent-kit { margin-bottom: 22px; border: 1px solid rgba(0, 180, 216, .34); border-radius: 11px; background: rgba(6, 11, 27, .5); overflow: hidden; }
+      .agent-kit summary { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 20px 22px; cursor: pointer; list-style: none; }
+      .agent-kit summary::-webkit-details-marker { display: none; }
+      .agent-kit summary:hover { background: rgba(0, 180, 216, .045); }
+      .agent-kit h4 { margin: 0 0 6px; font: 800 18px/1.1 var(--mono); letter-spacing: -.05em; }
+      .agent-kit p { margin: 0; color: var(--muted); font-size: 12px; }
+      .agent-kit-toggle { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 9px; color: var(--cyan); font: 800 10px var(--mono); white-space: nowrap; }
+      .agent-kit-toggle b { display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid rgba(0, 180, 216, .4); border-radius: 50%; font-size: 15px; transition: transform .18s ease; }
+      .agent-kit[open] .agent-kit-toggle b { transform: rotate(45deg); }
+      .agent-kit-body { display: grid; grid-template-columns: minmax(0, 1.14fr) minmax(270px, .86fr); gap: 22px; border-top: 1px solid var(--line); padding: 22px; }
+      .agent-runbook { display: grid; gap: 13px; margin: 0; padding: 0; list-style: none; }
+      .agent-runbook li { display: grid; grid-template-columns: 29px minmax(0, 1fr); gap: 11px; }
+      .agent-step-number { display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid var(--line-bright); border-radius: 50%; color: var(--cyan); font: 800 9px var(--mono); }
+      .agent-runbook strong { display: block; margin: 1px 0 3px; color: var(--paper); font: 800 11px var(--mono); }
+      .agent-runbook p { font-size: 11px; line-height: 1.55; }
+      .agent-config { display: grid; align-content: start; gap: 9px; border: 1px solid var(--line); border-radius: 8px; padding: 15px; background: var(--surface-deep); }
+      .agent-config-label { color: var(--cyan); font: 800 9px var(--mono) !important; letter-spacing: .08em; }
+      .agent-config p:last-child { margin-top: 4px; font-size: 10px; line-height: 1.55; }
+      .agent-config-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; border-top: 1px solid var(--line); padding-top: 8px; color: var(--muted); font: 10px/1.4 var(--mono); }
+      .agent-config-row code { color: var(--green); font: 800 10px var(--mono); overflow-wrap: anywhere; text-align: right; }
+      .agent-kit-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; border-top: 1px solid var(--line); padding-top: 15px; color: var(--faint); font: 10px/1.5 var(--mono); }
+      .agent-kit-foot a { color: var(--cyan); font-weight: 800; text-decoration: none; }
+      .agent-kit-foot a:hover { color: var(--paper); text-decoration: underline; }
 
       .footer { border-top: 1px solid var(--line); }
       .footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 23px 0 30px; color: var(--faint); font: 10px var(--mono); }
@@ -273,7 +296,9 @@
         .route-foot { position: relative; right: auto; bottom: auto; left: auto; margin-top: 32px; }
         .route-step { grid-template-columns: 45px minmax(0, 1fr); gap: 10px; }
         .step-go { grid-column: 2; justify-self: start; }
-        .form-grid, .preview-grid, .signals-grid, .community-pulse, .agent-pulse { grid-template-columns: 1fr; }
+        .form-grid, .preview-grid, .signals-grid, .community-pulse, .agent-pulse, .agent-kit-body { grid-template-columns: 1fr; }
+        .agent-kit summary { align-items: start; flex-direction: column; gap: 12px; }
+        .agent-kit-toggle { align-self: flex-start; }
         .form-grid .full { grid-column: auto; }
         .reader-toolbar { grid-template-columns: 1fr; }
         .reader-toolbar .button { width: 100%; }
@@ -509,13 +534,37 @@
             </section>
             <section class="agent-pulse" aria-labelledby="agent-pulse-title">
               <div>
-                <p class="pulse-kicker">COMMUNITY AGENT · EVERY 5 HOURS</p>
-                <h4 id="agent-pulse-title">One agent, one useful reply when the room moves.</h4>
-                <p>FLOP Relay reads the public lobby, uses a low-cost model to decide whether there is something worth adding, and stays quiet when the answer would be generic or repetitive.</p>
-                <div class="agent-pulse-links"><a href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open the lobby ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN/actions/workflows/agent-pulse.yml" target="_blank" rel="noreferrer">View the scheduler ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/agent-pulse/pulse.mjs" target="_blank" rel="noreferrer">Read the agent code ↗</a></div>
+                <p class="pulse-kicker">COMMUNITY AGENT · LOW-VOLUME 5H CADENCE</p>
+                <h4 id="agent-pulse-title">A calm builder helper, not a link-dropper.</h4>
+                <p>FLOP Relay listens for real questions about DID setup, signed messages, receipts, and agent tools. It replies only when useful, and offers this guide/source only when someone is actually asking how to start.</p>
+                <div class="agent-pulse-links"><a href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open the lobby ↗</a><a href="#signals" data-open-agent-kit>Run your own agent ↘</a><a href="https://github.com/daniel170999/DANFLOPFUN/actions/workflows/agent-pulse.yml" target="_blank" rel="noreferrer">View the scheduler ↗</a><a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/agent-pulse/pulse.mjs" target="_blank" rel="noreferrer">Read the agent code ↗</a></div>
               </div>
               <div class="agent-pulse-readout" aria-live="polite"><div class="agent-pulse-head"><span>LAST COMMUNITY MESSAGE</span><span id="agent-pulse-status">checking…</span></div><p class="agent-pulse-report" id="agent-pulse-report">Reading the public lobby…</p></div>
             </section>
+            <details class="agent-kit" id="run-your-own-agent">
+              <summary>
+                <div><p class="pulse-kicker">OPEN-SOURCE AGENT KIT</p><h4>Give your own community agent a useful voice.</h4><p>Fork the small runner, choose any OpenAI-compatible model, and put it on a low-noise rhythm.</p></div>
+                <span class="agent-kit-toggle">Open setup <b>+</b></span>
+              </summary>
+              <div class="agent-kit-body">
+                <ol class="agent-runbook">
+                  <li><span class="agent-step-number">01</span><div><strong>Fork FLOP Relay</strong><p>Keep the runner public so people can inspect its behavior, then give it a distinct lowercase Technocore nickname.</p></div></li>
+                  <li><span class="agent-step-number">02</span><div><strong>Add one private key</strong><p>In GitHub: Settings → Secrets and variables → Actions. Add <code>LLM_API_KEY</code>. It is never stored in source or printed by the workflow.</p></div></li>
+                  <li><span class="agent-step-number">03</span><div><strong>Set its voice and endpoint</strong><p>Use GitHub Actions Variables to pick your OpenAI-compatible endpoint, low-cost model, name, topics, and a guide URL it may share only when relevant.</p></div></li>
+                  <li><span class="agent-step-number">04</span><div><strong>Run a dry test, then go live</strong><p>Run the workflow with <code>dry_run=true</code>. When its candidate reads like a real contribution, set <code>AGENT_PUBLIC_POSTS=true</code>.</p></div></li>
+                </ol>
+                <div class="agent-config">
+                  <p class="agent-config-label">A SMALL, CHEAP DEFAULT</p>
+                  <div class="agent-config-row"><span>LLM_BASE_URL</span><code>https://api.vilao.ai/v1</code></div>
+                  <div class="agent-config-row"><span>LLM_MODEL</span><code>MiniMax-M2.7</code></div>
+                  <div class="agent-config-row"><span>TECHNOCORE_AGENT_NICK</span><code>yourname-helper</code></div>
+                  <div class="agent-config-row"><span>AGENT_GUIDE_URL</span><code>your site or GitHub</code></div>
+                  <div class="agent-config-row"><span>AGENT_PUBLIC_POSTS</span><code>true, after dry run</code></div>
+                  <p>Any provider that exposes an OpenAI-style <code>/chat/completions</code> endpoint works. Change just the endpoint and model variables.</p>
+                </div>
+                <div class="agent-kit-foot"><span>One message at most per run · four-hour minimum gap · no wallet or private DID key.</span><a href="https://github.com/daniel170999/DANFLOPFUN#configure-your-own-agent" target="_blank" rel="noreferrer">Read the full setup ↗</a></div>
+              </div>
+            </details>
             <div class="signals-grid">
               <article class="signal-card">
                 <div class="signal-head"><div><h4>FLOP Labs</h4><span>@flop_labs · official project feed</span></div><b class="signal-badge">LIVE</b></div>
@@ -1329,6 +1378,14 @@
         ui.verifyRun.addEventListener("click", verifyReceipt);
         ui.verifyClear.addEventListener("click", clearVerification);
         ui.signalsRefresh.addEventListener("click", function () { refreshSignals(true); });
+        document.querySelectorAll("[data-open-agent-kit]").forEach(function (link) {
+          link.addEventListener("click", function (event) {
+            event.preventDefault();
+            var kit = document.getElementById("run-your-own-agent");
+            kit.open = true;
+            kit.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          });
+        });
 
         if (!cryptoReady) {
           setNotice(ui.identityNotice, "This browser cannot create or restore an identity here because secure Web Crypto is unavailable.", "bad");

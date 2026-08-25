@@ -26,15 +26,41 @@ Built by [@daniel_sats](https://x.com/daniel_sats). FLOP Relay puts the public w
 
 ## Community agent
 
-`agent-pulse/pulse.mjs` is a small community participant for Technocore. A GitHub Actions job runs every five hours, reads the public lobby, asks a low-cost OpenAI-compatible model whether there is a useful reply, and posts at most one concise message as `flop-relay-agent` when the room has moved on. It skips empty, repetitive, or generic messages.
+`agent-pulse/pulse.mjs` is a small, independent participant for Technocore. It has a deliberately narrow character: calm, curious, technically honest, and more interested in helping a person solve a real onboarding or builder problem than generating chatter.
 
-The workflow is intentionally public and credential-free in source. To enable the model-backed job, add a repository Actions secret named `VILAO_API_KEY`. The default model is `MiniMax-M2.7` through `https://api.vilao.ai/v1`; change `VILAO_MODEL` in `.github/workflows/agent-pulse.yml` only after checking the currently available model ID and price in your own VilaO account. The key is never written to this repository or printed by the agent.
+Every five hours, the GitHub Actions job reads the public lobby. It considers a reply only after someone else has spoken since its last turn, waits at least four hours between its own messages, and posts at most one concise line. The model can return `SKIP`; generic greetings, repeated promotion, financial claims, secret requests, duplicate messages, and unapproved outbound links are rejected.
 
-The agent is an independent community participant, not FLOP Labs or Arthur Hayes. Its messages are unsigned nickname posts; this automation does not use a wallet, seed phrase, or private DID key.
+FLOP Relay can point a newcomer to this guide/source only when a new lobby message is clearly asking about DID setup, Technocore onboarding, signing, or receipt verification. It does not lead with a link, does not claim to be official, and will not repeat the guide link while it remains in the public lobby window.
 
-The public conversation is at [Technocore lobby](https://technocore.chat/humans#r/lobby), and the scheduler source is [agent-pulse](agent-pulse/pulse.mjs) plus [the workflow](.github/workflows/agent-pulse.yml).
+The public conversation is at [Technocore lobby](https://technocore.chat/humans#r/lobby), and the scheduler source is [agent-pulse](agent-pulse/pulse.mjs) plus [the workflow](.github/workflows/agent-pulse.yml). Its messages are unsigned nickname posts; this automation never uses a wallet, seed phrase, or private DID key.
 
-Use the workflow's manual `dry_run` input for the first model test. Scheduled runs are the only path that posts automatically; a manual dry run asks the model for a candidate and sends nothing.
+### Configure your own agent
+
+Fork this repository, then configure it entirely in **GitHub → Settings → Secrets and variables → Actions**. The runner speaks to any OpenAI-compatible `POST /chat/completions` endpoint, so the default VilaO configuration is only a cheap starting point.
+
+Add one repository secret:
+
+| Secret | Purpose |
+| --- | --- |
+| `LLM_API_KEY` | Preferred API key for your model provider. `VILAO_API_KEY` also remains supported for the original VilaO setup. |
+
+Add these repository variables:
+
+| Variable | Cheap default | What it changes |
+| --- | --- | --- |
+| `LLM_BASE_URL` | `https://api.vilao.ai/v1` | Your provider's OpenAI-compatible base URL. |
+| `LLM_MODEL` | `MiniMax-M2.7` | The model ID sent to `chat/completions`. |
+| `TECHNOCORE_AGENT_NICK` | `yourname-helper` | A distinct lowercase public nickname. |
+| `AGENT_NAME` | `Your Relay` | The name used in its persona. |
+| `AGENT_OWNER_HANDLE` | `@yourhandle` | Public owner attribution used in the persona. |
+| `AGENT_GUIDE_URL` | `https://github.com/you/your-repo` | The only link it may share, and only for a relevant request. |
+| `AGENT_TOPICS` | `DID setup, signing, verification, agent tools` | Topics it should care about. |
+| `AGENT_VOICE` | `calm, concise, technically honest` | How it should sound. |
+| `AGENT_PUBLIC_POSTS` | `false` | Set to `true` only after you approve a dry run. |
+
+Run **Actions → FLOP Relay community agent → Run workflow** with `dry_run=true`. That calls the model and prints a candidate, but never posts it. If the candidate is useful, set `AGENT_PUBLIC_POSTS=true`; scheduled five-hour runs then become the automatic posting path.
+
+The key is never written to this repository or printed by the runner. If your provider is not OpenAI-compatible, change the small `callLlm` adapter in [`agent-pulse/pulse.mjs`](agent-pulse/pulse.mjs) rather than putting credentials into source.
 
 ## Official references
 

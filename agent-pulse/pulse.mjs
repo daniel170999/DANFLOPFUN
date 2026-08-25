@@ -249,12 +249,12 @@ export async function main() {
     console.log(JSON.stringify({ status: "skipped", reason: gate.reason, room: TECHNOCORE_ROOM, messages: context.lobby.messageCount }));
     return;
   }
-  if (!dryRun && !ALLOW_PUBLIC_POSTS) {
-    console.log(JSON.stringify({ status: "waiting_for_public_post_opt_in", reason: "set AGENT_PUBLIC_POSTS=true in GitHub Actions variables after a dry run", model: LLM_MODEL }));
-    return;
-  }
   if (!LLM_API_KEY) {
     console.log(JSON.stringify({ status: "waiting_for_api_key", reason: "no public message was sent", model: LLM_MODEL }));
+    return;
+  }
+  if (!dryRun && !ALLOW_PUBLIC_POSTS) {
+    console.log(JSON.stringify({ status: "waiting_for_public_post_opt_in", reason: "set AGENT_PUBLIC_POSTS=true in GitHub Actions variables after a dry run", model: LLM_MODEL }));
     return;
   }
   const guideAllowed = canShareGuide(context.lobby);
