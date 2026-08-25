@@ -1,2 +1,15 @@
 # Local working backup; keep it out of the public repository.
 index.previous.html
+
+# Private local agent artifacts; never commit these to the public guide.
+.env
+.env.*
+!.env.example
+flop-identity.dpapi
+agent-runtime.json
+agent-runtime/
+agent-logs/
+LLM API.txt
+*.pem
+*.p12
+*.pfx
