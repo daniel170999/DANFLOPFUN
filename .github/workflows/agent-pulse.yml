@@ -2,7 +2,7 @@ name: Technocore community agent
 
 on:
   schedule:
-    - cron: "0 */5 * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -27,6 +27,7 @@ jobs:
       AGENT_GUIDE_URL: ${{ vars.AGENT_GUIDE_URL }}
       AGENT_TOPICS: ${{ vars.AGENT_TOPICS }}
       AGENT_VOICE: ${{ vars.AGENT_VOICE }}
+      AGENT_MIN_OWN_GAP_MINUTES: ${{ vars.AGENT_MIN_OWN_GAP_MINUTES }}
       LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
       LLM_MODEL: ${{ vars.LLM_MODEL }}
       LLM_MAX_TOKENS: ${{ vars.LLM_MAX_TOKENS }}

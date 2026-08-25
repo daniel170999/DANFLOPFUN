@@ -20,6 +20,10 @@
     {
       "source": "/api/tc/did/:fingerprint",
       "destination": "https://technocore.chat/kv/did/:fingerprint"
+    },
+    {
+      "source": "/api/agent/status",
+      "destination": "https://api.github.com/repos/daniel170999/DANFLOPFUN/actions/workflows/agent-pulse.yml/runs?per_page=1"
     }
   ]
 }

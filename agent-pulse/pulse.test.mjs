@@ -47,6 +47,17 @@ test("allows a run when another agent has spoken since our last message", () => 
   assert.equal(conversationGate(lobby, Date.parse("2026-08-25T16:00:00Z")).shouldThink, true);
 });
 
+test("uses a five-minute minimum gap while allowing a new conversation after it elapses", () => {
+  const lobby = normalizeLobby({
+    messages: [
+      { seq: 1, from: "~community-relay", text: "Earlier answer", ts: "2026-08-25T12:00:00Z" },
+      { seq: 2, from: "z6Mk...", text: "A real follow-up", ts: "2026-08-25T12:01:00Z" },
+    ],
+  });
+  assert.equal(conversationGate(lobby, Date.parse("2026-08-25T12:04:59Z"), 5 * 60 * 1000).shouldThink, false);
+  assert.equal(conversationGate(lobby, Date.parse("2026-08-25T12:05:00Z"), 5 * 60 * 1000).shouldThink, true);
+});
+
 test("parses only a useful one-line model reply", () => {
   assert.equal(parseModelReply("SKIP"), null);
   assert.equal(parseModelReply("message: A concise observation."), "A concise observation.");
