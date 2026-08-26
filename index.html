@@ -1557,8 +1557,8 @@
           ui.workDetail.textContent = "Community board · " + jobs.length + " jobs · " + passports + " DID passports · community-run, not operated by FLOP Labs, not an allocation ledger.";
         }
 
-        async function readPublicJson(url) {
-          var response = await fetch(url, { cache: "no-store", headers: { Accept: "application/json" } });
+        async function readPublicJson(url, timeoutMs) {
+          var response = await fetch(url, { cache: "no-store", headers: { Accept: "application/json" }, signal: AbortSignal.timeout(timeoutMs || 12000) });
           if (!response.ok) throw new Error(url + " returned HTTP " + response.status);
           return response.json();
         }
@@ -1571,16 +1571,18 @@
           setChip(ui.radarChip, "reading", "busy");
           setChip(ui.workChip, "reading", "busy");
           try {
+            var workPromise = readPublicJson("/api/kibble/board", 45000).then(
+              function (value) { return { status: "fulfilled", value: value }; },
+              function (error) { return { status: "rejected", reason: error }; }
+            );
             var settled = await Promise.allSettled([
-              fetch("/api/tc/health", { cache: "no-store", headers: { Accept: "text/plain" } }).then(function (response) { if (!response.ok) throw new Error("health"); return response.text(); }),
+              fetch("/api/tc/health", { cache: "no-store", headers: { Accept: "text/plain" }, signal: AbortSignal.timeout(12000) }).then(function (response) { if (!response.ok) throw new Error("health"); return response.text(); }),
               readPublicJson("/api/tc/lobby?limit=200"),
-              readPublicJson("/api/tc/rooms"),
-              readPublicJson("/api/kibble/board")
+              readPublicJson("/api/tc/rooms")
             ]);
             var healthResult = settled[0];
             var lobbyResult = settled[1];
             var roomsResult = settled[2];
-            var workResult = settled[3];
 
             var healthOnline = healthResult.status === "fulfilled" && Boolean(healthResult.value.trim());
             ui.pulseHealth.textContent = healthOnline ? "online" : "unavailable";
@@ -1610,6 +1612,10 @@
               setChip(ui.radarChip, "unavailable", "bad");
             }
 
+            var liveCount = settled.filter(function (result) { return result.status === "fulfilled"; }).length;
+            setChip(ui.pulseChip, liveCount === settled.length ? "Technocore live" : liveCount + "/" + settled.length + " Technocore sources live", liveCount ? "ok" : "bad");
+
+            var workResult = await workPromise;
             if (workResult.status === "fulfilled") renderWorkBoard(workResult.value);
             else {
               ui.workList.replaceChildren(Object.assign(document.createElement("div"), { className: "task-empty", textContent: "The community work board is unavailable. No other module is blocked." }));
@@ -1617,8 +1623,6 @@
               ui.workDetail.textContent = "Community board unavailable; Technocore reads remain independent.";
             }
 
-            var liveCount = settled.filter(function (result) { return result.status === "fulfilled"; }).length;
-            setChip(ui.pulseChip, liveCount === settled.length ? "all sources live" : liveCount + "/" + settled.length + " sources live", liveCount ? "ok" : "bad");
           } catch {
             ui.pulseHealth.textContent = "unavailable";
             ui.pulseWindow.textContent = "—";
