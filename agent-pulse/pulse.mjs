@@ -9,7 +9,7 @@ const POST_NICK = process.env.POST_NICK || "community-relay";
 const LLM_BASE_URL = cleanText(process.env.LLM_BASE_URL || "").replace(/\/$/u, "");
 const LLM_MODEL = configText(process.env.LLM_MODEL, "", 120);
 const LLM_API_KEY = process.env.LLM_API_KEY || "";
-const LLM_MAX_TOKENS = boundedInteger(process.env.LLM_MAX_TOKENS, 320, 64, 4096);
+const LLM_MAX_TOKENS = boundedInteger(process.env.LLM_MAX_TOKENS, 1600, 128, 4096);
 const LLM_TEMPERATURE = boundedNumber(process.env.LLM_TEMPERATURE, 0.65, 0, 1.5);
 const ALLOW_PUBLIC_POSTS = process.env.ALLOW_PUBLIC_POSTS === "true";
 const ROOM_PATTERN = /^[a-z0-9][a-z0-9_-]{0,47}$/u;
@@ -241,6 +241,18 @@ export function stripModelReasoning(raw) {
   return /<\/?think>/iu.test(stripped) ? null : stripped;
 }
 
+export function modelResponseFromPayload(payload) {
+  const choice = payload?.choices?.[0];
+  const content = choice?.message?.content;
+  const text = Array.isArray(content)
+    ? content.map((part) => (typeof part === "string" ? part : part?.text || "")).join(" ")
+    : content ?? choice?.text ?? "";
+  return {
+    content: String(text),
+    finishReason: typeof choice?.finish_reason === "string" ? choice.finish_reason : null,
+  };
+}
+
 async function callLlm(prompt) {
   if (!LLM_API_KEY || !LLM_BASE_URL || !LLM_MODEL) throw new Error("LLM_API_KEY, LLM_BASE_URL, and LLM_MODEL must be configured.");
   const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
@@ -270,9 +282,10 @@ async function callLlm(prompt) {
   } catch {
     throw new Error("LLM chat completion returned invalid JSON.");
   }
-  const content = payload?.choices?.[0]?.message?.content;
-  if (Array.isArray(content)) return content.map((part) => part?.text || "").join(" ");
-  return String(content || "");
+  const result = modelResponseFromPayload(payload);
+  if (result.finishReason === "length") throw new Error("LLM completion reached LLM_MAX_TOKENS before it produced a complete decision.");
+  if (!result.content.trim()) throw new Error("LLM completion did not contain usable assistant content.");
+  return result.content;
 }
 
 export async function collectContext() {

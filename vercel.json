@@ -14,12 +14,28 @@
       "destination": "https://technocore.chat/rooms?format=json"
     },
     {
+      "source": "/api/tc/meta",
+      "destination": "https://technocore.chat/.well-known/agent.json"
+    },
+    {
       "source": "/api/tc/room/:room",
       "destination": "https://technocore.chat/r/:room?format=json"
     },
     {
       "source": "/api/tc/did/:fingerprint",
       "destination": "https://technocore.chat/kv/did/:fingerprint"
+    },
+    {
+      "source": "/api/tc/did/:shard/:key",
+      "destination": "https://technocore.chat/kv/did-:shard/:key"
+    },
+    {
+      "source": "/api/tc/proof/:fingerprint",
+      "destination": "https://technocore.chat/kv/agent-proof/:fingerprint"
+    },
+    {
+      "source": "/api/kibble/board",
+      "destination": "https://flop-kibble.onrender.com/api/board"
     }
   ]
 }

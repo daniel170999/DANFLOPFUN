@@ -7,6 +7,7 @@ import {
   conversationGate,
   formatMarketContext,
   formatRoomContext,
+  modelResponseFromPayload,
   normalizeLobby,
   parseModelReply,
   stripModelReasoning,
@@ -76,6 +77,14 @@ test("strips closed model reasoning and rejects an incomplete reasoning response
   assert.equal(parseModelReply("<think>private chain of thought</think> Helpful final answer."), "Helpful final answer.");
   assert.equal(stripModelReasoning("<think>unfinished"), null);
   assert.equal(parseModelReply("<think>unfinished"), null);
+});
+
+test("detects truncated reasoning-model completions before parsing a reply", () => {
+  assert.deepEqual(modelResponseFromPayload({ choices: [{ finish_reason: "stop", message: { content: [{ type: "text", text: "A useful line." }] } }] }), {
+    content: "A useful line.",
+    finishReason: "stop",
+  });
+  assert.equal(modelResponseFromPayload({ choices: [{ finish_reason: "length", message: { content: "<think>unfinished" } }] }).finishReason, "length");
 });
 
 test("only permits the guide for a relevant unanswered onboarding request", () => {
