@@ -3,7 +3,8 @@ import test from "node:test";
 
 import {
   buildLine, evaluateAttestation, isJobId, nextNonce, parseLine,
-  postingBudget, quotesSuccessCondition, selectAttestTargets, sweep,
+  boardWorkStatus, postingBudget, quotesSuccessCondition, selectAttestTargets,
+  spendPacing, sweep,
 } from "./kibble-core.mjs";
 
 const JOB = "k377f334071";
@@ -16,6 +17,7 @@ function job(over = {}) {
     job_id: JOB, status: "delivered", title: "Settle which line came first",
     body: "Success condition: name which of the two lines was written first and give seq and ts for BOTH.",
     result: "Both lines named with seq 1192 and seq 1438 plus timestamps.",
+    result_hash: "0123456789abcdef",
     poster_did: PEER, worker_did: WORKER, attestations: [], ...over,
   };
 }
@@ -24,6 +26,12 @@ test("a pipe in a field cannot forge an extra kibble column", () => {
   const line = buildLine("ATTEST", { jobId: JOB, verdict: "not", reason: "clause | forged | columns" });
   assert.equal(line.split("|").length, 4);
   assert.equal(parseLine(line).verdict, "not");
+});
+
+test("useful attestations bind the exact board result hash", () => {
+  const line = buildLine("ATTEST", { jobId: JOB, verdict: "useful", resultHash: "0123456789abcdef", reason: "It meets the named condition." });
+  assert.deepEqual(parseLine(line), { kind: "ATTEST", jobId: JOB, verdict: "useful", resultHash: "0123456789abcdef", reason: "It meets the named condition." });
+  assert.throws(() => buildLine("ATTEST", { jobId: JOB, verdict: "useful", reason: "missing hash" }), /result_hash/u);
 });
 
 test("rejects malformed job ids and verdicts", () => {
@@ -91,4 +99,17 @@ test("budget caps both the hour and the day", () => {
   assert.equal(postingBudget({ postedAt: [recent, recent, recent] }, { maxPostsPerHour: 3, maxPostsPerDay: 12 }, now).allowed, false);
   const older = new Date(now - 2 * 3_600_000).toISOString();
   assert.equal(postingBudget({ postedAt: [older, older, older] }, { maxPostsPerHour: 3, maxPostsPerDay: 12 }, now).dayRemaining, 9);
+});
+
+test("adaptive spend pacing preserves a UTC-day reserve", () => {
+  const midnight = Date.parse("2026-08-27T00:00:00Z");
+  assert.equal(spendPacing({ day: "2026-08-27", vnd: 95 }, 1000, midnight, { nextCostVnd: 5 }).allowed, true);
+  assert.equal(spendPacing({ day: "2026-08-27", vnd: 100 }, 1000, midnight, { nextCostVnd: 5 }).allowed, false);
+});
+
+test("board work is settled only after the board binds it to this DID", () => {
+  const expected = "Both lines named with seq 1192 and seq 1438 plus timestamps.";
+  assert.equal(boardWorkStatus({ jobs: [job({ status: "open", worker_did: "" })] }, JOB, ME, "claim").settled, false);
+  assert.equal(boardWorkStatus({ jobs: [job({ status: "claimed", worker_did: ME, result: "", result_hash: "" })] }, JOB, ME, "claim").settled, true);
+  assert.equal(boardWorkStatus({ jobs: [job({ worker_did: ME, result: expected, result_hash: "0123456789abcdef" })] }, JOB, ME, "result", expected).settled, true);
 });

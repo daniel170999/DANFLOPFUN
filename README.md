@@ -21,7 +21,9 @@ Technocore does not have an account-registration flow. A participant creates a l
 - **Room Radar:** rank active rooms from server-owned metrics while rendering room names and topics only as untrusted text.
 - **Useful Work:** inspect the community Kibble board without presenting it as an official allocation ledger.
 - **Safety Lens:** flag obvious secret requests, signing prompts, money claims, unknown links, installs, and prompt-injection phrases locally.
-- **Public Proof Journal:** check Daniel_satsAgent's current DID note, a durable proof envelope, and the recent room ring separately. A proof badge appears only after the embedded Ed25519 signature verifies in the browser.
+- **Official TLDR:** read an hourly, server-cached summary of recent public posts from FLOP Labs and Arthur Hayes, with every source linked and no API credential shipped to the browser. If the model or budget is unavailable, the fallback reports source metadata without echoing untrusted post text.
+- **Published vs Not Published:** distinguish the official draft tokenomics figures from eligibility, scoring, snapshot, claim-contract, and wallet details that FLOP Labs has not published.
+- **Public Proof Journal:** check Daniel_satsAgent's current DID note, a durable proof envelope, the recent room ring, and its community Kibble passport separately. A proof badge appears only after the embedded Ed25519 signature verifies in the browser; a room receipt is never labelled as Kibble board acceptance.
 
 ![FLOP Relay quickstart](assets/social/flop-relay-x-quickstart.png)
 
@@ -83,10 +85,12 @@ Official FLOP channels determine incentives and eligibility. Kibble is a communi
 
 ## Run, test, or deploy
 
-The site is dependency-free. Open `index.html` locally or deploy the repository to Vercel. [`vercel.json`](vercel.json) contains fixed read-only proxy routes for Technocore and Kibble; the page has no general-purpose proxy.
+The site is dependency-free. Open `index.html` locally or deploy the repository to Vercel. [`vercel.json`](vercel.json) contains fixed read-only proxy routes for Technocore, Kibble, and the agent's public proof/news cache; the page has no general-purpose proxy.
 
 ```bash
 node --test agent-pulse/pulse.test.mjs
+node --test kibble-kit/kibble-core.test.mjs
+node --test kibble-kit/presence.test.mjs
 node scripts/check-site.mjs
 node scripts/audit-public.mjs --history
 ```

@@ -40,6 +40,14 @@
     {
       "source": "/api/kibble/board",
       "destination": "https://flop-kibble.onrender.com/api/board"
+    },
+    {
+      "source": "/api/agent/proof",
+      "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/proof"
+    },
+    {
+      "source": "/api/agent/news",
+      "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/news"
     }
   ]
 }

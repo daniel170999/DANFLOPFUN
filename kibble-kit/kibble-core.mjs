@@ -11,6 +11,7 @@ export const KIBBLE_CATEGORIES = ["explain", "research", "review", "build", "coo
 export const MAX_LINE = 4000;
 
 const JOB_ID_PATTERN = /^k[0-9a-f]{10}$/u;
+const RESULT_HASH_PATTERN = /^[0-9a-f]{16}$/u;
 const INVISIBLE = /[\p{Cc}\p{Cf}\p{Cs}\p{Co}\p{Zl}\p{Zp}]/gu;
 
 export function clean(value, maximum = 4000) {
@@ -43,7 +44,11 @@ export function buildLine(kind, fields = {}) {
     if (!verdict) throw new Error("ATTEST verdict must be exactly 'useful' or 'not'.");
     const reason = field(fields.reason, 1200);
     if (!reason) throw new Error("ATTEST needs a reason.");
-    return `ATTEST v1 | ${fields.jobId} | ${verdict} | ${reason}`;
+    const resultHash = field(fields.resultHash, 16);
+    if (verdict === "useful" && !RESULT_HASH_PATTERN.test(resultHash)) throw new Error("A useful ATTEST needs the board result_hash.");
+    return resultHash
+      ? `ATTEST v1 | ${fields.jobId} | ${verdict} | rh:${resultHash} | ${reason}`
+      : `ATTEST v1 | ${fields.jobId} | ${verdict} | ${reason}`;
   }
   if (upper === "CLAIM") {
     if (!isJobId(fields.jobId)) throw new Error("CLAIM needs a valid job_id.");
@@ -81,7 +86,14 @@ export function parseLine(text) {
   if (kind === "ATTEST") {
     if (rest.length < 3 || !isJobId(rest[0])) return null;
     if (rest[1] !== "useful" && rest[1] !== "not") return null;
-    return { kind, jobId: rest[0], verdict: rest[1], reason: rest.slice(2).join(" / ") };
+    const hashMatch = /^rh:([0-9a-f]{16})$/u.exec(rest[2] || "");
+    return {
+      kind,
+      jobId: rest[0],
+      verdict: rest[1],
+      ...(hashMatch ? { resultHash: hashMatch[1] } : {}),
+      reason: rest.slice(hashMatch ? 3 : 2).join(" / "),
+    };
   }
   if (kind === "CLAIM") return isJobId(rest[0]) ? { kind, jobId: rest[0], role: rest[1] || "worker" } : null;
   if (kind === "RESULT") return isJobId(rest[0]) && rest.length >= 2 ? { kind, jobId: rest[0], summary: rest.slice(1).join(" / ") } : null;
@@ -159,6 +171,29 @@ export function ownPassport(board, ownDid) {
   return passports.find((entry) => entry?.did === ownDid) || null;
 }
 
+export function boardWorkStatus(board, jobId, ownDid, stage, expectedResult = "") {
+  const jobs = Array.isArray(board?.jobs) ? board.jobs : [];
+  const job = jobs.find((entry) => entry?.job_id === jobId) || null;
+  if (!job) return { settled: false, state: "missing", job: null };
+  const workerDid = String(job.worker_did || "");
+  if (workerDid && workerDid !== ownDid) return { settled: false, state: "conflict", job };
+  if (stage === "claim") {
+    const claimed = workerDid === ownDid && ["claimed", "delivered", "attested", "rejected"].includes(String(job.status || ""));
+    return { settled: claimed, state: claimed ? "claimed" : "pending", job };
+  }
+  if (stage === "result") {
+    if (workerDid !== ownDid) return { settled: false, state: "pending", job };
+    const actual = clean(job.result, 3000);
+    if (!actual) return { settled: false, state: "pending", job };
+    const expected = clean(expectedResult, 3000);
+    if (expected && actual !== expected) return { settled: false, state: "different_result", job };
+    const resultHash = clean(job.result_hash, 16);
+    if (!RESULT_HASH_PATTERN.test(resultHash)) return { settled: false, state: "pending", job };
+    return { settled: true, state: "delivered", resultHash, job };
+  }
+  return { settled: false, state: "invalid_stage", job };
+}
+
 const STOPWORDS = new Set(["the", "and", "for", "that", "this", "with", "from", "your", "you", "are", "was", "not", "but", "all", "one", "two", "its", "job", "must", "should", "will", "can", "each", "than", "then", "when", "what", "which", "into", "over", "both", "give", "does"]);
 
 // The board's own failure mode is template stamping. An attestation that cannot reproduce an
@@ -207,7 +242,9 @@ export function evaluateAttestation(value, job) {
   }
   if (/https?:\/\//iu.test(text)) return { ok: false, reason: "url_in_reason" };
   if (!quotesSuccessCondition(text, job?.body, job?.title)) return { ok: false, reason: "did_not_quote_success_condition" };
-  return { ok: true, verdict, reason: text };
+  const resultHash = clean(job?.result_hash, 16);
+  if (verdict === "useful" && !RESULT_HASH_PATTERN.test(resultHash)) return { ok: false, reason: "missing_result_hash" };
+  return { ok: true, verdict, reason: text, ...(resultHash ? { resultHash } : {}) };
 }
 
 export function attestationPromptFor(job) {
@@ -289,6 +326,22 @@ export function addSpend(spend, costVnd, now) {
   const day = new Date(now).toISOString().slice(0, 10);
   const previous = spend?.day === day ? Number(spend.vnd) || 0 : 0;
   return { day, vnd: previous + (Number(costVnd) || 0) };
+}
+
+export function spendPacing(spend, limitVnd, now, options = {}) {
+  const money = budgetState(spend, limitVnd, now);
+  const dayStart = Date.parse(`${money.day}T00:00:00.000Z`);
+  const elapsedFraction = Math.min(1, Math.max(0, (now - dayStart) / 86_400_000));
+  const openingVnd = Number.isFinite(options.openingVnd) ? Math.max(0, options.openingVnd) : Math.min(100, money.limitVnd);
+  const reserveFraction = Number.isFinite(options.reserveFraction) ? Math.max(0, options.reserveFraction) : 0.08;
+  const allowanceVnd = Math.min(money.limitVnd, Math.max(openingVnd, Math.floor(money.limitVnd * (elapsedFraction + reserveFraction))));
+  const nextCostVnd = Math.max(0, Number(options.nextCostVnd) || 0);
+  return {
+    ...money,
+    allowanceVnd,
+    headroomVnd: Math.max(0, allowanceVnd - money.spentVnd),
+    allowed: !money.exhausted && money.spentVnd + nextCostVnd <= allowanceVnd,
+  };
 }
 
 // --- worker mode ------------------------------------------------------------
