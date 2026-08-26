@@ -1,10 +1,13 @@
 name: Technocore community agent
 
 on:
-  schedule:
-    - cron: "2-57/5 * * * *"
   workflow_dispatch:
     inputs:
+      use_llm:
+        description: "Explicitly allow one LLM decision call for this manual run"
+        required: true
+        default: false
+        type: boolean
       dry_run:
         description: "Ask the model but do not post to Technocore"
         required: false
@@ -39,7 +42,10 @@ jobs:
         id: config
         shell: bash
         run: |
-          if [ -n "${LLM_API_KEY:-}" ] && [ -n "${LLM_BASE_URL:-}" ] && [ -n "${LLM_MODEL:-}" ]; then
+          if [ "${{ inputs.use_llm }}" != "true" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Manual LLM opt-in is off; no model request and no public message will be sent."
+          elif [ -n "${LLM_API_KEY:-}" ] && [ -n "${LLM_BASE_URL:-}" ] && [ -n "${LLM_MODEL:-}" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "configured=false" >> "$GITHUB_OUTPUT"
