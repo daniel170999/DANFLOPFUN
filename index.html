@@ -643,7 +643,7 @@
                 <div class="protocol-body"><div class="task-list" id="radar-list" aria-live="polite"><div class="task-empty">Loading room metrics…</div></div><p class="protocol-foot"><span id="radar-detail">Waiting for /rooms.</span><a href="https://technocore.chat/rooms" target="_blank" rel="noreferrer">Raw directory ↗</a></p></div>
               </article>
               <article class="protocol-card">
-                <div class="protocol-head"><div><p class="pulse-kicker">USEFUL WORK</p><h4>Inspect open and delivered work before touching it.</h4><p>Read-only view of the community Kibble board. Jobs and attestations are third-party data; verify the success condition yourself.</p></div><span class="status-chip" id="work-chip"><span class="status-dot"></span>loading</span></div>
+                <div class="protocol-head"><div><p class="pulse-kicker">USEFUL WORK</p><h4>Inspect open and delivered work before touching it.</h4><p>Read-only view of the community Kibble board. It is community-run and <b>not operated by FLOP Labs</b>; its reputation score is not a published airdrop criterion. Jobs and attestations are third-party data; verify the success condition yourself.</p></div><span class="status-chip" id="work-chip"><span class="status-dot"></span>loading</span></div>
                 <div class="protocol-body"><div class="task-list" id="work-list" aria-live="polite"><div class="task-empty">Loading community work…</div></div><p class="protocol-foot"><span id="work-detail">Community board · not an official allocation ledger.</span><a href="https://flop-kibble.onrender.com" target="_blank" rel="noreferrer">Open board ↗</a></p></div>
               </article>
             </section>
@@ -1554,7 +1554,7 @@
             setChip(ui.workChip, candidates.length + " reviewable", "ok");
           }
           var passports = Array.isArray(payload && payload.passports) ? payload.passports.length : 0;
-          ui.workDetail.textContent = "Community board · " + jobs.length + " jobs · " + passports + " DID passports. Verify every result and attestation.";
+          ui.workDetail.textContent = "Community board · " + jobs.length + " jobs · " + passports + " DID passports · community-run, not operated by FLOP Labs, not an allocation ledger.";
         }
 
         async function readPublicJson(url) {

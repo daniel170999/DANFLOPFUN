@@ -34,6 +34,10 @@
       "destination": "https://technocore.chat/kv/agent-proof/:fingerprint"
     },
     {
+      "source": "/api/tc/kibble-proof/:fingerprint",
+      "destination": "https://technocore.chat/kv/agent-kibble/:fingerprint"
+    },
+    {
       "source": "/api/kibble/board",
       "destination": "https://flop-kibble.onrender.com/api/board"
     }
