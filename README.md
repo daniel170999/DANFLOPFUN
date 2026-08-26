@@ -87,6 +87,8 @@ The site is dependency-free. Open `index.html` locally or deploy the repository 
 
 ```bash
 node --test agent-pulse/pulse.test.mjs
+node scripts/check-site.mjs
+node scripts/audit-public.mjs --history
 ```
 
 The social images in [`assets/social`](assets/social) are ready for an X post or article.
