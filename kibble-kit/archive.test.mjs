@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  archiveStats, detectGap, groupByDay, highestSeq, isSigned,
-  mergeBucket, queryRecords, selectArchivable,
+  archiveHasSufficientEvidence, archiveNoCoverageText, archiveQueryUrl, archiveStats,
+  classifyArchiveQuestion, detectGap, evaluateArchiveReply, groupByDay, highestSeq, isSigned,
+  mergeBucket, queryRecords, selectArchivable, selectArchiveEvidence,
 } from "./archive-core.mjs";
 
 const DID = "did:key:z6MkvYvgdk7s98SZNRUd41J6JLxStTQDw3tKvrY2TiuSshnp";
@@ -106,4 +107,39 @@ test("an absent range bound does not silently become zero", () => {
   assert.equal(queryRecords(rows, { to: 0 }).length, 0);
   assert.equal(queryRecords(rows, { from: 0 }).length, 2);
   assert.equal(queryRecords(rows, { to: "nonsense" }).length, 2, "an unparsable bound is ignored, not applied");
+});
+
+test("classifies only concrete history questions", () => {
+  const question = classifyArchiveQuestion({ text: 'Which came first: "signed receipt" or "nonce replay"? Check seq 120 and seq 121.' });
+  assert.equal(question.kind, "ordering");
+  assert.deepEqual(question.targetSeqs, [120, 121]);
+  assert.equal(classifyArchiveQuestion({ text: "What happened after seq 120?" }), null);
+  assert.equal(classifyArchiveQuestion({ text: "What is Technocore and how do I join?" }), null);
+  assert.equal(classifyArchiveQuestion({ text: "Where can I paste my private key to recover the lost receipt?" }), null);
+});
+
+test("selects only archive records that the question points at", () => {
+  const rows = [
+    { room: "kibble", seq: 120, ts: "2026-08-27T10:00:00.000Z", nonce: "10", text: "signed receipt" },
+    { room: "kibble", seq: 121, ts: "2026-08-27T10:00:01.000Z", nonce: "11", text: "nonce replay" },
+    { room: "kibble", seq: 122, ts: "2026-08-27T10:00:02.000Z", nonce: "12", text: "unrelated" },
+  ];
+  const classification = classifyArchiveQuestion({ text: 'Which came first: "signed receipt" or "nonce replay"? Check seq 120 and seq 121.' });
+  assert.deepEqual(selectArchiveEvidence(rows, classification).map((row) => row.seq), [120, 121]);
+  assert.equal(archiveHasSufficientEvidence(rows, classification), true);
+  assert.equal(archiveHasSufficientEvidence(rows.slice(0, 1), classification), false);
+});
+
+test("archive reply gate requires exact evidence and the archive URL", () => {
+  const classification = classifyArchiveQuestion({ text: 'Which came first: "signed receipt" or "nonce replay"? Check seq 120 and seq 121.' });
+  const records = [
+    { room: "kibble", seq: 120, ts: "2026-08-27T10:00:00.000Z", nonce: "10", text: "signed receipt" },
+    { room: "kibble", seq: 121, ts: "2026-08-27T10:00:01.000Z", nonce: "11", text: "nonce replay" },
+  ];
+  const url = archiveQueryUrl("https://agent.example", "kibble", classification);
+  const answer = JSON.stringify({ answer: `seq 120 at 2026-08-27T10:00:00.000Z came before seq 121 at 2026-08-27T10:00:01.000Z. The signed records are ordered by the server sequence; check the archive evidence here: ${url}`, confident: true });
+  assert.equal(evaluateArchiveReply(answer, { room: "kibble", classification, records, queryUrl: url }).ok, true);
+  assert.equal(evaluateArchiveReply(answer.replace("seq 121", "seq 999"), { room: "kibble", classification, records, queryUrl: url }).ok, false);
+  assert.equal(evaluateArchiveReply(answer.replace(url, "https://example.com"), { room: "kibble", classification, records, queryUrl: url }).ok, false);
+  assert.match(archiveNoCoverageText("kibble", url), /only started on 2026-08-27/u);
 });
