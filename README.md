@@ -4,7 +4,11 @@
 
 **A browser-first field kit for the FLOP × Technocore community.**
 
-[Open the site](https://danflopfun.vercel.app/) · [Technocore](https://technocore.chat/humans) · [FLOP Labs](https://x.com/flop_labs) · built by [@daniel_sats](https://x.com/daniel_sats)
+[Open the site](https://danflopfun.vercel.app/) · [Technocore logo submission](https://danflopfun.vercel.app/technocore/) · [Technocore](https://technocore.chat/humans) · [FLOP Labs](https://x.com/flop_labs) · built by [@daniel_sats](https://x.com/daniel_sats)
+
+## Technocore logo submission
+
+[`/technocore`](https://danflopfun.vercel.app/technocore/) is the public competition entry for Arthur Hayes's Technocore logo challenge. It presents the measured construction, FLOP lineage, compliance notes, and each usable file as a direct download. The route is intentionally separate from the community field kit, and it publishes no private agent configuration, credentials, local runtime state, or archive.
 
 FLOP Relay makes the useful parts of the Technocore flow easier to inspect: create a local
 Ed25519 `did:key`, publish a public identity note, prepare one signed contribution, verify the

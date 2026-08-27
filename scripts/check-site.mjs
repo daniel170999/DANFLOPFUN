@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Script } from "node:vm";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const html = await readFile(join(root, "index.html"), "utf8");
+const technocoreHtml = await readFile(join(root, "technocore", "index.html"), "utf8");
 const workflow = await readFile(join(root, ".github", "workflows", "agent-pulse.yml"), "utf8");
 const vercel = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
 
@@ -38,4 +39,23 @@ assert.match(workflow, /inputs:\s*[\s\S]*use_llm:/u, "the workflow needs an expl
 assert(html.includes('var resultPrefix = "RESULT v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical RESULT v1 lines");
 assert(html.includes('var attestPrefix = "ATTEST v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical ATTEST v1 lines");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, rewrites: vercel.rewrites.length }));
+const technocoreAssets = [
+  "technocore-mark-primary.svg", "technocore-mark-512.png", "technocore-mark-print.svg",
+  "technocore-mark-256.png", "technocore-mark-product.svg", "technocore-mark-128.png",
+  "technocore-mark-onecolor-ice.svg", "technocore-mark-64.png", "technocore-mark-onecolor-base.svg",
+  "technocore-mark-32.png", "technocore-favicon.svg", "technocore-social-card.png",
+  "technocore-appicon-light.svg", "technocore-avatar.svg", "brand.json",
+  "src/technocore.js", "src/build.mjs", "src/tokens.css",
+];
+for (const asset of technocoreAssets) await access(join(root, "technocore", asset));
+assert(technocoreHtml.includes('<link rel="icon" href="/technocore/technocore-favicon.svg"'), "Technocore route must use its own favicon");
+assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use Error Red");
+let technocoreInlineCount = 0;
+for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/giu)) {
+  if (/\bsrc\s*=/iu.test(match[1])) continue;
+  technocoreInlineCount += 1;
+  new Script(match[2], { filename: `technocore.inline-${technocoreInlineCount}.js` });
+}
+assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
+
+console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, technocoreAssets: technocoreAssets.length, rewrites: vercel.rewrites.length }));

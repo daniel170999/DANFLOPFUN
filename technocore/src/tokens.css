@@ -1,0 +1,81 @@
+/* ============================================================================
+   FLOP Network design tokens — canonical V3.0 swatches + derived tokens.
+   Transcribed from flop.finance/design.md. Do not invent values here.
+
+   The two themes invert which swatches carry text:
+     on Base  → Cyan and Green are text-safe signals, Blue and Grey are structure
+     on Ice   → Blue and Grey are text-safe, Cyan and Green are fills only
+   ========================================================================== */
+
+:root {
+  /* canonical swatches */
+  --flop-base:            #0A1128;   /* 17.4:1 on Ice — primary digital ground   */
+  --flop-grey:            #5C6670;   /* non-text on dark; secondary text on light */
+  --flop-blue:            #0466C8;   /* fills on dark; text and links on light   */
+  --flop-cyan:            #00B4D8;   /* parent accent, the Chip colour           */
+  --flop-green:           #32D74B;   /* verified / product — Technocore default  */
+  --flop-ice:             #F5F7FA;   /* primary text on dark; light substrate    */
+  --flop-red:             #FF453A;   /* operational failure ONLY, never decor    */
+
+  /* derived */
+  --flop-surface:         #151D32;   /* Base + Grey — cards, panels              */
+  --flop-surface-light:   #232A3E;   /* tonal depth, borders on dark             */
+  --flop-text-secondary:  #A1A7AE;   /* body text on dark                        */
+  --flop-primary-hover:   #3DC5E0;   /* interactive lift                         */
+  --flop-border-alt:      #D9DDE1;   /* borders on light                         */
+
+  /* spacing — 8px rhythm, no arbitrary values */
+  --sp-xs: 4px;  --sp-sm: 8px;  --sp-md: 16px;  --sp-lg: 24px;  --sp-xl: 32px;
+
+  /* radii — "foundry precision". No soft curves propagate into UI chrome. */
+  --r-none: 0;   --r-sm: 2px;   --r-md: 4px;    --r-lg: 8px;     --r-full: 9999px;
+
+  /* type */
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-body: Inter, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* type scale */
+  --t-h1:   32px;  --lh-h1: 1.1;    /* Space Mono Bold */
+  --t-h2:   24px;  --lh-h2: 1.2;    /* Space Mono Bold */
+  --t-h3:   18px;  --lh-h3: 1.3;    /* Space Mono Bold */
+  --t-body: 14px;  --lh-body: 1.5;  /* Inter           */
+  --t-sm:   12px;  --lh-sm: 1.4;    /* Inter           */
+  --t-label:12px;  --lh-label: 1;   /* Space Mono      */
+  --t-code: 13px;  --lh-code: 1.4;  /* Space Mono      */
+}
+
+/* ---- dark theme: FLOP is dark-primary, so this is the home state ---------- */
+:root {
+  --ground:     var(--flop-base);
+  --surface:    var(--flop-surface);
+  --border:     var(--flop-surface-light);
+  --ink:        var(--flop-ice);
+  --ink-2:      var(--flop-text-secondary);
+  --accent:     var(--flop-green);
+  --accent-alt: var(--flop-cyan);
+}
+
+/* ---- light theme --------------------------------------------------------- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ground:     var(--flop-ice);
+    --surface:    #FFFFFF;
+    --border:     var(--flop-border-alt);
+    --ink:        var(--flop-base);
+    --ink-2:      var(--flop-grey);
+    --accent:     var(--flop-blue);   /* Green fails as text on Ice — 1.8:1 */
+    --accent-alt: var(--flop-blue);
+  }
+}
+:root[data-theme="light"] {
+  --ground:     var(--flop-ice);
+  --surface:    #FFFFFF;
+  --border:     var(--flop-border-alt);
+  --ink:        var(--flop-base);
+  --ink-2:      var(--flop-grey);
+  --accent:     var(--flop-blue);
+  --accent-alt: var(--flop-blue);
+}
+
+/* Never mix the two themes in one view. Never place the mark on a mid-tone or
+   photographic ground — Base or Ice White only. */

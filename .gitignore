@@ -13,3 +13,13 @@ LLM API.txt
 *.pem
 *.p12
 *.pfx
+
+# Local browser/runtime output and dependency folders.
+runtime/
+logs/
+.tmp-raster/
+node_modules/
+*.log
+**/*-chrome/
+**/chrome-profile/
+**/chrome-tc-render*/

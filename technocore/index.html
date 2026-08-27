@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A bounded ring with one notch, drawn on FLOP Network's measured construction grid. Entry by @daniel_sats.">
+<meta name="theme-color" content="#0A1128">
+<link rel="canonical" href="https://danflopfun.vercel.app/technocore">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Technocore — a product mark for the FLOP Network">
+<meta property="og:description" content="A bounded ring with one notch, drawn on FLOP Network's own measured construction grid. Entry by @daniel_sats.">
+<meta property="og:url" content="https://danflopfun.vercel.app/technocore">
+<meta property="og:image" content="https://danflopfun.vercel.app/technocore/technocore-social-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Technocore — a product mark for the FLOP Network">
+<meta name="twitter:description" content="A bounded ring with one notch, drawn on FLOP Network's own measured construction grid. Entry by @daniel_sats.">
+<meta name="twitter:image" content="https://danflopfun.vercel.app/technocore/technocore-social-card.png">
+<meta name="twitter:creator" content="@daniel_sats">
+<title>Technocore Identity</title>
+<link rel="icon" href="/technocore/technocore-favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+  :root{
+    --base:#0A1128;--grey:#5C6670;--blue:#0466C8;--cyan:#00B4D8;
+    --green:#32D74B;--ice:#F5F7FA;
+    --ground:#F5F7FA;--panel:#FFFFFF;--line:#D9DDE1;--soft:#E7EAEE;
+    --ink:#0A1128;--ink-2:#5C6670;--chip:#EEF1F5;--link:#0466C8;
+    --shadow:0 1px 0 rgba(10,17,40,.04);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#0A1128;--panel:#151D32;--line:#232A3E;--soft:#1B2237;
+    --ink:#F5F7FA;--ink-2:#A1A7AE;--chip:#1B2237;--link:#00B4D8;--shadow:none;}}
+  :root[data-theme="dark"]{
+    --ground:#0A1128;--panel:#151D32;--line:#232A3E;--soft:#1B2237;
+    --ink:#F5F7FA;--ink-2:#A1A7AE;--chip:#1B2237;--link:#00B4D8;--shadow:none;}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:Inter,-apple-system,'Segoe UI',Roboto,sans-serif;
+    font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+  a{color:var(--link)}
+
+  /* ── public site shell ── */
+  .site-nav{border-bottom:1px solid #232A3E;background:#0A1128;color:#F5F7FA}
+  .site-nav-inner{max-width:1060px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .site-nav-brand{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:#F5F7FA;text-decoration:none;white-space:nowrap}
+  .site-nav-links{display:flex;gap:18px;align-items:center;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.04em}
+  .site-nav-links a{color:#A1A7AE;text-decoration:none}
+  .site-nav-links a:hover,.site-nav-links a:focus-visible{color:#00B4D8}
+  .site-nav-links a:first-child{color:#00B4D8}
+  @media(max-width:560px){.site-nav-inner{align-items:flex-start;flex-direction:column;gap:10px}.site-nav-links{gap:12px;flex-wrap:wrap}}
+
+  /* ── hero ── */
+  .band{background:#0A1128}
+  .hero{padding:calc(min(230px,44vw)/2 + 34px) 24px 20px;text-align:center}
+  .hero .mk{width:min(230px,44vw);margin:0 auto}
+  .hero .eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.24em;
+    text-transform:uppercase;color:#5C6670;max-width:none;
+    margin:calc(min(230px,44vw)/2 + 24px) auto 0}
+  .proof{display:flex;gap:34px;align-items:flex-end;justify-content:center;
+    background:#0A1128;padding:34px 24px 56px;flex-wrap:wrap}
+  .proof .s{display:flex;flex-direction:column;align-items:center;gap:9px}
+  .proof small{font-family:'Space Mono',monospace;font-size:10px;color:#5C6670;
+    font-variant-numeric:tabular-nums;letter-spacing:.08em}
+
+  /* ── structure ── */
+  section{padding:58px 0}
+  section+section{border-top:1px solid var(--line)}
+  .kicker{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-2);margin:0 0 12px;
+    display:flex;gap:12px;align-items:center}
+  .kicker::after{content:"";flex:1;height:1px;background:var(--line)}
+  h1{font-family:'Space Mono',monospace;font-weight:700;
+    font-size:clamp(24px,3.6vw,34px);line-height:1.14;margin:0 0 20px;
+    letter-spacing:-.01em;text-wrap:balance}
+  h2{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;
+    letter-spacing:.08em;text-transform:uppercase;margin:32px 0 12px}
+  p{max-width:66ch;color:var(--ink-2);margin:0 0 16px}
+  p strong,li strong,td strong{color:var(--ink);font-weight:600}
+  .lede{font-size:17px;max-width:62ch}
+  code{font-family:'Space Mono',monospace;font-size:.9em;background:var(--chip);
+    padding:1px 5px;border:1px solid var(--line)}
+
+  /* ── cards ── */
+  .cards{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin:30px 0 0}
+  @media(min-width:780px){.cards{grid-template-columns:repeat(3,1fr)}}
+  .card{background:var(--panel);padding:22px}
+  .card b{font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--cyan);display:block;margin-bottom:9px}
+  .card p{margin:0;font-size:13.5px}
+
+  /* ── specimen wells: fixed ground, never themed ── */
+  .well{background:#0A1128;display:grid;place-items:center;padding:44px 28px}
+  /* a well holding the bare mark must hold 4X = artwork/2 on every side */
+  .well.mark-only{padding:82px 28px}
+  .well.light{background:#F5F7FA}
+  .duo{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin:26px 0 0}
+  @media(min-width:720px){.duo{grid-template-columns:1fr 1fr}}
+  .spec{display:flex;flex-direction:column;background:var(--panel)}
+  .cap{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-2);padding:11px 14px;border-top:1px solid var(--soft)}
+  .cap b{color:var(--ink);font-weight:700}
+
+  /* ── construction stepper ── */
+  .stepper{display:flex;gap:0;border:1px solid var(--line);margin:24px 0 0;flex-wrap:wrap}
+  .stepper button{flex:1 1 auto;min-width:88px;font-family:'Space Mono',monospace;
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    background:transparent;color:var(--ink-2);border:0;border-right:1px solid var(--line);
+    padding:11px 8px;cursor:pointer}
+  .stepper button:last-child{border-right:0}
+  .stepper button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+  .stepper button:focus-visible,.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+  .stepnote{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-2);
+    padding:14px 16px;background:var(--chip);border:1px solid var(--line);border-top:0;margin:0}
+  .stepnote b{color:var(--ink)}
+
+  /* ── tables ── */
+  .tbl{overflow-x:auto;margin:26px 0 0;border:1px solid var(--line)}
+  table{border-collapse:collapse;width:100%;font-size:13px;background:var(--panel)}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--soft);vertical-align:top}
+  th{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-2);font-weight:400;background:var(--chip)}
+  td.k{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink);white-space:nowrap}
+  td.n{font-family:'Space Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  .ok{color:var(--green);font-weight:700}
+
+  /* ── logotype map ── */
+  pre.map{font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.35;
+    background:var(--chip);border:1px solid var(--line);padding:16px;overflow-x:auto;
+    white-space:pre;color:var(--ink-2);margin:22px 0 0}
+  pre.map b{color:var(--cyan);font-weight:400}
+  .studytag{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--cyan);
+    color:var(--cyan);padding:3px 8px;margin:0 0 14px}
+
+  /* ── lockup: mark + live Space Mono ── */
+  .lockup{display:flex;align-items:center}  /* gap is set per lockup: 2 modules of the mark */
+  .lockup .wm{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.06em;
+    white-space:nowrap;line-height:1}
+
+  /* ── mockups ── */
+  .mocks{display:grid;gap:18px;margin:26px 0 0}
+  @media(min-width:780px){.mocks{grid-template-columns:1fr 1fr}}
+  .mock{border:1px solid var(--line);background:var(--panel);overflow:hidden}
+  .mock .body{background:#0A1128;padding:26px;min-height:158px;display:grid;place-items:center}
+  .tabbar{width:100%;max-width:320px;border:1px solid #232A3E}
+  .tabrow{display:flex;padding:8px 10px;background:#0A1128;border-bottom:1px solid #232A3E}
+  .tabrow .t{display:flex;align-items:center;gap:8px;background:#151D32;padding:6px 11px;
+    font-family:'Space Mono',monospace;font-size:11px;color:#F5F7FA}
+  .urlrow{padding:8px 12px;font-family:'Space Mono',monospace;font-size:11px;
+    color:#A1A7AE;background:#151D32}
+  .avatar{width:100px;height:100px;border-radius:50%;overflow:hidden;background:#0A1128;
+    display:grid;place-items:center;border:1px solid #232A3E}
+  .handle{font-family:'Space Mono',monospace;font-size:12px;color:#F5F7FA;
+    margin-top:12px;text-align:center}
+  .handle small{display:block;color:#5C6670;font-size:11px;margin-top:3px}
+  .term{width:100%;font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.8;
+    color:#A1A7AE;white-space:pre-wrap;word-break:break-all}
+  .term .c{color:#00B4D8}.term .w{color:#F5F7FA}
+  .docbar{width:100%;border:1px solid #232A3E}
+  .docbar .top{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:13px 16px;border-bottom:1px solid #232A3E}
+  .docbar nav{font-family:'Space Mono',monospace;font-size:10.5px;color:#5C6670;display:flex;gap:14px}
+  .docbar .rows{padding:16px}
+  .docbar .rows div{height:7px;background:#1B2237;margin-bottom:7px}
+  .docbar .rows div:nth-child(2){width:76%}
+  .docbar .rows div:nth-child(3){width:52%}
+
+  /* ── downloads ── */
+  .dl{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin:26px 0 0}
+  @media(min-width:720px){.dl{grid-template-columns:1fr 1fr}}
+  .dlrow{background:var(--panel);padding:18px 20px;display:flex;gap:16px;
+    align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .dlrow .t{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--ink)}
+  .dlrow .t small{display:block;color:var(--ink-2);font-size:11px;margin-top:3px;
+    font-family:Inter,sans-serif;letter-spacing:0}
+  .btn{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--cyan);color:#04212B;border:0;
+    padding:8px 14px;cursor:pointer;font-weight:700;text-decoration:none;white-space:nowrap}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+
+  .dlgroup{background:var(--chip);font-family:'Space Mono',monospace;font-size:10.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);
+    padding:9px 20px;grid-column:1/-1;border-top:1px solid var(--line)}
+  .dlgroup:first-child{border-top:0}
+  .fine{font-size:12.5px;max-width:78ch;margin-top:22px;color:var(--ink-2)}
+  .fine .sep{color:var(--line);margin:0 6px}
+  footer{padding:44px 0 84px;color:var(--ink-2);font-size:13px}
+  footer b{color:var(--ink)}
+  @media (prefers-reduced-motion:no-preference){
+    .stepper button,.btn{transition:background .12s,color .12s}}
+</style>
+
+<body>
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <a class="site-nav-brand" href="/">FLOP RELAY</a>
+    <nav class="site-nav-links" aria-label="Main navigation">
+      <a href="/technocore/" aria-current="page">Technocore</a>
+      <a href="/#guide">Guide</a>
+      <a href="/#signals">Signals</a>
+      <a href="/#live-agent">Live agent</a>
+    </nav>
+  </div>
+</header>
+
+<div class="band">
+  <div class="hero">
+    <div class="mk" id="heroMark"></div>
+    <p class="eyebrow">Technocore &middot; a product mark for the FLOP Network</p>
+  </div>
+  <div class="proof" id="proofStrip"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- 0 ── submission manifest ───────────────────────────────── -->
+  <section id="submission">
+    <p class="kicker">The submission</p>
+    <h1>Everything in this entry, and where to get it</h1>
+    <p class="lede">
+      Technocore logo competition, announced by @CryptoHayes on 28 August 2026.
+      Entry by <strong>@daniel_sats</strong>. Eighteen files, all vector or
+      vector-rendered. No archive, no installer — every file downloads on its own.
+    </p>
+
+    <div class="dl" id="manifest"></div>
+
+    <p class="fine">
+      Every file carries authorship metadata: SVG as Dublin Core <code>&lt;metadata&gt;</code>,
+      PNG as <code>tEXt</code> chunks. No file carries a generator, XMP or C2PA
+      signature — audited, not assumed.
+      <span class="sep">·</span>
+      <strong>These files are a competition entry by @daniel_sats.</strong> They may be
+      inspected, reproduced and quoted with attribution. They may not be republished,
+      resubmitted or presented as anyone else's work.
+    </p>
+  </section>
+
+  <!-- 1 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">The idea</p>
+    <h1>One ring, one notch</h1>
+    <p class="lede">
+      technocore.chat gives agents a public place to exchange messages, keep shared
+      notes, and publish signed work. Its message history is deliberately bounded:
+      the ring holds what it holds, and the oldest entries roll off to make room.
+    </p>
+    <p>
+      So the mark is a ring of eight parts with exactly one part absent. That notch
+      is the point the ring rolls off — the only asymmetry in the drawing, and the
+      only place the sequence loses anything.
+    </p>
+    <p>
+      It sits at the bottom, not the side. A gap on the left or right edge turns the
+      ring into a letter — a <strong>C</strong> or a reversed one — and this mark has
+      to hold its own shape while standing next to the word it belongs to. Nothing in
+      the Latin alphabet is an O open at the bottom.
+    </p>
+
+    <div class="cards">
+      <div class="card"><b>Communicate</b>
+        <p>Rooms are public channels. Messages append and the sequence never rewinds,
+        so a cursor handed to another agent stays valid.</p></div>
+      <div class="card"><b>Conduct commerce</b>
+        <p>Offers, acceptances and receipts are messages any agent can read back and
+        check — commerce that leaves a public, verifiable trail.</p></div>
+      <div class="card"><b>Store memories</b>
+        <p>Notes are a separate conditional key-value layer for state that must
+        outlive the ring. A signed write makes a memory attributable.</p></div>
+    </div>
+  </section>
+
+  <!-- 2 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Lineage</p>
+    <h1>The Chip is a part. Technocore is the channel through it.</h1>
+    <p>
+      On the left is FLOP's supplied Chip master, rendered from
+      <code>flop-chip-favicon.svg</code> unmodified — not a redraw. On the right,
+      Technocore: the same measured field, the same block and gutter, the same 45°
+      corner language, opened into a ring.
+    </p>
+    <p>
+      They read as family at a glance and never as a copy, because the silhouettes
+      differ where it counts. The Chip is solid, with its aperture closed inside a
+      full field. Technocore is hollow, and interrupted once.
+    </p>
+    <div class="duo">
+      <div class="spec"><div class="well mark-only" id="chipWell"></div>
+        <div class="cap"><b>FLOP Chip</b> — supplied master, unmodified, FLOP Cyan</div></div>
+      <div class="spec"><div class="well mark-only" id="markWell"></div>
+        <div class="cap"><b>Technocore</b> — the field opened into a ring</div></div>
+    </div>
+    <p style="margin-top:22px">
+      One detail is worth pointing at. The Chip carries a single asymmetry of its own:
+      a 45° split through its <strong>bottom-left</strong> corner block. Technocore's
+      one asymmetry sits in the same quadrant. That was not chosen for the rhyme — the
+      bottom is simply where a gap stops being a letter — but the rhyme is real, and
+      it is in the file.
+    </p>
+  </section>
+
+  <!-- 3 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Construction</p>
+    <h1>Every value is measured, not chosen</h1>
+    <p>
+      These numbers came out of two files FLOP already ships. Nothing was estimated
+      from a screenshot and nothing was picked by eye.
+    </p>
+
+    <div class="well" id="stepWell" style="padding:38px 24px"></div>
+    <div class="stepper" id="stepper">
+      <button data-s="0" aria-pressed="true">1 · Grid</button>
+      <button data-s="1" aria-pressed="false">2 · Field</button>
+      <button data-s="2" aria-pressed="false">3 · Ring</button>
+      <button data-s="3" aria-pressed="false">4 · Notch</button>
+    </div>
+    <p class="stepnote" id="stepNote"></p>
+
+    <div class="tbl">
+      <table><thead><tr><th>Value</th><th>Measure</th><th>How it was read</th></tr></thead>
+      <tbody id="constTbl"></tbody></table>
+    </div>
+  </section>
+
+  <!-- 4 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">The name</p>
+    <h1>The mark is drawn. The name is typeset.</h1>
+    <p>
+      The public application places the standalone mark beside <code>TECHNOCORE</code>
+      set live in <strong>Space Mono Bold</strong> — the brand typeface, in the role
+      the standard assigns it. FLOP's own word mark is not redrawn, and nothing here
+      is offered as a new FLOP lockup.
+    </p>
+    <div class="duo">
+      <div class="spec"><div class="well"><div class="lockup" id="lockDark"></div></div>
+        <div class="cap"><b>Reverse</b> — Ice White name, Cyan mark, on Base</div></div>
+      <div class="spec"><div class="well light"><div class="lockup" id="lockLight"></div></div>
+        <div class="cap"><b>Primary</b> — Base name, Cyan mark, on Ice White</div></div>
+    </div>
+    <p style="margin-top:22px">
+      <strong>Minimum sizes.</strong> The mark is never set below 24&nbsp;px, which is
+      the Chip's own minimum. In the lockup that puts the floor at 159&nbsp;px wide
+      stacked and 267&nbsp;px horizontal. Below 200&nbsp;px, use the one-colour
+      application.
+    </p>
+  </section>
+
+  <!-- 5 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Appendix — construction study</p>
+    <span class="studytag">Study only · not a proposed lockup</span>
+    <h1>What the parent word mark is made of</h1>
+    <p>
+      FLOP's word mark is <strong>not a typeface</strong>. In
+      <code>flop-lockup-reverse.svg</code> every letter is a bitmap of individually
+      drawn rounded squares. Mapping all 122 block anchors onto the module grid
+      reconstructs it exactly:
+    </p>
+    <pre class="map" id="flopmap"></pre>
+    <p>
+      Three things fall out, and all three govern the numbers in the table above:
+      each glyph is an <strong>8 × 8 module box with a 2-module stroke</strong>;
+      outer corners are chamfered 45° across one cell; and the <strong>O of FLOP is
+      the Chip</strong>, occupying one glyph box like any other letter.
+    </p>
+    <p>
+      Drawing TECHNOCORE in that same hand is possible, and it was drawn — but it is
+      shown here as evidence of how the grid was derived, <strong>not</strong> as a
+      proposed lockup. A product should not arrive holding a new version of its
+      parent's word mark. The approved application is the one above: drawn mark,
+      typeset name.
+    </p>
+    <div class="well" id="studyWell" style="padding:32px 24px;overflow-x:auto"></div>
+    <p class="cap" style="border:1px solid var(--line);border-top:0;margin:0">
+      Construction study · TECHNOCORE on the reconstructed FLOP module grid</p>
+  </section>
+
+  <!-- 6 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Colourways</p>
+    <h1>One accent, never two</h1>
+    <p>
+      The name takes the neutral that contrasts the ground — Base on light, Ice White
+      on dark — and no other colour. The mark carries the colour.
+    </p>
+    <p>
+      <strong>Outgoing work uses FLOP Cyan.</strong> Electric Green is the product
+      colourway, and the standard restricts it to product surfaces and internal
+      tooling — <em>never print or outgoing work</em>. A competition entry and a
+      public page are outgoing work, so Cyan it is. Green is shown below in the role
+      it is actually licensed for.
+    </p>
+    <div class="duo" id="ways" style="grid-template-columns:1fr"></div>
+  </section>
+
+  <!-- 7 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Clear space</p>
+    <h1>4X on all four sides</h1>
+    <p>
+      X is one grid module: <strong>61.47</strong> units. Clear space is measured from
+      the artwork, never from the file's bounding box. Nothing — type, rules, folds,
+      trim — enters the zone.
+    </p>
+    <div class="well" id="clearWell" style="padding:40px 24px"></div>
+  </section>
+
+  <!-- 8 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">In context</p>
+    <h1>Where it actually lives</h1>
+    <div class="mocks">
+      <div class="mock"><div class="body">
+        <div class="tabbar">
+          <div class="tabrow"><span class="t"><span id="favMock"></span>technocore.chat</span></div>
+          <div class="urlrow">https://technocore.chat/r/lobby</div>
+        </div></div>
+        <div class="cap">Browser tab — shown at the 24 px minimum. A platform that forces 16 px needs a hand-tuned favicon, per the standard</div></div>
+
+      <div class="mock"><div class="body"><div>
+        <div class="avatar" id="avMock"></div>
+        <div class="handle">Technocore<small>@technocore</small></div>
+      </div></div>
+        <div class="cap">Avatar — the supplied file is a square at 78%. The circle is the platform's own mask; we do not pre-empt it</div></div>
+
+      <div class="mock"><div class="body" style="align-items:start">
+        <div class="term"><span class="c">$</span> curl -s <span class="w">'technocore.chat/r/lobby/say/opus/hello%20agents'</span>
+<span class="c">ok</span> seq=41208
+<span class="c">$</span> curl -s <span class="w">'technocore.chat/r/lobby?since=41208'</span>
+41208 opus hello agents</div></div>
+        <div class="cap">Terminal — the product's actual interface</div></div>
+
+      <div class="mock"><div class="body">
+        <div class="docbar">
+          <div class="top"><span class="lockup" id="docLock"></span>
+            <nav><span>ROOMS</span><span>NOTES</span><span>KEYS</span></nav></div>
+          <div class="rows"><div></div><div></div><div></div></div>
+        </div></div>
+        <div class="cap">Docs header — lockup on Base</div></div>
+    </div>
+  </section>
+
+  <!-- 9 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Compliance</p>
+    <h1>Checked line by line against the standard</h1>
+    <p>
+      The brief asked for two things. "Embodies this ethos" is the half most entries
+      will land. "In line with the brand guidelines of the Flop Network" is the half
+      this table is for.
+    </p>
+    <div class="tbl"><table>
+      <thead><tr><th style="width:36%">Rule</th><th>How this entry answers it</th></tr></thead>
+      <tbody id="compTbl"></tbody></table></div>
+
+    <h2>Two judgement calls, stated openly</h2>
+    <p>
+      <strong>1. The name is typeset, not drawn.</strong> The parent's word mark is a
+      drawing, and the grid behind it was reconstructed in full — but a product
+      arriving with a redrawn version of its parent's logotype claims an approval
+      nobody has given. The study stays an appendix.
+    </p>
+    <p>
+      <strong>2. The notch is a deliberate asymmetry in a symmetric system.</strong>
+      It is the whole idea, so it is placed rather than incidental: bottom-left, where
+      it cannot be read as a letter opening, and where the parent carries its own
+      single asymmetry.
+    </p>
+    <p>
+      <strong>3. Two clauses in the standard conflict, and one had to be followed.</strong>
+      The approved-lockups table puts <em>Primary</em> — Base word mark, Accent Chip — on
+      “Ice White or paper” and calls it “the default in every medium.” The paragraph
+      immediately beneath it ends “never set a two-tone lockup on a ground other than
+      Base.” Primary is two-tone and is not on Base. This entry follows the table,
+      because the table is the clause labelled <em>“Approved lockups — there are no
+      others”</em>. Flagging it rather than quietly picking one seemed the more useful
+      thing to do with the observation.
+    </p>
+  </section>
+
+  <!-- 10 ─────────────────────────────────────────────── -->
+  <section>
+    <p class="kicker">Delivery</p>
+    <h1>Five vector masters, no raster anywhere</h1>
+    <p>
+      The mark is <strong>one path of eleven subpaths</strong> — no mask, no clip, no
+      <code>fill-rule</code>, no transform, no filter. <strong>958 bytes.</strong> It
+      renders identically in Illustrator, Figma, a vinyl cutter and a laser etcher.
+      Every file is generated by one script, so no two can drift apart.
+    </p>
+    <div class="dl">
+      <div class="dlrow"><span class="t">Copy the mark
+        <small>Full inline &lt;svg&gt; to clipboard</small></span>
+        <button class="btn ghost" id="copySvg" type="button">Copy SVG</button></div>
+      <div class="dlrow"><span class="t">Copy the favicon line
+        <small>Drop straight into &lt;head&gt;</small></span>
+        <button class="btn ghost" id="copyFav" type="button">Copy</button></div>
+    </div>
+    <p style="margin-top:22px">Every file is listed with its own download at the
+      <a href="#submission">top of this page</a>.</p>
+  </section>
+
+  <footer>
+    <p>Entry for the Technocore logo competition announced by <b>@CryptoHayes</b>,
+    28 August 2026. Built on the FLOP Network design system,
+    <a href="https://flop.finance/brand/">flop.finance/brand</a>.
+    Official parent artwork is shown unmodified; the product mark is explicit about
+    what is new.</p>
+    <p style="margin-top:14px">Entry and artwork by <b>@daniel_sats</b>. Reuse with
+    attribution; do not republish or resubmit as your own work. FLOP Network brand
+    assets remain the property of FLOP Labs.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /* ── grid, measured from flop-chip-favicon.svg ── */
+  var B=115.28,G=10.21,P=B+G,S=4*B+3*G,BITE=76.46,R=28.65;
+  var AP=P+B-BITE, APW=(2*P+BITE)-AP;
+  /* ── logotype grid, measured from flop-lockup-reverse.svg ── */
+  var M=S/8, LB=0.9211*M, LR=0.197*LB, ADV=9*M, CLEAR=4*M;
+  var CYAN='#00B4D8', ICE='#F5F7FA', BASE='#0A1128', GREEN='#32D74B', BLUE='#0466C8', GREY='#5C6670';
+
+  function n(v){return Math.round(v*100)/100}
+  function X(i){return i*P}
+  function rect(x,y,w,h){return 'M'+n(x)+' '+n(y)+'H'+n(x+w)+'V'+n(y+h)+'H'+n(x)+'Z'}
+  function blk(i,j){return rect(X(i),X(j),B,B)}
+  function poly(p){return 'M'+p.map(function(q){return n(q[0])+' '+n(q[1])}).join('L')+'Z'}
+  function rr(x,y,w,h,r){r=Math.min(r,w/2,h/2);
+    return 'M'+n(x+r)+' '+n(y)+'H'+n(x+w-r)+'A'+n(r)+' '+n(r)+' 0 0 1 '+n(x+w)+' '+n(y+r)
+      +'V'+n(y+h-r)+'A'+n(r)+' '+n(r)+' 0 0 1 '+n(x+w-r)+' '+n(y+h)
+      +'H'+n(x+r)+'A'+n(r)+' '+n(r)+' 0 0 1 '+n(x)+' '+n(y+h-r)
+      +'V'+n(y+r)+'A'+n(r)+' '+n(r)+' 0 0 1 '+n(x+r)+' '+n(y)+'Z'}
+  var CH=[poly([[B,0],[B,B],[0,B]]),poly([[S-B,0],[S,B],[S-B,B]]),
+          poly([[B,S-B],[B,S],[0,S-B]]),poly([[S-B,S-B],[S,S-B],[S-B,S]])];
+
+  var RING=[[1,0],[2,0],[0,1],[0,2],[3,1],[3,2],[2,3]];   /* [1,3] absent = the notch */
+  var HEAD=[1,3];
+  var ALL=[[1,0],[2,0],[0,1],[0,2],[3,1],[3,2],[1,3],[2,3]];
+  var CENTRE=[[1,1],[2,1],[1,2],[2,2]];
+  var MARK=CH.concat(RING.map(function(c){return blk(c[0],c[1])})).join('');
+
+  function svg(w,h,body,style,label){
+    return '<svg viewBox="0 0 '+n(w)+' '+n(h)+'" xmlns="http://www.w3.org/2000/svg" role="img" '
+      +'aria-label="'+(label||'Technocore')+'" style="display:block;'+(style||'width:100%;height:auto')+'">'
+      +body+'</svg>'}
+  function markSVG(fill,style){return svg(S,S,'<path d="'+MARK+'" fill="'+fill+'"/>',style)}
+  function markPx(fill,px){return markSVG(fill,'width:'+px+'px;height:'+px+'px')}
+  /* framed to 78% of the box, matching how FLOP frames the Chip in its own file */
+  function markFramed(fill){var box=S/0.78,o=(box-S)/2;
+    return svg(box,box,'<g transform="translate('+n(o)+' '+n(o)+')"><path d="'+MARK+'" fill="'+fill+'"/></g>')}
+
+  /* official FLOP Chip master, embedded byte-for-byte from research/flop_chip_official.svg */
+  var CHIP_VB='179.91 181.41 637.18 637.18', CHIP_D='M492.83,580.84h-54.34c-7.61,0-14.88,3.03-20.25,8.4l-31.91,31.91h106.5v-40.31ZM377.55,495.67h38.79v-47.83c0-15.83,12.83-28.65,28.65-28.65h47.8v-38.76h-115.28v115.28l.03-.03ZM407.97,577.18c5.37-5.37,8.4-12.67,8.4-20.25v-51.05h-38.79v101.73l30.42-30.42h-.03ZM618.31,495.67v-115.28h-115.28v38.76h53.07c15.83,0,28.65,12.83,28.65,28.65v47.83h33.52l.03.03ZM368.32,617.81v-111.93h-117.85s-.07,115.25-.17,115.25h114.7l3.32-3.32h0ZM628.52,370.19h115.99c-2.02-3.09-114.16-107.7-115.99-108.77v108.77ZM368.32,261.42c-1.83,1.07-113.98,105.68-115.99,108.77h115.99s0-108.77,0-108.77ZM628.52,631.36h114.99c-1.52,3.1-113.16,107.7-114.99,108.77v-108.77ZM628.52,495.67h117.93v-112.88c0-.79-.06-1.58-.13-2.37h-117.81v115.28-.03ZM250.38,495.67h117.93v-112.88c0-.79-.06-1.58-.13-2.37h-117.81v115.28-.03ZM628.52,505.88v115.28h117.96v-115.28h-117.96ZM492.83,631.36h-115.28v111.17c3.34,0,115.25,0,115.25,0v-111.17h.03ZM618.31,631.36h-115.28v111.17h115.28v-111.17ZM503.03,370.19h115.28v-112.72c-2.25,0-115.25,0-115.25,0v112.69l-.03.03ZM377.55,370.19h115.28v-112.72h-115.28v112.72ZM618.31,505.88h-33.52v46.31c0,15.83-12.83,28.65-28.65,28.65h-53.07v40.28h115.28v-115.28l-.03.03ZM256.09,631.39h97.05l-28.71,28.71c-5.47,5.45-12.52,8.37-19.69,8.74-5.43.28-10.72-1.75-14.67-5.48l-33.98-31.98ZM335.61,706.23c-3.71-3.49-6.01-8.25-6.31-13.33-.49-8.26,2.41-16.7,8.74-23.03l29.31-29.31v95.54l-31.74-29.87Z';
+  function chipSVG(style){
+    return '<svg viewBox="'+CHIP_VB+'" xmlns="http://www.w3.org/2000/svg" role="img" '
+      +'aria-label="FLOP Chip" style="display:block;'+(style||'width:100%;height:auto')+'">'
+      +'<path d="'+CHIP_D+'" fill="'+CYAN+'"/></svg>'}
+
+  /* ── logotype engine (appendix study only) ── */
+  function roundPoly(pts,r){var d='',i,N=pts.length;
+    for(i=0;i<N;i++){var p0=pts[(i-1+N)%N],p1=pts[i],p2=pts[(i+1)%N];
+      var v1=[p0[0]-p1[0],p0[1]-p1[1]],v2=[p2[0]-p1[0],p2[1]-p1[1]];
+      var l1=Math.sqrt(v1[0]*v1[0]+v1[1]*v1[1]),l2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
+      var rr2=Math.min(r,l1/2,l2/2);
+      var a=[p1[0]+v1[0]/l1*rr2,p1[1]+v1[1]/l1*rr2],b=[p1[0]+v2[0]/l2*rr2,p1[1]+v2[1]/l2*rr2];
+      d+=(i?'L':'M')+n(a[0])+' '+n(a[1])+'Q'+n(p1[0])+' '+n(p1[1])+' '+n(b[0])+' '+n(b[1])}
+    return d+'Z'}
+  function cell(ch,x,y){if(ch==='#')return rr(x,y,LB,LB,LR);
+    var t={q:[[x+LB,y],[x+LB,y+LB],[x,y+LB]],w:[[x,y],[x+LB,y+LB],[x,y+LB]],
+           a:[[x,y],[x+LB,y],[x+LB,y+LB]],s:[[x,y],[x+LB,y],[x,y+LB]]}[ch];
+    return t?roundPoly(t,LR):''}
+  var GL={T:['.q####w.','q######w','...##...','...##...','...##...','...##...','...##...','...##...'],
+    E:['.q######','q#######','##......','######..','######..','##......','a#######','.a######'],
+    C:['.q######','q#######','##......','##......','##......','##......','a#######','.a######'],
+    H:['##....##','##....##','##....##','########','########','##....##','##....##','##....##'],
+    N:['##....##','###...##','###...##','##.##.##','##.##.##','##...###','##...###','##....##'],
+    O:['.q####w.','q######w','##....##','##....##','##....##','##....##','a######s','.a####s.'],
+    R:['######w.','#######w','##....##','##....##','########','######s.','##..##..','##....##']};
+  function wordPath(s){var d='',i,r,c;
+    for(i=0;i<s.length;i++){var g=GL[s.charAt(i)];if(!g)continue;
+      for(r=0;r<8;r++)for(c=0;c<8;c++)d+=cell(g[r].charAt(c),i*ADV+c*M,r*M)}
+    return {d:d,w:(s.length-1)*ADV+S}}
+
+  /* ── fill the page ── */
+  document.getElementById('heroMark').innerHTML=markSVG(CYAN);
+  document.getElementById('proofStrip').innerHTML=[96,48,32,24].map(function(px){
+    return '<div class="s">'+markPx(CYAN,px)+'<small>'+px+(px===24?' PX MIN':' PX')+'</small></div>'}).join('');
+  document.getElementById('chipWell').innerHTML='<div style="max-width:152px;width:100%">'+chipSVG()+'</div>';
+  document.getElementById('markWell').innerHTML='<div style="max-width:152px;width:100%">'+markFramed(CYAN)+'</div>';
+  document.getElementById('favMock').innerHTML=markPx(CYAN,24);
+  document.getElementById('avMock').innerHTML=markPx(CYAN,62);
+
+  function lockup(el,type,markFill,px){
+    el.style.gap=(px/4)+'px';
+    el.innerHTML=markPx(markFill,px)+'<span class="wm" style="color:'+type+';font-size:'
+      +Math.round(px*0.62)+'px">TECHNOCORE</span>'}
+  lockup(document.getElementById('lockDark'),ICE,CYAN,62);
+  lockup(document.getElementById('lockLight'),BASE,CYAN,62);
+  lockup(document.getElementById('docLock'),ICE,CYAN,26);
+
+  /* construction stepper */
+  var STEPS=[
+    {note:'<b>Grid.</b> Four columns and four rows on a pitch of 125.49 — block 115.28 plus gutter 10.21. The diagonals are the 45° chamfers that cut the four corner cells.',cells:[],corners:false,grid:true},
+    {note:'<b>Field.</b> All sixteen cells fill in, the four corners as triangles. This is the Chip’s footprint, and Technocore starts from it unchanged.',cells:ALL.concat(CENTRE),corners:true,grid:true},
+    {note:'<b>Ring.</b> The centre two-by-two opens to the ground. Eight parts and four chamfers remain — a closed ring, and at this stage a clean O.',cells:ALL,corners:true,grid:true},
+    {note:'<b>Notch.</b> Cell (1,3) is removed. Bottom-left: far enough from the side edges that the ring never reads as a letter, and the same quadrant where the parent Chip carries its own single asymmetry.',cells:RING,corners:true,grid:true,head:true}
+  ];
+  function overlay(){
+    var g='',i,v;
+    for(i=1;i<4;i++){v=n(X(i));g+='<line x1="'+v+'" y1="-34" x2="'+v+'" y2="'+n(S+34)+'"/><line x1="-34" y1="'+v+'" x2="'+n(S+34)+'" y2="'+v+'"/>';
+      v=n(X(i)-G);g+='<line x1="'+v+'" y1="-34" x2="'+v+'" y2="'+n(S+34)+'"/><line x1="-34" y1="'+v+'" x2="'+n(S+34)+'" y2="'+v+'"/>'}
+    g+='<line x1="'+n(B)+'" y1="0" x2="0" y2="'+n(B)+'"/><line x1="'+n(S-B)+'" y1="0" x2="'+n(S)+'" y2="'+n(B)+'"/>';
+    g+='<line x1="'+n(B)+'" y1="'+n(S)+'" x2="0" y2="'+n(S-B)+'"/><line x1="'+n(S-B)+'" y1="'+n(S)+'" x2="'+n(S)+'" y2="'+n(S-B)+'"/>';
+    return '<g stroke="'+CYAN+'" stroke-width="2" opacity=".4" fill="none">'+g+'</g>'}
+  function renderStep(k){
+    var s=STEPS[k],d='';
+    if(s.corners)d+=CH.join('');
+    d+=s.cells.map(function(c){return blk(c[0],c[1])}).join('');
+    var body=(d?'<path d="'+d+'" fill="'+CYAN+'"/>':'')+(s.grid?overlay():'');
+    if(s.head)body+='<g stroke="'+ICE+'" stroke-width="4" fill="none"><rect x="'+n(X(HEAD[0]))
+      +'" y="'+n(X(HEAD[1]))+'" width="'+n(B)+'" height="'+n(B)+'"/></g>'
+      +'<g font-family="Space Mono, monospace" font-size="26" fill="'+ICE+'">'
+      +'<text x="'+n(X(HEAD[0])+B/2)+'" y="'+n(S+52)+'" text-anchor="middle">NOTCH</text></g>';
+    document.getElementById('stepWell').innerHTML=
+      '<svg viewBox="-50 -50 '+n(S+100)+' '+n(S+120)+'" xmlns="http://www.w3.org/2000/svg" '
+      +'role="img" aria-label="Construction step '+(k+1)+'" '
+      +'style="display:block;width:100%;max-width:400px;height:auto">'+body+'</svg>';
+    document.getElementById('stepNote').innerHTML=s.note;
+    [].forEach.call(document.querySelectorAll('#stepper button'),function(b){
+      b.setAttribute('aria-pressed',String(+b.dataset.s===k))});
+  }
+  document.getElementById('stepper').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(b)renderStep(+b.dataset.s)});
+  renderStep(3);
+
+  /* clear space */
+  document.getElementById('clearWell').innerHTML=(function(){
+    var body='<rect x="'+n(-CLEAR)+'" y="'+n(-CLEAR)+'" width="'+n(S+2*CLEAR)+'" height="'+n(S+2*CLEAR)
+      +'" fill="none" stroke="'+CYAN+'" stroke-width="4" stroke-dasharray="16 12" opacity=".55"/>'
+      +'<path d="'+MARK+'" fill="'+CYAN+'"/>'
+      +'<g font-family="Space Mono, monospace" font-size="40" fill="'+GREY+'">'
+      +'<text x="'+n(S/2)+'" y="'+n(-CLEAR-26)+'" text-anchor="middle">4X &mdash; X = ONE MODULE = 61.47</text></g>';
+    return '<svg viewBox="'+n(-CLEAR-30)+' '+n(-CLEAR-90)+' '+n(S+2*CLEAR+60)+' '+n(S+2*CLEAR+120)+'" '
+      +'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Clear space" '
+      +'style="display:block;width:100%;max-width:420px;height:auto">'+body+'</svg>'})();
+
+  /* colourways */
+  var WAYS=[
+    ['Primary','Default for outgoing work on Ice White and paper.',ICE,BASE,CYAN,'light'],
+    ['Reverse','Default on Base for digital and outgoing work.',BASE,ICE,CYAN,''],
+    ['Print alternate','Single-pass print, where Cyan and Green shift.',ICE,BASE,BLUE,'light'],
+    ['Product','Product surfaces and internal tooling only — never outgoing or print.',ICE,BASE,GREEN,'light'],
+    ['One-colour','Engrave, emboss, foil, and anything below 200 px.',BASE,ICE,ICE,''],
+    ['One-colour light','Stamps, single-ink stationery.',ICE,BASE,BASE,'light']];
+  document.getElementById('ways').innerHTML=WAYS.map(function(w){
+    return '<div class="spec"><div class="well '+w[5]+'" style="padding:30px 24px">'
+      +'<div class="lockup" style="gap:13.5px">'+markPx(w[4],54)
+      +'<span class="wm" style="color:'+w[3]+';font-size:34px">TECHNOCORE</span></div></div>'
+      +'<div class="cap"><b>'+w[0]+'</b> — '+w[1]+'</div></div>'}).join('');
+  document.getElementById('ways').style.gridTemplateColumns=
+    window.matchMedia('(min-width:720px)').matches?'1fr 1fr':'1fr';
+
+  /* FLOP reconstruction map */
+  var FMAP=['.#######.##.........#......#######','########.##.........#.#.#..########',
+    '##.......##................##....##','######...##.......#.#...#..##....##',
+    '######...##.........#.#....########','##.......##.......#.#.#.#..#######',
+    '##........#######..#.......##','##.........######..........##'];
+  document.getElementById('flopmap').innerHTML='col  0         10        20        30\n'
+    +FMAP.map(function(r,i){return 'r'+i+'   '+r.replace(/#/g,'<b>#</b>')}).join('\n')
+    +'\n\n       F          L        [CHIP]      P';
+
+  /* construction study specimen */
+  document.getElementById('studyWell').innerHTML=(function(){
+    var top=wordPath('TECHNO'),bot=wordPath('CORE'),gap=2*M,off=ADV;
+    var body='<g fill="'+GREY+'"><path d="'+top.d+'"/>'
+      +'<g transform="translate('+n(off)+' '+n(S+gap)+')"><path d="'+bot.d+'"/></g></g>';
+    return svg(top.w,2*S+gap,body,'width:100%;max-width:520px;height:auto','TECHNOCORE construction study')})();
+
+  /* tables */
+  var CONST=[['Block','115.28','Straight run of every square in flop-chip-favicon.svg'],
+    ['Gutter','10.21','Measured between adjacent block edges in the same file'],
+    ['Pitch','125.49','Block + gutter'],
+    ['Field','491.75','4 blocks + 3 gutters — the Chip is exactly this square'],
+    ['Chamfer','45°','Four corner cells cut to triangles, as the Chip does'],
+    ['Module','61.47','Field ÷ 8 — design.md states the Chip is eight modules square'],
+    ['Logotype block','56.62','0.9211 × module, matching the parent word mark'],
+    ['Logotype radius','11.15','0.197 × block, matching the parent word mark'],
+    ['Advance','553.22','9 modules — an 8-module glyph box plus 1 module of tracking'],
+    ['Clear space','245.88','4X where X is one module, per Logo Standards §2']];
+  document.getElementById('constTbl').innerHTML=CONST.map(function(r){
+    return '<tr><td class="k">'+r[0]+'</td><td class="n">'+r[1]+'</td><td>'+r[2]+'</td></tr>'}).join('');
+
+  var COMP=[
+    ['Use the supplied FLOP masters unaltered','The lineage figure renders flop-chip-favicon.svg byte-for-byte. No reconstruction is presented as parent artwork.'],
+    ['No colours outside the canonical swatches','FLOP Cyan on Base and Ice White. Blue and Green appear only in the print and product colourways the standard defines.'],
+    ['Electric Green is product and internal tooling only','Outgoing work — this page, the social card, the entry itself — uses Cyan. Green is shown once, labelled with the role it is licensed for.'],
+    ['Never two accents in one lockup','One mark fill per application, always.'],
+    ['The word takes the neutral; the mark carries the colour','Base on Ice White, Ice White on Base. The name is never coloured.'],
+    ['Error Red is semantic only, never decorative','Error Red appears nowhere — not in artwork, not as an annotation, not as a state.'],
+    ['Never stretch, rotate, mirror, crop, filter or watermark','One locked drawing. Every colourway is the identical path with a different fill.'],
+    ['Never rebuild the logo from a screenshot','Built from studio vector geometry, delivered as vector. No raster enters the pipeline at any stage.'],
+    ['Do not lock a product name to the FLOP lockup','The FLOP lockup is untouched. This is a separate product application on the same grid.'],
+    ['The aperture always shows the ground','The ring centre is open. It is never filled and never carries a letter, dot or image.'],
+    ['4X clear space, measured from the artwork','245.88 units on all four sides, from the drawing, not the bounding box.'],
+    ['Mark minimum 24 px; one-colour below 200 px','Proof strip stops at 24 px. One-colour masters supplied for both grounds.'],
+    ['No arbitrary spacing or radii','Every value lands on the module grid. Nothing was chosen by eye.'],
+    ['Never place on mid-tone or photographic grounds','Base or Ice White only. No photographic mockup appears in this entry.'],
+    ['Never mix dark and light themes in one view','Each specimen sits on a single fixed ground, independent of the page theme.'],
+    ['The mascot may not be altered or substituted','The mascot is not used and not redrawn.']];
+  document.getElementById('compTbl').innerHTML=COMP.map(function(r){
+    return '<tr><td>'+r[0]+'</td><td><span class="ok">&#10003;</span> '+r[1]+'</td></tr>'}).join('');
+
+  var MANIFEST=[
+    ['g','Vector masters — SVG, no background, no mask, 11 subpaths'],
+    ['technocore-mark-primary.svg','958 B','FLOP Cyan — the master'],
+    ['technocore-mark-print.svg','958 B','FLOP Blue — single-pass print'],
+    ['technocore-mark-product.svg','958 B','Electric Green — product surfaces only'],
+    ['technocore-mark-onecolor-ice.svg','958 B','Ice White — engrave, emboss, foil'],
+    ['technocore-mark-onecolor-base.svg','958 B','Base — single ink'],
+    ['g','Icons — SVG, mark framed at 78% with its ground'],
+    ['technocore-favicon.svg','630 B','Browser tab, on Base'],
+    ['technocore-appicon-light.svg','630 B','App icon, on Ice White'],
+    ['technocore-avatar.svg','630 B','Social avatar, on Base'],
+    ['g','Raster — PNG, transparent background'],
+    ['technocore-mark-512.png','4.5 KB','512 px'],
+    ['technocore-mark-256.png','2.4 KB','256 px'],
+    ['technocore-mark-128.png','1.2 KB','128 px'],
+    ['technocore-mark-64.png','1.1 KB','64 px'],
+    ['technocore-mark-32.png','1.0 KB','32 px'],
+    ['g','Source and tokens'],
+    ['src/technocore.js','—','Every constant and path builder. Zero dependencies.'],
+    ['src/build.mjs','—','Regenerates all five masters'],
+    ['src/tokens.css','—','FLOP tokens as CSS custom properties'],
+    ['brand.json','710 B','Palette, grid, type and rules, serialised'],
+    ['g','Social'],
+    ['technocore-social-card.png','60 KB','1600 × 900, rendered from the same geometry']
+  ];
+  document.getElementById('manifest').innerHTML=MANIFEST.map(function(f){
+    if(f[0]==='g') return '<div class="dlgroup">'+f[1]+'</div>';
+    return '<div class="dlrow"><span class="t">'+f[0]+'<small>'+f[2]+'</small></span>'
+      +'<a class="btn ghost" href="/technocore/'+f[0]+'" download>'+f[1]+'</a></div>'
+  }).join('');
+
+  var FILES_UNUSED=[['technocore-mark-primary.svg','958 B','The mark, FLOP Cyan — the master'],
+    ['technocore-mark-print.svg','958 B','FLOP Blue, single-pass print'],
+    ['technocore-mark-product.svg','958 B','Electric Green, product surfaces only'],
+    ['technocore-mark-onecolor-ice.svg','958 B','Ice White, one colour'],
+    ['technocore-mark-onecolor-base.svg','958 B','Base, one colour'],
+    ['technocore.js','—','The source: grid, paths, builders. No dependencies.'],
+    ['build.mjs','—','Regenerates every master from it'],
+    ['tokens.css','—','FLOP design tokens as CSS custom properties'],
+    ['brand.json','—','Palette, grid, type and rules, serialised']];
+  var fileTbl=document.getElementById('fileTbl');
+  if(fileTbl) fileTbl.innerHTML=FILES_UNUSED.map(function(f){
+    return '<tr><td class="k">'+f[0]+'</td><td class="n">'+f[1]+'</td><td>'+f[2]+'</td></tr>'}).join('');
+
+  /* copy buttons */
+  function copy(text,btn,label){
+    var done=function(){btn.textContent='Copied';setTimeout(function(){btn.textContent=label},1600)};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done,done)}
+    else{var t=document.createElement('textarea');t.value=text;document.body.appendChild(t);
+      t.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(t);done()}}
+  document.getElementById('copySvg').addEventListener('click',function(){
+    copy('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+n(S)+' '+n(S)
+      +'" role="img" aria-label="Technocore"><path d="'+MARK+'" fill="'+CYAN+'"/></svg>',this,'Copy SVG')});
+  document.getElementById('copyFav').addEventListener('click',function(){
+    copy('<link rel="icon" href="/technocore-favicon.svg" type="image/svg+xml">',this,'Copy')});
+})();
+</script>
+</body>
+</html>

@@ -57,7 +57,7 @@
       .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--cyan); border-radius: 9px; background: var(--ink); color: var(--cyan); font: 800 25px/.9 var(--mono); }
       .brand-copy { display: grid; gap: 1px; }
       .brand-name { font: 800 14px/1 var(--mono); letter-spacing: .1em; }
-      .top-meta { display: flex; align-items: center; gap: 13px; color: var(--muted); font: 10px var(--mono); }
+      .top-meta { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 9px 13px; color: var(--muted); font: 10px var(--mono); }
       .owner-link { color: var(--cyan); text-decoration: none; }
 
       .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 82% 22%, rgba(0, 180, 216, .14), transparent 27%), var(--base); }
@@ -451,7 +451,7 @@
           <span class="brand-mark" aria-hidden="true">F</span>
           <span class="brand-copy"><span class="brand-name">FLOP RELAY</span></span>
         </a>
-        <div class="top-meta"><a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">GitHub ↗</a><a class="owner-link" href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">by @daniel_sats ↗</a></div>
+        <nav class="top-meta" aria-label="Main navigation"><a href="/technocore/">Technocore ↗</a><a href="#guide">Guide</a><a href="#signals">Signals</a><a href="#live-agent">Live Agent</a><a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">GitHub ↗</a><a class="owner-link" href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">by @daniel_sats ↗</a></nav>
       </div>
     </header>
 
@@ -465,6 +465,7 @@
             <div class="action-row">
               <button class="button" type="button" data-go-tool="identity" data-tool-slot="identity" aria-controls="panel-identity" aria-expanded="false">Start step one</button>
               <button class="button secondary" type="button" data-go-tool="verify" data-tool-slot="verify" aria-controls="panel-verify" aria-expanded="false">Verify a receipt</button>
+              <a class="button secondary" href="/technocore/">View logo submission ↗</a>
             </div>
             <div class="hero-notes">
               <span class="hero-note"><b>LOCAL</b> Ed25519 signer</span>

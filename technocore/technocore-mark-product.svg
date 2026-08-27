@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 491.75 491.75" role="img" aria-label="Technocore">
+  <metadata>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+             xmlns:dc="http://purl.org/dc/elements/1.1/"
+             xmlns:cc="http://creativecommons.org/ns#">
+      <cc:Work rdf:about="">
+        <dc:title>Technocore</dc:title>
+        <dc:creator><cc:Agent><dc:title>Daniel (@daniel_sats)</dc:title></cc:Agent></dc:creator>
+        <dc:rights><cc:Agent><dc:title>Copyright 2026 Daniel (@daniel_sats). Submitted to the FLOP Labs Technocore logo competition. Reuse permitted with attribution to @daniel_sats; do not republish as your own.</dc:title></cc:Agent></dc:rights>
+        <dc:source>https://danflopfun.vercel.app/technocore</dc:source>
+        <dc:description>Technocore product mark for the FLOP Network. Built on FLOP’s measured construction grid: block 115.28, gutter 10.21, field 491.75, 45° chamfers.</dc:description>
+        <dc:date>2026-08-28</dc:date>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+<!-- Technocore — a product mark for the FLOP Network.
+     Mark grid   : block 115.28 · gutter 10.21 · pitch 125.49 · field 491.75 (4x4) · 45° chamfers
+     Clear space : 245.88 (4X, X = one module) measured from the artwork, not the bounding box
+     Minimums    : mark 24px · one-colour below 200px
+     Grid-derived Technocore artwork. Use the supplied FLOP masters byte-for-byte for parent-brand lineage. -->
+<title>Technocore</title><path d="M115.28 0L115.28 115.28L0 115.28ZM376.47 0L491.75 115.28L376.47 115.28ZM115.28 376.47L115.28 491.75L0 376.47ZM376.47 376.47L491.75 376.47L376.47 491.75ZM125.49 0H240.77V115.28H125.49ZM250.98 0H366.26V115.28H250.98ZM0 125.49H115.28V240.77H0ZM0 250.98H115.28V366.26H0ZM376.47 125.49H491.75V240.77H376.47ZM376.47 250.98H491.75V366.26H376.47ZM250.98 376.47H366.26V491.75H250.98Z" fill="#32D74B"/></svg>

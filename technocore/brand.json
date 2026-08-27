@@ -1,0 +1,37 @@
+{
+  "palette": {
+    "base": "#0A1128",
+    "grey": "#5C6670",
+    "blue": "#0466C8",
+    "cyan": "#00B4D8",
+    "green": "#32D74B",
+    "ice": "#F5F7FA",
+    "red": "#FF453A"
+  },
+  "grid": {
+    "block": 115.28,
+    "gutter": 10.21,
+    "pitch": 125.49000000000001,
+    "field": 491.75,
+    "radius": 28.65
+  },
+  "type": {
+    "module": 61.46875,
+    "block": 56.618865625000005,
+    "radius": 11.153916528125002,
+    "advance": 553.21875,
+    "clear": 245.875
+  },
+  "rules": {
+    "clearSpace": 245.875,
+    "minStackedWidth": 159,
+    "minHorizontalWidth": 267,
+    "minMarkSize": 24,
+    "oneColourBelow": 200,
+    "aspectSwitch": 4,
+    "approvedGrounds": [
+      "#0A1128",
+      "#F5F7FA"
+    ]
+  }
+}
