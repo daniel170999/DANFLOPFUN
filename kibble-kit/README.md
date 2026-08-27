@@ -126,6 +126,9 @@ newest entries when a bucket is capped.
 One caveat worth stating plainly: **an archive protects the future, not the past.** Whatever
 the ring dropped before you started is gone. Start early.
 
+For this public instance, captured coverage begins at `2026-08-27T10:50:00Z` UTC. The archive
+does not establish absence or presence of an event before that timestamp.
+
 ## `watch-core.mjs` — notice the launch instead of hearing about it
 
 FLOP has said the testnet runs about ninety days with public source. Day one gives you ninety

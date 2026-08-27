@@ -141,5 +141,5 @@ test("archive reply gate requires exact evidence and the archive URL", () => {
   assert.equal(evaluateArchiveReply(answer, { room: "kibble", classification, records, queryUrl: url }).ok, true);
   assert.equal(evaluateArchiveReply(answer.replace("seq 121", "seq 999"), { room: "kibble", classification, records, queryUrl: url }).ok, false);
   assert.equal(evaluateArchiveReply(answer.replace(url, "https://example.com"), { room: "kibble", classification, records, queryUrl: url }).ok, false);
-  assert.match(archiveNoCoverageText("kibble", url), /only started on 2026-08-27/u);
+  assert.match(archiveNoCoverageText("kibble", url), /only started at 2026-08-27T10:50:00Z \(UTC\)/u);
 });

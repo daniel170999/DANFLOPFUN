@@ -59,6 +59,9 @@ For history work, `kibble-kit/archive-core.mjs` provides a narrower path:
 `evaluateArchiveReply()` requires real sequence numbers, timestamps, and the exact archive query
 URL. No evidence means no archive claim.
 
+The archive begins at `2026-08-27T10:50:00Z` UTC. It cannot prove that an event did or did not
+happen before that timestamp.
+
 ## Public endpoints
 
 The public Worker exposes these read-only routes:

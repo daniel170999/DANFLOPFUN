@@ -24,12 +24,16 @@ export const WATCH_TARGETS = [
 
 export function readTarget(target, response) {
   if (target.kind === "status") return { status: response.status };
+  const status = Number(response?.status);
+  // A JSON or keyword body from a 5xx/redirect error page is not an observation. Keeping the
+  // previous baseline is what prevents an outage from becoming a fake version/launch signal.
+  if (!Number.isInteger(status) || status < 200 || status >= 300) return { available: false };
   if (target.kind === "json") {
     try {
       const parsed = JSON.parse(response.body);
       return { value: String(parsed?.[target.pick] ?? "") };
     } catch {
-      return { value: "" };
+      return { available: false };
     }
   }
   if (target.kind === "keywords") {
@@ -44,6 +48,7 @@ export function readTarget(target, response) {
 // matters; a 200 that flaps to 503 is just an outage and must not fire a launch alert.
 export function compareTarget(target, before, after) {
   if (!before) return { changed: false, note: "baseline recorded" };
+  if (!after || after.available === false) return { changed: false, note: "observation unavailable" };
 
   if (target.kind === "status") {
     const was404 = before.status === 404;
@@ -73,7 +78,25 @@ export function compareTarget(target, before, after) {
 // the protocol tends to grow a room before it grows a docs page.
 const ROOM_HINTS = /(testnet|faucet|genesis|mainnet|validator|miner|claim|epoch|devnet)/iu;
 
-export function interestingRooms(rooms, known = []) {
+// A room listing is a baseline source, not a normal target. It is valid only when the endpoint
+// returned a successful, parseable object with an array of rooms. A 200 maintenance page or an
+// error-shaped JSON body must not seed an empty baseline and make every old room look new later.
+export function readRoomListing(response) {
+  const status = Number(response?.status);
+  if (!Number.isInteger(status) || status < 200 || status >= 300) return { available: false };
+  try {
+    const parsed = JSON.parse(String(response?.body || ""));
+    if (!Array.isArray(parsed?.rooms)) return { available: false };
+    return { available: true, rooms: parsed.rooms };
+  } catch {
+    return { available: false };
+  }
+}
+
+// seeded says whether a room listing has ever been read successfully. A first observation is a
+// baseline, not a launch event.
+export function interestingRooms(rooms, known = [], seeded = true) {
+  if (!seeded) return [];
   const seen = new Set(known);
   return (Array.isArray(rooms) ? rooms : [])
     .map((row) => String(row?.room || row?.name || ""))
@@ -87,4 +110,18 @@ export function summariseWatch(changes) {
   if (launch.length) return { level: "launch", headline: `LAUNCH SIGNAL: ${launch.map((row) => row.note).join(" | ")}` };
   if (notable.length) return { level: "notable", headline: `changed: ${notable.map((row) => row.note).join(" | ")}` };
   return { level: "quiet", headline: "no change" };
+}
+
+// A signal that cannot go stale is not a signal, it is a banner. Keep the history, but say
+// plainly whether the most recent successful check still sees it.
+export function signalView(lastSignal, checkedAt) {
+  if (!lastSignal) return { active: false, lastSignal: null };
+  const firedAt = Date.parse(lastSignal.at || "");
+  const checked = Date.parse(checkedAt || "");
+  const active = Number.isFinite(firedAt) && Number.isFinite(checked) && firedAt >= checked;
+  return {
+    active,
+    lastSignal,
+    stale: Boolean(lastSignal) && !active,
+  };
 }

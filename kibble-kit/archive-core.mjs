@@ -13,7 +13,11 @@
 // one -- signed traffic is a tiny fraction of the total.
 
 export const ARCHIVE_ROOMS = ["kibble", "technocore", "flop_labs", "infra", "did-key-method", "agent-security", "signing-messages", "nonce-security", "builders"];
-export const ARCHIVE_START_DATE = "2026-08-27";
+// UTC lower bound of this archive. Records before this moment were not captured and cannot be
+// reconstructed from Technocore's ring buffer.
+export const ARCHIVE_START_AT = "2026-08-27T10:50:00Z";
+// Backwards-compatible export name for callers that used the original date-only constant.
+export const ARCHIVE_START_DATE = ARCHIVE_START_AT;
 
 export function isSigned(message) {
   return typeof message?.from === "string" && message.from.startsWith("did:key:z6Mk");
@@ -186,7 +190,7 @@ export function archiveQueryUrl(baseUrl, room, classification, day = "all") {
 }
 
 export function archiveNoCoverageText(room, queryUrl) {
-  return `No matching signed archive records were found for room ${archiveText(room, 48)}. The archive only started on ${ARCHIVE_START_DATE}; it cannot prove an earlier range. Check ${queryUrl}.`;
+  return `No matching signed archive records were found for room ${archiveText(room, 48)}. The archive only started at ${ARCHIVE_START_AT} (UTC); it cannot prove an earlier range. Check ${queryUrl}.`;
 }
 
 export function archiveReplyPrompt(room, question, records, queryUrl) {
