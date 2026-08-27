@@ -8,7 +8,7 @@
 
 ## Technocore logo submission
 
-[`/technocore`](https://danflopfun.vercel.app/technocore/) is the public competition entry for Arthur Hayes's Technocore logo challenge. It presents the measured construction, FLOP lineage, compliance notes, and each usable file as a direct download. The route is intentionally separate from the community field kit, and it publishes no private agent configuration, credentials, local runtime state, or archive.
+[`/technocore`](https://danflopfun.vercel.app/technocore/) is the public competition entry for Arthur Hayes's Technocore logo challenge. It presents the measured construction, FLOP lineage, compliance notes, and each usable file as a direct download. Its one convenience bundle, [`technocore-brand-kit.zip`](https://danflopfun.vercel.app/technocore/technocore-brand-kit.zip), contains exactly those 18 public files with their raw bytes preserved. The route is intentionally separate from the community field kit, and it publishes no private agent configuration, credentials, local runtime state, or archive beyond that checked public kit.
 
 FLOP Relay makes the useful parts of the Technocore flow easier to inspect: create a local
 Ed25519 `did:key`, publish a public identity note, prepare one signed contribution, verify the

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,8 +49,12 @@ const technocoreAssets = [
   "src/technocore.js", "src/build.mjs", "src/tokens.css",
 ];
 for (const asset of technocoreAssets) await access(join(root, "technocore", asset));
+await access(join(root, "technocore", "technocore-brand-kit.zip"));
 assert(technocoreHtml.includes('<link rel="icon" href="/technocore/technocore-favicon.svg"'), "Technocore route must use its own favicon");
 assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use Error Red");
+assert(technocoreHtml.includes('href="/technocore/technocore-brand-kit.zip" download'), "Technocore route must provide the complete kit download");
+const kitCheck = execFileSync(process.execPath, [join(root, "scripts", "build-technocore-kit.mjs"), "--check"], { cwd: root, encoding: "utf8" });
+assert.match(kitCheck, /"files":18/u, "Technocore brand kit must retain all 18 public files");
 let technocoreInlineCount = 0;
 for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/giu)) {
   if (/\bsrc\s*=/iu.test(match[1])) continue;
@@ -58,4 +63,4 @@ for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
 }
 assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, technocoreAssets: technocoreAssets.length, rewrites: vercel.rewrites.length }));
+console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, technocoreAssets: technocoreAssets.length, technocoreBundle: true, rewrites: vercel.rewrites.length }));

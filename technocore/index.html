@@ -188,6 +188,13 @@
     letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);
     padding:9px 20px;grid-column:1/-1;border-top:1px solid var(--line)}
   .dlgroup:first-child{border-top:0}
+  .bundle{display:flex;align-items:center;justify-content:space-between;gap:18px;
+    flex-wrap:wrap;background:var(--chip);border:1px solid var(--line);padding:18px 20px;
+    margin:26px 0 0}
+  .bundle-copy{display:grid;gap:3px}
+  .bundle-copy b{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--ink)}
+  .bundle-copy span{color:var(--ink-2);font-size:12px}
+  .bundle + .dl{margin-top:1px}
   .fine{font-size:12.5px;max-width:78ch;margin-top:22px;color:var(--ink-2)}
   .fine .sep{color:var(--line);margin:0 6px}
   footer{padding:44px 0 84px;color:var(--ink-2);font-size:13px}
@@ -226,9 +233,14 @@
     <p class="lede">
       Technocore logo competition, announced by @CryptoHayes on 28 August 2026.
       Entry by <strong>@daniel_sats</strong>. Eighteen files, all vector or
-      vector-rendered. No archive, no installer — every file downloads on its own.
+      vector-rendered. Download the complete kit once, or inspect and download each
+      file on its own.
     </p>
 
+    <div class="bundle" aria-label="Complete Technocore brand kit download">
+      <div class="bundle-copy"><b>Complete brand kit</b><span>All 18 listed files · raw source bytes preserved</span></div>
+      <a class="btn" href="/technocore/technocore-brand-kit.zip" download>Download all · 18 files · ZIP</a>
+    </div>
     <div class="dl" id="manifest"></div>
 
     <p class="fine">
