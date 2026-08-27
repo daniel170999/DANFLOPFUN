@@ -53,6 +53,7 @@ await access(join(root, "technocore", "technocore-brand-kit.zip"));
 assert(technocoreHtml.includes('<link rel="icon" href="/technocore/technocore-favicon.svg"'), "Technocore route must use its own favicon");
 assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use Error Red");
 assert(technocoreHtml.includes('href="/technocore/technocore-brand-kit.zip" download'), "Technocore route must provide the complete kit download");
+assert(technocoreHtml.includes("@media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}"), "Technocore narrow layouts must confine wide lockups to specimen-level scrolling");
 const kitCheck = execFileSync(process.execPath, [join(root, "scripts", "build-technocore-kit.mjs"), "--check"], { cwd: root, encoding: "utf8" });
 assert.match(kitCheck, /"files":18/u, "Technocore brand kit must retain all 18 public files");
 let technocoreInlineCount = 0;
