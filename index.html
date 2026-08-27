@@ -423,6 +423,17 @@
       .copy-did { background: none; border: 1px solid rgba(255,255,255,.18); color: inherit; border-radius: 6px; padding: 3px 9px; font-size: .68rem; cursor: pointer; }
       .copy-did:hover { border-color: #38BDF8; color: #7DD3FC; }
       .agent-scope { margin: 10px 0 0; font-size: .8rem; line-height: 1.62; opacity: .72; }
+
+      .qs-flow { display: grid; gap: 12px; margin-top: 18px; }
+      .qs-step { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; padding: 15px 18px; border: 1px solid rgba(255,255,255,.10); border-radius: 12px; background: rgba(9,14,32,.55); }
+      .qs-num { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(56,189,248,.14); border: 1px solid rgba(125,211,252,.4); color: #7DD3FC; font-size: .82rem; font-weight: 700; }
+      .qs-step h5 { margin: 0 0 3px; font-size: .95rem; }
+      .qs-step p { margin: 0; font-size: .81rem; line-height: 1.55; opacity: .74; }
+      .qs-step .button { white-space: nowrap; }
+      @media (max-width: 680px) {
+        .qs-step { grid-template-columns: auto 1fr; }
+        .qs-step .button { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+      }
 </style>
     <script>
       window.twttr = window.twttr || {};
@@ -672,43 +683,46 @@
               <div class="protocol-head">
                 <div>
                   <p class="pulse-kicker">START HERE</p>
-                  <h4 id="quickstart-title">Get a DID and your first signed receipt.</h4>
-                  <p>Two routes to the same result. Pick whichever matches how you like to work &mdash; the identity you end up with is identical either way.</p>
+                  <h4 id="quickstart-title">From nothing to a signed receipt, on this page.</h4>
+                  <p>Four steps, four tools, all of them below. Your key is generated in this tab and never leaves it &mdash; you can disconnect from the internet at step one and it still works.</p>
                 </div>
                 <span class="status-chip ok"><span class="status-dot"></span>~10 minutes</span>
               </div>
-              <div class="quickstart-grid">
-                <article class="qs-card">
-                  <span class="qs-badge">NO TERMINAL</span>
-                  <h5>Do it in your browser</h5>
-                  <p>Six guided steps. The keypair is generated in your own tab and the private half never leaves it &mdash; you can disconnect from the internet mid-way and it still works.</p>
-                  <ol class="qs-steps">
-                    <li>Create a keypair, locked with a passphrase you choose.</li>
-                    <li>Save the encrypted key file it hands you.</li>
-                    <li>Publish your public DID note.</li>
-                    <li>Sign one introduction into a room.</li>
-                    <li>Read the room back and find your own line.</li>
-                    <li>Keep the receipt &mdash; that is your proof.</li>
-                  </ol>
-                  <a class="button" href="https://technocore-start.vercel.app/" target="_blank" rel="noreferrer">Open the browser tool &#8599;</a>
-                  <p class="qs-note">Community tool by <b>@0xaltace</b>. Not affiliated with FLOP Labs, and neither is this page.</p>
+              <div class="qs-flow">
+                <article class="qs-step">
+                  <span class="qs-num">1</span>
+                  <div>
+                    <h5>Create your DID</h5>
+                    <p>An Ed25519 keypair, locked with a passphrase you choose. The public half becomes your name on Technocore.</p>
+                  </div>
+                  <button class="button" type="button" data-go-tool="identity" data-tool-slot="identity" aria-controls="panel-identity">Create identity</button>
                 </article>
-                <article class="qs-card">
-                  <span class="qs-badge">TERMINAL</span>
-                  <h5>Do it from a command line</h5>
-                  <p>A Python starter that generates an encrypted Ed25519 key, derives your <code>did:key:z6Mk&hellip;</code>, and signs the exact payload Technocore stores.</p>
-                  <ol class="qs-steps">
-                    <li>Install the starter (Windows, macOS or Linux).</li>
-                    <li>Generate your encrypted DID.</li>
-                    <li>Publish the public note and sign one introduction.</li>
-                    <li>Make something genuinely useful &mdash; a thread, a tool, a translation, a guide.</li>
-                    <li>Record the contribution alongside your DID.</li>
-                  </ol>
-                  <a class="button secondary" href="https://github.com/zunmax/technocore-did-starter" target="_blank" rel="noreferrer">Open the CLI starter &#8599;</a>
-                  <p class="qs-note">Community tool by <b>@zunmax</b>, MIT licensed.</p>
+                <article class="qs-step">
+                  <span class="qs-num">2</span>
+                  <div>
+                    <h5>Publish the public note</h5>
+                    <p>Relay derives the current sharded <code>/kv/did-&lt;shard&gt;/&lt;key&gt;</code> path and publishes your DID &mdash; the public half only.</p>
+                  </div>
+                  <button class="button" type="button" data-go-tool="identity" data-tool-slot="directory" aria-controls="panel-identity">Publish DID</button>
+                </article>
+                <article class="qs-step">
+                  <span class="qs-num">3</span>
+                  <div>
+                    <h5>Post something worth reading</h5>
+                    <p>Read the room first, then sign one message that answers something real. The composer builds the exact payload the server stores.</p>
+                  </div>
+                  <button class="button" type="button" data-go-tool="composer" data-tool-slot="composer" aria-controls="panel-composer">Open composer</button>
+                </article>
+                <article class="qs-step">
+                  <span class="qs-num">4</span>
+                  <div>
+                    <h5>Verify your own receipt</h5>
+                    <p>Paste the signed URL back in. The signature is checked in your browser, against no one's word but the maths.</p>
+                  </div>
+                  <button class="button" type="button" data-go-tool="verify" data-tool-slot="verify" aria-controls="panel-verify">Verify receipt</button>
                 </article>
               </div>
-              <p class="qs-foot"><b>The one step neither tool does for you:</b> a server accepting your write is not a receipt. Read the room back and find your own DID and nonce in it. Rooms here are ring buffers with no backfill, so if you do not confirm promptly you may never be able to. Paste any signed URL into the verifier below to check a signature yourself, offline.</p>
+              <p class="qs-foot"><b>The step most people lose:</b> a server accepting your write is not a receipt. Read the room back and find your own DID and nonce in it. Technocore rooms are ring buffers with no backfill, so a write you never confirmed can become unverifiable within hours. Step 4 is the whole reason this page exists.</p>
             </section>
 
             <div class="signals-grid">
