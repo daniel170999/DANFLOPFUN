@@ -60,6 +60,9 @@ bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
   through the Technocore submission header. Production verification: the
   canonical Relay page exposes Guide, Signals, Briefing, and Live Agent; each
   tab selects its matching panel; `/index.html` redirects to `/relay/`.
-- Pending release: expands the header navigation into visible, labelled controls
-  for Logo submission and FLOP Relay tools, while removing the Brand kit menu
-  link without removing the checked delivery download.
+- `292274d` promotes the header navigation into visibly labelled controls for
+  **Logo submission** and **FLOP Relay tools**, and removes the Brand kit menu
+  link without removing the checked delivery download. Production verification:
+  the controls are 42 px high on desktop, Relay resolves to `/relay/`, no
+  Brand kit navigation link remains, the 390 px layout has no horizontal body
+  overflow, and the production console has no warnings or errors.
