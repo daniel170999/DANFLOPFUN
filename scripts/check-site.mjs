@@ -41,6 +41,8 @@ new Script([
   `var LIVE_AGENT_DID = ${JSON.stringify(liveDid)};`,
   inlineFunctionSource(html, "noteValue"),
   inlineFunctionSource(html, "parseKibbleEnvelope"),
+  inlineFunctionSource(html, "actionEvidenceState"),
+  inlineFunctionSource(html, "boardMatchesAction"),
 ].join("\n")).runInNewContext(kibbleParserContext);
 const kibbleEnvelope = {
   version: 1,
@@ -56,6 +58,58 @@ assert.throws(
   /Kibble action list is invalid/u,
   "Relay must retain a bounded action-list parser",
 );
+const legacyAction = {
+  kind: "attest",
+  jobId: "k123456789a",
+  nonce: "42",
+  outcome: "legacy_room_readback",
+  receipt: { sequence: 99, nonce: "42", verified: false },
+};
+assert.equal(kibbleParserContext.actionEvidenceState(legacyAction), "legacy", "legacy room read-back must never be presented as current verified proof");
+assert.equal(
+  kibbleParserContext.actionEvidenceState({ ...legacyAction, outcome: "room_verified" }),
+  "invalid",
+  "room_verified requires receipt.verified=true",
+);
+assert.equal(
+  kibbleParserContext.actionEvidenceState({ ...legacyAction, outcome: "room_verified", receipt: { ...legacyAction.receipt, verified: true } }),
+  "room_verified",
+  "an exact verified room receipt remains current proof",
+);
+assert.equal(
+  kibbleParserContext.actionEvidenceState({
+    ...legacyAction,
+    kind: "result",
+    outcome: "board_verified",
+    text: "RESULT v1 | k123456789a | artifact hash",
+    board: { verification: "exact_job_card", resultHash: "0123456789abcdef" },
+  }),
+  "board_verified",
+  "a signed RESULT with exact board evidence remains board proof",
+);
+const boardAction = {
+  ...legacyAction,
+  kind: "result",
+  outcome: "board_verified",
+  text: "RESULT v1 | k123456789a | artifact hash",
+  board: { verification: "exact_job_card", resultHash: "0123456789abcdef" },
+};
+assert.equal(
+  kibbleParserContext.boardMatchesAction(boardAction, {
+    jobs: [{ job_id: boardAction.jobId, worker_did: liveDid, status: "delivered", result: "artifact hash", result_hash: "0123456789abcdef" }],
+  }),
+  true,
+  "Relay must corroborate a board proof against the exact current card",
+);
+assert.equal(
+  kibbleParserContext.boardMatchesAction(boardAction, {
+    jobs: [{ job_id: boardAction.jobId, worker_did: "did:key:other", status: "delivered", result: "artifact hash", result_hash: "0123456789abcdef" }],
+  }),
+  false,
+  "Relay must reject a board card owned by another DID",
+);
+assert.equal(kibbleParserContext.actionEvidenceState({ ...legacyAction, outcome: "accepted", receipt: null }), "pending", "an ACK remains pending rather than verified");
+assert(!html.includes("signed room receipt"), "Relay must not collapse signature validity and receipt validity into one claim");
 assert(html.includes("RECENT LOBBY LINE"), "Relay must label its bounded lobby read accurately");
 assert(!html.includes("RECENT ROOM LINE"), "Relay must not present a lobby-only read as general room coverage");
 assert(html.includes("not present in current lobby window"), "Relay must describe a missing lobby line without implying all rooms were checked");

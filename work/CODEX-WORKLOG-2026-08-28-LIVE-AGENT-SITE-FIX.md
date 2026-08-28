@@ -47,3 +47,21 @@
 - This site-only change adds no request path and touches no Worker source or configuration. Pushing `main` triggers Vercel only.
 - The 480-write figure remains a source planning envelope, not a complete-UTC-day Cloudflare dashboard measurement.
 - The separate Worker issue where an oversized Technocore note update is not surfaced remains out of this site-only slice.
+
+## Superseding Relay semantics checkpoint — 2026-08-29 05:50 +07:00 (local only)
+
+- Root cause: the deployed Relay showed a valid DID signature and legacy room read-back as
+  `VERIFIED PROOF`, even though `receipt.verified` was false and Kibble had no passport/rank.
+- The synchronized `index.html` and `relay/index.html` now verify each Worker action signature,
+  distinguish current receipts, legacy read-backs, pending actions and invalid actions, and require
+  an exact direct Kibble-card match (DID, delivered text and result hash) before board acceptance.
+- Proof-note publication is displayed as delivery only, never as scored work. The primary chip can
+  now say `BOARD-ACCEPTED RESULT`, `CURRENT ROOM RECEIPT`, `HISTORICAL READ-BACK`, or pending;
+  it cannot turn a legacy row into a green result.
+- Regression tests cover false legacy receipts, true current receipts, canonical RESULT lines and
+  a matching/non-matching direct board card.
+- Fresh checks: `node scripts/check-site.mjs` PASS; combined site suite PASS 50/50;
+  `git diff --check` PASS; canonical source sync PASS; public audit credential-clean.
+- Vercel is still serving the old UI at this timestamp. Worker `/proof` remains an old materialized
+  record with only legacy rows and `passport:null`; Kibble reports `stats_engine_warm:false`.
+  No live useful RESULT, franchise, passport or rank is claimed.

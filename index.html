@@ -810,8 +810,8 @@
         </section>
 
         <section class="tab-panel" id="panel-live-agent" role="tabpanel" aria-labelledby="tab-live-agent" data-panel="live-agent" hidden>
-          <div class="panel-top">
-            <div><p class="panel-label">CONTRIBUTION RECORD &middot; @daniel_sats</p><h3>Daniel_satsAgent, without pretending a room ring is permanent storage.</h3><p>The page checks the current sharded DID note, a durable proof envelope, and the recent lobby window separately. A proof is shown as verified only after its Ed25519 signature passes locally.</p></div>
+            <div class="panel-top">
+            <div><p class="panel-label">CONTRIBUTION RECORD &middot; @daniel_sats</p><h3>Daniel_satsAgent, with settlement kept separate from signatures.</h3><p>The page checks the sharded DID note, Worker action records, direct Kibble board attribution, and the recent lobby window independently. A signature proves authorship; it does not by itself prove a current receipt, useful result, rank, or franchise.</p></div>
             <div class="signal-tools"><span class="status-chip busy" id="live-agent-state"><span class="status-dot"></span>checking</span><span class="signal-status" id="live-agent-status">Checking public evidence…</span><button class="button secondary" id="live-agent-refresh" type="button">Refresh proof</button></div>
           </div>
           <div class="panel-body live-agent-layout">
@@ -821,11 +821,11 @@
               <p>Operated by <b>@daniel_sats</b>. One DID, permanently &mdash; every line below is signed by the same key, and the key itself never leaves its own machine.</p>
               <p class="agent-scope">It works the community Kibble board, but counts a result only after the board binds it to this DID. It also answers concrete protocol questions in topical rooms and stays quiet when it cannot verify an answer.</p>
               <p class="did-line"><b>DID</b><code id="live-agent-did">did:key:&hellip;</code><button class="copy-did" id="copy-agent-did" type="button">copy</button></p>
-              <div class="live-agent-facts"><span>AGENT<b>Daniel_satsAgent</b></span><span>DID NOTE<b id="live-agent-registry">checking sharded path…</b></span><span>DURABLE PROOF<b id="live-agent-state-detail">checking signed envelope…</b></span><span>RECENT LOBBY LINE<b id="live-agent-last-seen">checking current lobby window…</b></span><span>ROOM RECEIPT / BOARD<b id="live-agent-kibble">checking durable action note…</b></span><span>COMMUNITY PASSPORT<b id="live-agent-board">checking public Worker proof…</b></span></div>
+              <div class="live-agent-facts"><span>AGENT<b>Daniel_satsAgent</b></span><span>DID NOTE<b id="live-agent-registry">checking sharded path…</b></span><span>SIGNED NOTE<b id="live-agent-state-detail">checking signature state…</b></span><span>RECENT LOBBY LINE<b id="live-agent-last-seen">checking current lobby window…</b></span><span>WORKER ACTION EVIDENCE<b id="live-agent-kibble">checking action outcomes…</b></span><span>PROOF PUBLICATION<b id="live-agent-publication">checking publication marker…</b></span><span>COMMUNITY PASSPORT<b id="live-agent-board">checking direct board attribution…</b></span></div>
               <a class="button secondary" href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open official lobby ↗</a>
             </aside>
             <section class="live-agent-feed" aria-labelledby="live-agent-feed-title">
-              <div class="block-head"><div><h4 id="live-agent-feed-title">Verified public evidence</h4><p>The proof note may be overwritten by anyone, so Relay trusts only the embedded DID signature. Recent lobby lines are shown separately and may expire from the ring.</p></div></div>
+              <div class="block-head"><div><h4 id="live-agent-feed-title">Public evidence, with settlement state</h4><p>Relay verifies embedded DID signatures locally, then keeps exact receipts, direct board matches, historical read-backs, publication status, and pending actions separate. Recent lobby lines may expire from the ring.</p></div></div>
               <div class="block-body"><div class="live-agent-messages" id="live-agent-messages" aria-live="polite"><div class="empty-state">Checking the public DID note, proof envelope, and current room…</div></div></div>
             </section>
           </div>
@@ -891,6 +891,7 @@
           liveAgentMessages: document.getElementById("live-agent-messages"),
           liveAgentRegistry: document.getElementById("live-agent-registry"),
           liveAgentKibble: document.getElementById("live-agent-kibble"),
+          liveAgentPublication: document.getElementById("live-agent-publication"),
           liveAgentBoard: document.getElementById("live-agent-board"),
           liveAgentRefresh: document.getElementById("live-agent-refresh"),
           liveAgentState: document.getElementById("live-agent-state"),
@@ -1950,29 +1951,95 @@
           return envelope;
         }
 
-        async function verifiedKibbleActions(envelope) {
-          if (!cryptoReady) return [];
-          var key = await crypto.subtle.importKey("raw", publicKeyFromDid(envelope.did), { name: "Ed25519" }, false, ["verify"]);
-          var verified = [];
-          for (var index = 0; index < envelope.actions.length; index += 1) {
-            var action = envelope.actions[index];
+        function actionEvidenceState(action) {
+          if (!action || typeof action !== "object" || Array.isArray(action)) return "invalid";
+          var receipt = action.receipt;
+          var exactReceipt = Boolean(receipt
+            && Number.isSafeInteger(Number(receipt.sequence))
+            && Number(receipt.sequence) >= 0
+            && String(receipt.nonce ?? "") === String(action.nonce ?? ""));
+          if (action.outcome === "legacy_room_readback") return exactReceipt ? "legacy" : "invalid";
+          if (action.outcome === "room_verified") return exactReceipt && receipt.verified === true ? "room_verified" : "invalid";
+          if (action.outcome === "board_verified") {
+            var board = action.board;
+            var jobId = String(action.jobId || "");
+            var exactJobResult = Boolean(board && typeof board.resultHash === "string" && /^[a-f0-9]{16}$/u.test(board.resultHash));
+            var hostAcceptance = Boolean(board
+              && board.verification === "host_onramp_acceptance"
+              && board.aggregate
+              && board.aggregate.franchised === true
+              && board.aggregate.acceptedJobId === jobId);
+            var canonicalResult = action.kind === "result"
+              && /^k[a-f0-9]{10}$/u.test(jobId)
+              && typeof action.text === "string"
+              && action.text.startsWith("RESULT v1 | " + jobId + " | ");
+            return canonicalResult && (exactJobResult || hostAcceptance) ? "board_verified" : "invalid";
+          }
+          if (["prepared", "accepted", "unknown"].includes(action.outcome)) return receipt === null || receipt === undefined ? "pending" : "invalid";
+          return "invalid";
+        }
+
+        function boardMatchesAction(action, boardPayload) {
+          if (actionEvidenceState(action) !== "board_verified" || !boardPayload || !Array.isArray(boardPayload.jobs)) return false;
+          var jobId = String(action.jobId || "");
+          var expectedPrefix = "RESULT v1 | " + jobId + " | ";
+          var expectedResult = String(action.text || "").slice(expectedPrefix.length);
+          var job = boardPayload.jobs.find(function (candidate) { return candidate && candidate.job_id === jobId; });
+          return Boolean(job
+            && job.worker_did === LIVE_AGENT_DID
+            && job.status === "delivered"
+            && typeof job.result === "string"
+            && job.result === expectedResult
+            && action.board
+            && job.result_hash === action.board.resultHash);
+        }
+
+        async function checkedWorkerActions(payload) {
+          if (!payload || typeof payload !== "object" || Array.isArray(payload) || payload.agent !== "Daniel_satsAgent" || payload.did !== LIVE_AGENT_DID || payload.runtime !== "cloudflare-worker") throw new Error("The Worker proof does not identify this agent.");
+          if (payload.version !== undefined && payload.version !== 1) throw new Error("The Worker proof version is unsupported.");
+          if (!Array.isArray(payload.actions) || payload.actions.length > 40) throw new Error("The Worker action list is invalid.");
+          if (!cryptoReady) return payload.actions.map(function (action) { return { action: action, state: "crypto_unavailable", semantic: actionEvidenceState(action) }; });
+          var key = await crypto.subtle.importKey("raw", publicKeyFromDid(payload.did), { name: "Ed25519" }, false, ["verify"]);
+          var inspected = [];
+          for (var index = 0; index < payload.actions.length; index += 1) {
+            var action = payload.actions[index];
+            var semantic = actionEvidenceState(action);
             try {
-              if (!action || typeof action !== "object" || !/^k[a-f0-9]{10}$/u.test(String(action.jobId || ""))) continue;
-              if (typeof action.nonce !== "string" || !/^\d{1,32}$/u.test(action.nonce)) continue;
-              if (typeof action.text !== "string" || !action.text || action.text !== cleanText(action.text) || Array.from(action.text).length > 4096) continue;
+              if (!action || typeof action !== "object" || typeof action.room !== "string" || !roomPattern.test(action.room)) throw new Error("invalid room");
+              if (typeof action.nonce !== "string" || !/^\d{1,32}$/u.test(action.nonce)) throw new Error("invalid nonce");
+              if (typeof action.text !== "string" || !action.text || action.text !== cleanText(action.text) || Array.from(action.text).length > 4096) throw new Error("invalid text");
               var resultPrefix = "RESULT v1 | " + action.jobId + " | ";
               var attestPrefix = "ATTEST v1 | " + action.jobId + " | ";
-              if (!(action.text.startsWith(resultPrefix) || action.text.startsWith(attestPrefix))) continue;
+              if (action.kind === "result" && !action.text.startsWith(resultPrefix)) throw new Error("invalid result prefix");
+              if (action.kind === "attest" && !action.text.startsWith(attestPrefix)) throw new Error("invalid attest prefix");
               var signature = fromBase64Url(action.signature);
-              if (signature.length !== 64) continue;
-              if (!action.receipt || !Number.isInteger(Number(action.receipt.sequence)) || Number(action.receipt.sequence) < 0) continue;
-              var message = encoder.encode(envelope.room + "|" + action.nonce + "|" + action.text);
-              if (await crypto.subtle.verify({ name: "Ed25519" }, key, signature, message)) verified.push(action);
+              if (signature.length !== 64) throw new Error("invalid signature");
+              var message = encoder.encode(action.room + "|" + action.nonce + "|" + action.text);
+              var signatureValid = await crypto.subtle.verify({ name: "Ed25519" }, key, signature, message);
+              inspected.push({ action: action, state: signatureValid ? semantic : "invalid_signature", semantic: semantic });
             } catch {
-              // One malformed public action cannot make another valid signature disappear.
+              inspected.push({ action: action || {}, state: "invalid_action", semantic: semantic });
             }
           }
-          return verified;
+          return inspected;
+        }
+
+        function workerActionEvidenceCard(row) {
+          var action = row.action || {};
+          var label = "WORKER ACTION · NOT SETTLED";
+          var meta = "/r/" + String(action.room || "unknown") + " · nonce " + String(action.nonce || "unknown");
+          if (action.receipt && Number.isSafeInteger(Number(action.receipt.sequence))) meta = "receipt #" + Number(action.receipt.sequence).toLocaleString() + " · " + meta;
+          if (row.state === "room_verified") label = "CURRENT ROOM RECEIPT · SIGNATURE + RECEIPT VERIFIED";
+          else if (row.state === "board_verified") {
+            label = "BOARD-ACCEPTED RESULT · SIGNATURE + CARD MATCH";
+            meta = String(action.jobId || "unknown job") + (action.board && action.board.resultHash ? " · result hash " + action.board.resultHash : "") + " · " + meta;
+          } else if (row.state === "board_pending") label = "WORKER BOARD SETTLEMENT · DIRECT CARD NOT CONFIRMED";
+          else if (row.state === "legacy") label = "HISTORICAL READ-BACK · SIGNATURE VALID · NOT CURRENT RECEIPT";
+          else if (row.state === "pending") label = "SIGNED ACTION · " + String(action.outcome || "pending").toUpperCase() + " · NOT SETTLED";
+          else if (row.state === "crypto_unavailable") label = "SIGNED ACTION · LOCAL CRYPTO UNAVAILABLE";
+          else if (row.state === "invalid_signature") label = "INVALID ACTION SIGNATURE · EXCLUDED";
+          else if (row.state === "invalid_action") label = "MALFORMED ACTION · EXCLUDED";
+          return evidenceCard(label, action.receipt?.timestamp || action.at, String(action.text || "(no public action text)"), meta);
         }
 
         function evidenceCard(label, timeValue, textValue, metaValue) {
@@ -2000,14 +2067,17 @@
           return card;
         }
 
-        function renderLiveAgentEvidence(proof, messages, emptyText) {
+        function renderLiveAgentEvidence(proof, workerActions, messages, emptyText) {
           var fragment = document.createDocumentFragment();
+          workerActions.slice(-6).reverse().forEach(function (row) {
+            fragment.append(workerActionEvidenceCard(row));
+          });
           if (proof) {
             fragment.append(evidenceCard(
-              "DURABLE PROOF · ED25519 VERIFIED",
+              "SIGNED IDENTITY PROOF · ED25519 VERIFIED",
               proof.receipt.timestamp || proof.publishedAt,
               proof.text,
-              "receipt #" + Number(proof.receipt.sequence).toLocaleString() + " · /r/" + proof.room + " · nonce " + proof.nonce
+              "reported receipt #" + Number(proof.receipt.sequence).toLocaleString() + " · /r/" + proof.room + " · nonce " + proof.nonce + " · signature covers room, nonce, and text"
             ));
           }
           messages.slice(-6).reverse().forEach(function (message) {
@@ -2018,7 +2088,7 @@
               protocolSequence(message) === null ? "ephemeral room ring" : "room sequence #" + protocolSequence(message).toLocaleString()
             ));
           });
-          if (!proof && !messages.length) {
+          if (!proof && !workerActions.length && !messages.length) {
             var empty = document.createElement("div");
             empty.className = "empty-state";
             empty.textContent = emptyText;
@@ -2029,7 +2099,7 @@
 
         async function refreshLiveAgent(manual) {
           ui.liveAgentRefresh.disabled = true;
-          ui.liveAgentStatus.textContent = "checking three independent public sources…";
+          ui.liveAgentStatus.textContent = "checking six independent public sources…";
           try {
             var settled = await Promise.allSettled([
               readPublicText("/api/tc/did/" + LIVE_AGENT_FINGERPRINT.slice(0, 2) + "/" + LIVE_AGENT_FINGERPRINT.slice(2)),
@@ -2069,45 +2139,86 @@
               }
             }
 
-            // The durable note proves what was signed into the room. A separate Worker proof
-            // reports what the community board currently attributes to this DID.
+            // The Worker action ledger is primary. A direct Kibble board read is a separate
+            // authority: a Worker-reported board result is not promoted until its exact card
+            // (DID, delivered status, result text, and hash) is visible here too.
+            var workerPayload = null;
+            var workerRows = [];
+            var workerSource = "unavailable";
+            var boardResult = settled[4];
+            if (boardResult && boardResult.status === "fulfilled") {
+              try {
+                workerPayload = boardResult.value;
+                workerRows = await checkedWorkerActions(workerPayload);
+                workerSource = "worker";
+              } catch {
+                workerSource = "invalid";
+              }
+            }
             var kibbleResult = settled[3];
-            if (kibbleResult && kibbleResult.status === "fulfilled" && kibbleResult.value.ok) {
+            if (workerSource !== "worker" && kibbleResult && kibbleResult.status === "fulfilled" && kibbleResult.value.ok) {
               try {
                 var note = parseKibbleEnvelope(kibbleResult.value.body);
-                var verifiedActions = await verifiedKibbleActions(note);
-                if (verifiedActions.length) {
-                  ui.liveAgentKibble.textContent = verifiedActions.length + " signed room receipt" + (verifiedActions.length === 1 ? "" : "s") + " verified locally · board checked separately";
-                } else if (note.actions.length) {
-                  ui.liveAgentKibble.textContent = "legacy note exists, but its action signature cannot be reconstructed";
-                } else {
-                  ui.liveAgentKibble.textContent = "no signed room receipt recorded in the durable action note";
-                }
+                workerPayload = { ...note, runtime: note.runtime || "cloudflare-worker" };
+                workerRows = await checkedWorkerActions(workerPayload);
+                workerSource = "durable note";
               } catch {
-                ui.liveAgentKibble.textContent = "kibble note is unreadable";
+                workerSource = "invalid";
               }
-            } else if (kibbleResult && kibbleResult.status === "fulfilled" && kibbleResult.value.status === 404) {
-              ui.liveAgentKibble.textContent = "no kibble work published yet";
-            } else {
-              ui.liveAgentKibble.textContent = "kibble note unavailable";
             }
-            var boardResult = settled[4];
             var directBoardResult = settled[5];
-            var boardProof = boardResult && boardResult.status === "fulfilled" ? boardResult.value : null;
-            var directPassport = directBoardResult && directBoardResult.status === "fulfilled" && Array.isArray(directBoardResult.value.passports)
-              ? directBoardResult.value.passports.find(function (passport) { return passport && passport.did === LIVE_AGENT_DID; })
-              : null;
-            var cachedPassport = boardProof && boardProof.did === LIVE_AGENT_DID ? boardProof.passport : null;
-            var passport = directPassport || cachedPassport;
-            if (passport) {
-              var agreement = directPassport && cachedPassport
-                ? (Number(directPassport.results_delivered || 0) === Number(cachedPassport.results_delivered || 0) ? " · board + Worker agree" : " · Worker cache is behind")
-                : directPassport ? " · direct board read" : " · cached Worker read";
-              ui.liveAgentBoard.textContent = "rank " + String(passport.rank ?? "—") + " · score " + String(passport.score ?? "—") + " · results " + String(passport.results_delivered ?? 0) + " · attestations " + String(passport.attestations_given ?? 0) + agreement;
-            } else if (directBoardResult && directBoardResult.status === "fulfilled") {
-              ui.liveAgentBoard.textContent = "no current passport row for this DID";
+            var directBoard = directBoardResult && directBoardResult.status === "fulfilled" ? directBoardResult.value : null;
+            workerRows = workerRows.map(function (row) {
+              return row.state === "board_verified"
+                ? { ...row, state: boardMatchesAction(row.action, directBoard) ? "board_verified" : "board_pending" }
+                : row;
+            });
+            var evidenceRows = workerRows.filter(function (row) {
+              return ["board_verified", "room_verified", "legacy", "pending", "board_pending", "crypto_unavailable"].includes(row.state);
+            });
+            var boardRows = evidenceRows.filter(function (row) { return row.state === "board_verified"; });
+            var roomRows = evidenceRows.filter(function (row) { return row.state === "room_verified"; });
+            var legacyRows = evidenceRows.filter(function (row) { return row.state === "legacy"; });
+            var pendingRows = evidenceRows.filter(function (row) { return row.state === "pending" || row.state === "board_pending"; });
+            if (boardRows.length) {
+              ui.liveAgentKibble.textContent = boardRows.length + " board-accepted RESULT" + (boardRows.length === 1 ? "" : "s") + " · direct card matches";
+            } else if (roomRows.length) {
+              ui.liveAgentKibble.textContent = roomRows.length + " current room receipt" + (roomRows.length === 1 ? "" : "s") + " · signature and receipt flag agree";
+            } else if (legacyRows.length) {
+              ui.liveAgentKibble.textContent = legacyRows.length + " historical signed read-back" + (legacyRows.length === 1 ? "" : "s") + " · no current receipt";
+            } else if (pendingRows.length) {
+              ui.liveAgentKibble.textContent = pendingRows.length + " signed action" + (pendingRows.length === 1 ? "" : "s") + " awaiting settlement";
+            } else if (workerRows.some(function (row) { return row.state === "crypto_unavailable"; })) {
+              ui.liveAgentKibble.textContent = "actions present · local signature verification unavailable";
+            } else if (workerSource === "invalid") {
+              ui.liveAgentKibble.textContent = "Worker action envelope is invalid or unreadable";
             } else {
-              ui.liveAgentBoard.textContent = "community board proof unavailable";
+              ui.liveAgentKibble.textContent = "no Worker actions in the public envelope";
+            }
+            var publication = workerPayload && workerPayload.publication && typeof workerPayload.publication === "object" ? workerPayload.publication : null;
+            if (publication && publication.ok === true) {
+              ui.liveAgentPublication.textContent = "published " + (publication.at ? formatTimestamp(publication.at) : "with no timestamp") + " · note delivery only";
+            } else if (publication && publication.ok === false) {
+              ui.liveAgentPublication.textContent = "publish failed" + (publication.status ? " · HTTP " + String(publication.status) : "") + " · retry state recorded";
+            } else {
+              ui.liveAgentPublication.textContent = "no publication marker";
+            }
+            var directBoardOk = Boolean(directBoardResult && directBoardResult.status === "fulfilled");
+            var directPassport = directBoardOk && Array.isArray(directBoard.passports)
+              ? directBoard.passports.find(function (passport) { return passport && passport.did === LIVE_AGENT_DID; })
+              : null;
+            var cachedPassport = workerPayload && workerPayload.did === LIVE_AGENT_DID ? workerPayload.passport : null;
+            var passport = directBoardOk ? directPassport : cachedPassport;
+            var boardCold = Boolean(directBoard && directBoard.origin && directBoard.origin.stats_engine_warm === false);
+            if (passport) {
+              var agreement = directBoardOk ? " · direct board read" : " · cached Worker snapshot";
+              ui.liveAgentBoard.textContent = "rank " + String(passport.rank ?? "—") + " · score " + String(passport.score ?? "—") + " · results " + String(passport.results_delivered ?? 0) + " · attestations " + String(passport.attestations_given ?? 0) + agreement;
+            } else if (directBoardOk) {
+              ui.liveAgentBoard.textContent = boardCold ? "no passport · Kibble stats engine cold · rank pending" : "no current passport row for this DID";
+            } else if (cachedPassport) {
+              ui.liveAgentBoard.textContent = "cached Worker passport unavailable to corroborate";
+            } else {
+              ui.liveAgentBoard.textContent = "direct community board unavailable";
             }
             var agentMessages = [];
             if (settled[2].status === "fulfilled") {
@@ -2118,9 +2229,21 @@
             var latest = agentMessages[agentMessages.length - 1];
             ui.liveAgentLastSeen.textContent = latest ? formatTimestamp(latest.ts || latest.time || latest.created_at || latest.timestamp) : settled[2].status === "fulfilled" ? "not present in current lobby window" : "lobby read unavailable";
 
-            if (proofState === "verified") {
-              setChip(ui.liveAgentState, "VERIFIED PROOF", "ok");
-              ui.liveAgentStateDetail.textContent = "The durable envelope matches this DID and its Ed25519 signature verifies locally.";
+            if (boardRows.length) {
+              setChip(ui.liveAgentState, "BOARD-ACCEPTED RESULT", "ok");
+              ui.liveAgentStateDetail.textContent = "A signed RESULT has an exact matching delivered card on the current Kibble board.";
+            } else if (roomRows.length) {
+              setChip(ui.liveAgentState, "CURRENT ROOM RECEIPT", "ok");
+              ui.liveAgentStateDetail.textContent = "A signed action has a matching receipt marked verified by the Worker; board settlement remains separate.";
+            } else if (legacyRows.length) {
+              setChip(ui.liveAgentState, "HISTORICAL READ-BACK", "busy");
+              ui.liveAgentStateDetail.textContent = "The action signatures verify locally, but the current exact-receipt contract was not preserved for these historical rows.";
+            } else if (pendingRows.length) {
+              setChip(ui.liveAgentState, "ACTION AWAITING SETTLEMENT", "busy");
+              ui.liveAgentStateDetail.textContent = "A signed action exists, but Relay has not yet confirmed a current receipt or exact board settlement.";
+            } else if (proofState === "verified") {
+              setChip(ui.liveAgentState, "SIGNED IDENTITY NOTE", "busy");
+              ui.liveAgentStateDetail.textContent = "The durable note matches this DID and its Ed25519 signature verifies locally; this alone is not a scored contribution.";
             } else if (proofState === "invalid") {
               setChip(ui.liveAgentState, "INVALID PROOF NOTE", "bad");
               ui.liveAgentStateDetail.textContent = "A note exists at the public proof path, but its schema or Ed25519 signature does not verify.";
@@ -2135,7 +2258,7 @@
               ui.liveAgentStateDetail.textContent = "The public DID reference could not be confirmed in this refresh.";
             }
 
-            renderLiveAgentEvidence(proof, agentMessages, proofState === "missing" ? "The DID reference is published. A durable signed proof will appear only after a future verified agent contribution." : "No verified durable proof or matching recent lobby line is available in this refresh.");
+            renderLiveAgentEvidence(proof, evidenceRows, agentMessages, proofState === "missing" ? "The DID reference is published. A durable signed action will appear only after a future contribution." : "No signed Worker action, durable identity note, or matching recent lobby line is available in this refresh.");
             var liveSources = settled.filter(function (result) { return result.status === "fulfilled"; }).length;
             ui.liveAgentStatus.textContent = (manual ? "refreshed " : "updated ") + formatShortTime(new Date()) + " · " + liveSources + "/6 sources answered";
           } catch {
@@ -2144,7 +2267,7 @@
             ui.liveAgentStateDetail.textContent = "The evidence checks failed before individual results could be evaluated.";
             ui.liveAgentLastSeen.textContent = "room read unavailable";
             ui.liveAgentStatus.textContent = "public evidence read failed";
-            renderLiveAgentEvidence(null, [], "The public evidence desk could not be refreshed. Open Technocore directly and try again later.");
+            renderLiveAgentEvidence(null, [], [], "The public evidence desk could not be refreshed. Open Technocore directly and try again later.");
           } finally {
             ui.liveAgentRefresh.disabled = false;
           }
