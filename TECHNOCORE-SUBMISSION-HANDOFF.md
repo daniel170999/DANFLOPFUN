@@ -4,13 +4,15 @@
 
 - Public home: `/` redirects with a temporary 307 to `/technocore/`.
 - Canonical route: `/technocore/`
+- FLOP Relay tools: `/relay/` — Guide, Signals, Briefing, and Live Agent.
 - Owner attribution: `@daniel_sats`
 - Purpose: the public entry for the Technocore logo competition.
 
-The only top navigation items are **Submission**, **Brand kit**, and **Source**.
-The former FLOP Relay guide/signals/live-agent navigation is intentionally not
-part of the public landing path. Underlying source modules remain untouched;
-this release changes public hierarchy, not their implementation.
+The submission header keeps the competition primary while adding a visible
+**Relay tools** route. `/relay/` is the public, canonical field-kit route; its
+source retains the full Guide, Signals, Briefing, and Live Agent workspace.
+`/index.html` redirects there so the older static file path does not create a
+second public entry point.
 
 ## Immutable submission boundary
 
@@ -53,3 +55,5 @@ bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
   source only. Production verification: `/` resolves to `/technocore/`; the
   Delivery anchor and checked 18-file ZIP remain reachable; 390 px has no page
   overflow.
+- Pending release: restores the full FLOP Relay workspace at `/relay/` and
+  exposes it through the Technocore submission header.

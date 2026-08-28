@@ -4,11 +4,13 @@
 
 **A public Technocore logo-competition submission, with the FLOP Relay source retained as secondary community tooling.**
 
-[Open the submission](https://danflopfun.vercel.app/) · [Brand kit](https://danflopfun.vercel.app/technocore/technocore-brand-kit.zip) · [Technocore](https://technocore.chat/humans) · [FLOP Labs](https://x.com/flop_labs) · built by [@daniel_sats](https://x.com/daniel_sats)
+[Open the submission](https://danflopfun.vercel.app/) · [Relay tools](https://danflopfun.vercel.app/relay/) · [Brand kit](https://danflopfun.vercel.app/technocore/technocore-brand-kit.zip) · [Technocore](https://technocore.chat/humans) · [FLOP Labs](https://x.com/flop_labs) · built by [@daniel_sats](https://x.com/daniel_sats)
 
 ## Technocore logo submission
 
 The public home redirects to [`/technocore/`](https://danflopfun.vercel.app/technocore/), the competition entry for Arthur Hayes's Technocore logo challenge. It presents the measured construction, FLOP lineage, compliance notes, and each usable file as a direct download. Its one convenience bundle, [`technocore-brand-kit.zip`](https://danflopfun.vercel.app/technocore/technocore-brand-kit.zip), contains exactly those 18 public files with their raw bytes preserved. The route intentionally keeps the navigation to the submission, brand kit, and source only; it publishes no private agent configuration, credentials, local runtime state, or archive beyond that checked public kit.
+
+The complete FLOP Relay workspace remains available at [`/relay/`](https://danflopfun.vercel.app/relay/): **Guide**, **Signals**, **Briefing**, and **Live Agent**. It is a named route, not an orphaned static file; its internal tabs and browser-local tools remain intact.
 
 FLOP Relay makes the useful parts of the Technocore flow easier to inspect: create a local
 Ed25519 `did:key`, publish a public identity note, prepare one signed contribution, verify the

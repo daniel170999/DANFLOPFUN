@@ -9,6 +9,7 @@ import { Script } from "node:vm";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const html = await readFile(join(root, "index.html"), "utf8");
+const relayHtml = await readFile(join(root, "relay", "index.html"), "utf8");
 const technocoreHtml = await readFile(join(root, "technocore", "index.html"), "utf8");
 const workflow = await readFile(join(root, ".github", "workflows", "agent-pulse.yml"), "utf8");
 const vercel = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
@@ -31,6 +32,8 @@ assert(Array.isArray(vercel.rewrites) && vercel.rewrites.length > 0, "vercel.jso
 assert(Array.isArray(vercel.redirects) && vercel.redirects.length > 0, "vercel.json must define the public landing redirect");
 const homeRedirect = vercel.redirects.find((redirect) => redirect.source === "/");
 assert.deepEqual(homeRedirect, { source: "/", destination: "/technocore/", permanent: false }, "the public home must redirect safely to the Technocore submission");
+const legacyRelayRedirect = vercel.redirects.find((redirect) => redirect.source === "/index.html");
+assert.deepEqual(legacyRelayRedirect, { source: "/index.html", destination: "/relay/", permanent: false }, "the legacy field-kit page must resolve to its named Relay route");
 const sources = vercel.rewrites.map((rewrite) => rewrite.source);
 assert.equal(new Set(sources).size, sources.length, "vercel.json contains duplicate rewrite sources");
 for (const rewrite of vercel.rewrites) {
@@ -42,6 +45,12 @@ assert.match(workflow, /^\s*workflow_dispatch\s*:/mu, "the public workflow needs
 assert.match(workflow, /inputs:\s*[\s\S]*use_llm:/u, "the workflow needs an explicit model-call opt-in");
 assert(html.includes('var resultPrefix = "RESULT v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical RESULT v1 lines");
 assert(html.includes('var attestPrefix = "ATTEST v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical ATTEST v1 lines");
+assert.equal(relayHtml.replaceAll("https://danflopfun.vercel.app/relay/", "https://danflopfun.vercel.app/"), html, "Relay must retain the complete field-kit implementation, apart from its canonical public route");
+assert(relayHtml.includes('<link rel="canonical" href="https://danflopfun.vercel.app/relay/"'), "Relay must declare its own canonical URL");
+for (const panel of ["guide", "signals", "briefing", "live-agent"]) {
+  assert(relayHtml.includes(`data-tab="${panel}"`), `Relay must retain the ${panel} tab`);
+  assert(relayHtml.includes(`data-panel="${panel}"`), `Relay must retain the ${panel} panel`);
+}
 
 const technocoreAssets = [
   "technocore-mark-primary.svg", "technocore-mark-512.png", "technocore-mark-print.svg",
@@ -58,6 +67,7 @@ assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use
 assert(technocoreHtml.includes('href="/technocore/technocore-brand-kit.zip" download'), "Technocore route must provide the complete kit download");
 assert(technocoreHtml.includes('href="#submission" aria-current="page">Submission</a>'), "Technocore route must make the competition submission its primary navigation item");
 assert(technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must preserve a direct brand-kit destination");
+assert(technocoreHtml.includes('href="/relay/">Relay tools</a>'), "Technocore route must retain a visible route back to the full FLOP Relay field kit");
 assert.match(technocoreHtml, /<section id="delivery">\s*<p class="kicker">Delivery<\/p>/u, "the brand-kit destination must land on the Delivery section");
 assert(!technocoreHtml.includes('href="/#guide"') && !technocoreHtml.includes('href="/#signals"') && !technocoreHtml.includes('href="/#live-agent"'), "Technocore navigation must not expose the retired field-kit sections");
 assert(technocoreHtml.includes("@media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}"), "Technocore narrow layouts must confine wide lockups to specimen-level scrolling");
@@ -71,4 +81,4 @@ for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
 }
 assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));
+console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, relay: true, technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));

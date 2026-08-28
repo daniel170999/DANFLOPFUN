@@ -5,6 +5,11 @@
       "source": "/",
       "destination": "/technocore/",
       "permanent": false
+    },
+    {
+      "source": "/index.html",
+      "destination": "/relay/",
+      "permanent": false
     }
   ],
   "rewrites": [
