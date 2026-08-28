@@ -48,6 +48,8 @@ bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
 - `7239d60` exposed the visible **Download all · 18 files · ZIP** control.
 - `e8f96f4` confined wide lockups to their specimen wells below 720 px, removing
   horizontal body overflow on narrow screens without changing logo geometry.
-- Pending release: makes `/technocore/` the public landing destination and
-  replaces the old field-kit navigation with the competition submission, brand
-  kit, and source only.
+- `2f35395` made `/technocore/` the public landing destination and replaced the
+  old field-kit navigation with the competition submission, brand kit, and
+  source only. Production verification: `/` resolves to `/technocore/`; the
+  Delivery anchor and checked 18-file ZIP remain reachable; 390 px has no page
+  overflow.
