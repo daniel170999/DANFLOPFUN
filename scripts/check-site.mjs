@@ -65,9 +65,11 @@ await access(join(root, "technocore", "technocore-brand-kit.zip"));
 assert(technocoreHtml.includes('<link rel="icon" href="/technocore/technocore-favicon.svg"'), "Technocore route must use its own favicon");
 assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use Error Red");
 assert(technocoreHtml.includes('href="/technocore/technocore-brand-kit.zip" download'), "Technocore route must provide the complete kit download");
-assert(technocoreHtml.includes('href="#submission" aria-current="page">Submission</a>'), "Technocore route must make the competition submission its primary navigation item");
-assert(technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must preserve a direct brand-kit destination");
-assert(technocoreHtml.includes('href="/relay/">Relay tools</a>'), "Technocore route must retain a visible route back to the full FLOP Relay field kit");
+assert(technocoreHtml.includes('href="#submission" aria-current="page">Logo submission</a>'), "Technocore route must make the competition submission its clear primary navigation item");
+assert(!technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must not clutter its primary navigation with the brand-kit anchor");
+assert(technocoreHtml.includes('href="/relay/">FLOP Relay tools</a>'), "Technocore route must retain a prominent route back to the full FLOP Relay field kit");
+assert(technocoreHtml.includes('.site-nav-links a{min-height:42px;display:inline-flex;'), "Technocore navigation controls must have an explicit accessible hit area");
+assert(technocoreHtml.includes('.site-nav-links a[aria-current="page"]{border-color:#00B4D8;background:#00B4D8;color:#0A1128}'), "Technocore navigation must visibly highlight the active competition destination");
 assert.match(technocoreHtml, /<section id="delivery">\s*<p class="kicker">Delivery<\/p>/u, "the brand-kit destination must land on the Delivery section");
 assert(!technocoreHtml.includes('href="/#guide"') && !technocoreHtml.includes('href="/#signals"') && !technocoreHtml.includes('href="/#live-agent"'), "Technocore navigation must not expose the retired field-kit sections");
 assert(technocoreHtml.includes("@media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}"), "Technocore narrow layouts must confine wide lockups to specimen-level scrolling");
@@ -81,4 +83,4 @@ for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
 }
 assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, relay: true, technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));
+console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, relay: true, technocoreNav: "prominent", technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));

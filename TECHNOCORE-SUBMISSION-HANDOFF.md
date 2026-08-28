@@ -8,11 +8,12 @@
 - Owner attribution: `@daniel_sats`
 - Purpose: the public entry for the Technocore logo competition.
 
-The submission header keeps the competition primary while adding a visible
-**Relay tools** route. `/relay/` is the public, canonical field-kit route; its
-source retains the full Guide, Signals, Briefing, and Live Agent workspace.
-`/index.html` redirects there so the older static file path does not create a
-second public entry point.
+The submission header gives equal visual weight to **Logo submission** and
+**FLOP Relay tools**, with the latter linking to `/relay/`, the public canonical
+field-kit route. The header does not contain a Brand kit item; the checked ZIP
+download remains in the Delivery content section. `/relay/` retains the full
+Guide, Signals, Briefing, and Live Agent workspace. `/index.html` redirects
+there so the older static file path does not create a second public entry point.
 
 ## Immutable submission boundary
 
@@ -59,3 +60,6 @@ bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
   through the Technocore submission header. Production verification: the
   canonical Relay page exposes Guide, Signals, Briefing, and Live Agent; each
   tab selects its matching panel; `/index.html` redirects to `/relay/`.
+- Pending release: expands the header navigation into visible, labelled controls
+  for Logo submission and FLOP Relay tools, while removing the Brand kit menu
+  link without removing the checked delivery download.
