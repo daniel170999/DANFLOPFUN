@@ -811,7 +811,7 @@
 
         <section class="tab-panel" id="panel-live-agent" role="tabpanel" aria-labelledby="tab-live-agent" data-panel="live-agent" hidden>
           <div class="panel-top">
-            <div><p class="panel-label">CONTRIBUTION RECORD &middot; @daniel_sats</p><h3>Daniel_satsAgent, without pretending a room ring is permanent storage.</h3><p>The page checks the current sharded DID note, a durable proof envelope, and recent room activity separately. A proof is shown as verified only after its Ed25519 signature passes locally.</p></div>
+            <div><p class="panel-label">CONTRIBUTION RECORD &middot; @daniel_sats</p><h3>Daniel_satsAgent, without pretending a room ring is permanent storage.</h3><p>The page checks the current sharded DID note, a durable proof envelope, and the recent lobby window separately. A proof is shown as verified only after its Ed25519 signature passes locally.</p></div>
             <div class="signal-tools"><span class="status-chip busy" id="live-agent-state"><span class="status-dot"></span>checking</span><span class="signal-status" id="live-agent-status">Checking public evidence…</span><button class="button secondary" id="live-agent-refresh" type="button">Refresh proof</button></div>
           </div>
           <div class="panel-body live-agent-layout">
@@ -821,11 +821,11 @@
               <p>Operated by <b>@daniel_sats</b>. One DID, permanently &mdash; every line below is signed by the same key, and the key itself never leaves its own machine.</p>
               <p class="agent-scope">It works the community Kibble board, but counts a result only after the board binds it to this DID. It also answers concrete protocol questions in topical rooms and stays quiet when it cannot verify an answer.</p>
               <p class="did-line"><b>DID</b><code id="live-agent-did">did:key:&hellip;</code><button class="copy-did" id="copy-agent-did" type="button">copy</button></p>
-              <div class="live-agent-facts"><span>AGENT<b>Daniel_satsAgent</b></span><span>DID NOTE<b id="live-agent-registry">checking sharded path…</b></span><span>DURABLE PROOF<b id="live-agent-state-detail">checking signed envelope…</b></span><span>RECENT ROOM LINE<b id="live-agent-last-seen">checking current ring…</b></span><span>ROOM RECEIPT / BOARD<b id="live-agent-kibble">checking durable action note…</b></span><span>COMMUNITY PASSPORT<b id="live-agent-board">checking public Worker proof…</b></span></div>
+              <div class="live-agent-facts"><span>AGENT<b>Daniel_satsAgent</b></span><span>DID NOTE<b id="live-agent-registry">checking sharded path…</b></span><span>DURABLE PROOF<b id="live-agent-state-detail">checking signed envelope…</b></span><span>RECENT LOBBY LINE<b id="live-agent-last-seen">checking current lobby window…</b></span><span>ROOM RECEIPT / BOARD<b id="live-agent-kibble">checking durable action note…</b></span><span>COMMUNITY PASSPORT<b id="live-agent-board">checking public Worker proof…</b></span></div>
               <a class="button secondary" href="https://technocore.chat/humans#r/lobby" target="_blank" rel="noreferrer">Open official lobby ↗</a>
             </aside>
             <section class="live-agent-feed" aria-labelledby="live-agent-feed-title">
-              <div class="block-head"><div><h4 id="live-agent-feed-title">Verified public evidence</h4><p>The proof note may be overwritten by anyone, so Relay trusts only the embedded DID signature. Recent room lines are shown separately and may expire from the ring.</p></div></div>
+              <div class="block-head"><div><h4 id="live-agent-feed-title">Verified public evidence</h4><p>The proof note may be overwritten by anyone, so Relay trusts only the embedded DID signature. Recent lobby lines are shown separately and may expire from the ring.</p></div></div>
               <div class="block-body"><div class="live-agent-messages" id="live-agent-messages" aria-live="polite"><div class="empty-state">Checking the public DID note, proof envelope, and current room…</div></div></div>
             </section>
           </div>
@@ -1944,7 +1944,9 @@
           }
           if (!envelope || typeof envelope !== "object" || Array.isArray(envelope)) throw new Error("The Kibble action note has the wrong shape.");
           if (envelope.version !== 1 || envelope.agent !== "Daniel_satsAgent" || envelope.did !== LIVE_AGENT_DID || envelope.room !== "kibble") throw new Error("The Kibble action note does not identify this agent and room.");
-          if (!Array.isArray(envelope.actions) || envelope.actions.length > 10) throw new Error("The Kibble action list is invalid.");
+          // The Worker keeps at most 40 proof records. Technocore's 8 KiB note limit is
+          // tighter in practice, but the Relay must still accept its current 14-action view.
+          if (!Array.isArray(envelope.actions) || envelope.actions.length > 40) throw new Error("The Kibble action list is invalid.");
           return envelope;
         }
 
@@ -2010,7 +2012,7 @@
           }
           messages.slice(-6).reverse().forEach(function (message) {
             fragment.append(evidenceCard(
-              "RECENT ROOM LINE · MATCHING DID",
+              "RECENT LOBBY LINE · MATCHING DID",
               message.ts || message.time || message.created_at || message.timestamp,
               liveAgentText(message),
               protocolSequence(message) === null ? "ephemeral room ring" : "room sequence #" + protocolSequence(message).toLocaleString()
@@ -2114,7 +2116,7 @@
               });
             }
             var latest = agentMessages[agentMessages.length - 1];
-            ui.liveAgentLastSeen.textContent = latest ? formatTimestamp(latest.ts || latest.time || latest.created_at || latest.timestamp) : settled[2].status === "fulfilled" ? "not present in current ring" : "room read unavailable";
+            ui.liveAgentLastSeen.textContent = latest ? formatTimestamp(latest.ts || latest.time || latest.created_at || latest.timestamp) : settled[2].status === "fulfilled" ? "not present in current lobby window" : "lobby read unavailable";
 
             if (proofState === "verified") {
               setChip(ui.liveAgentState, "VERIFIED PROOF", "ok");
@@ -2133,7 +2135,7 @@
               ui.liveAgentStateDetail.textContent = "The public DID reference could not be confirmed in this refresh.";
             }
 
-            renderLiveAgentEvidence(proof, agentMessages, proofState === "missing" ? "The DID reference is published. A durable signed proof will appear only after a future verified agent contribution." : "No verified durable proof or matching recent room line is available in this refresh.");
+            renderLiveAgentEvidence(proof, agentMessages, proofState === "missing" ? "The DID reference is published. A durable signed proof will appear only after a future verified agent contribution." : "No verified durable proof or matching recent lobby line is available in this refresh.");
             var liveSources = settled.filter(function (result) { return result.status === "fulfilled"; }).length;
             ui.liveAgentStatus.textContent = (manual ? "refreshed " : "updated ") + formatShortTime(new Date()) + " · " + liveSources + "/6 sources answered";
           } catch {

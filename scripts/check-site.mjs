@@ -14,6 +14,12 @@ const technocoreHtml = await readFile(join(root, "technocore", "index.html"), "u
 const workflow = await readFile(join(root, ".github", "workflows", "agent-pulse.yml"), "utf8");
 const vercel = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
 
+function inlineFunctionSource(source, name) {
+  const match = source.match(new RegExp(`^ {8}function ${name}\\([^\\n]*\\) \\{[\\s\\S]*?^ {8}\\}`, "mu"));
+  assert(match, `index.html must expose ${name} for release verification`);
+  return match[0].trimStart();
+}
+
 const ids = [...html.matchAll(/\sid="([^"]+)"/gu)].map((match) => match[1]);
 assert.equal(new Set(ids).size, ids.length, "index.html contains duplicate element IDs");
 
@@ -27,6 +33,32 @@ for (const match of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/giu)) {
   new Script(match[2], { filename: `index.inline-${inlineCount}.js` });
 }
 assert(inlineCount > 0, "no inline application script was found");
+
+const liveDid = html.match(/var LIVE_AGENT_DID = "([^"]+)";/u)?.[1];
+assert(liveDid, "the Live Agent DID must be present");
+const kibbleParserContext = {};
+new Script([
+  `var LIVE_AGENT_DID = ${JSON.stringify(liveDid)};`,
+  inlineFunctionSource(html, "noteValue"),
+  inlineFunctionSource(html, "parseKibbleEnvelope"),
+].join("\n")).runInNewContext(kibbleParserContext);
+const kibbleEnvelope = {
+  version: 1,
+  agent: "Daniel_satsAgent",
+  did: liveDid,
+  room: "kibble",
+  actions: Array.from({ length: 14 }, (_, index) => ({ nonce: String(index + 1) })),
+};
+const parsedKibbleEnvelope = kibbleParserContext.parseKibbleEnvelope(`UNTRUSTED PUBLIC NOTE\n\n${JSON.stringify(kibbleEnvelope)}`);
+assert.equal(parsedKibbleEnvelope.actions.length, 14, "Relay must accept the Worker's current 14-action proof envelope");
+assert.throws(
+  () => kibbleParserContext.parseKibbleEnvelope(JSON.stringify({ ...kibbleEnvelope, actions: Array.from({ length: 41 }, () => ({})) })),
+  /Kibble action list is invalid/u,
+  "Relay must retain a bounded action-list parser",
+);
+assert(html.includes("RECENT LOBBY LINE"), "Relay must label its bounded lobby read accurately");
+assert(!html.includes("RECENT ROOM LINE"), "Relay must not present a lobby-only read as general room coverage");
+assert(html.includes("not present in current lobby window"), "Relay must describe a missing lobby line without implying all rooms were checked");
 
 assert(Array.isArray(vercel.rewrites) && vercel.rewrites.length > 0, "vercel.json must define fixed rewrites");
 assert(Array.isArray(vercel.redirects) && vercel.redirects.length > 0, "vercel.json must define the public landing redirect");
