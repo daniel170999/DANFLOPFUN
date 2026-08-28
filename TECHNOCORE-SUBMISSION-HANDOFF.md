@@ -2,9 +2,15 @@
 
 ## Public route
 
-- Route: `/technocore/`
+- Public home: `/` redirects with a temporary 307 to `/technocore/`.
+- Canonical route: `/technocore/`
 - Owner attribution: `@daniel_sats`
 - Purpose: the public entry for the Technocore logo competition.
+
+The only top navigation items are **Submission**, **Brand kit**, and **Source**.
+The former FLOP Relay guide/signals/live-agent navigation is intentionally not
+part of the public landing path. Underlying source modules remain untouched;
+this release changes public hierarchy, not their implementation.
 
 ## Immutable submission boundary
 
@@ -42,3 +48,6 @@ bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
 - `7239d60` exposed the visible **Download all · 18 files · ZIP** control.
 - `e8f96f4` confined wide lockups to their specimen wells below 720 px, removing
   horizontal body overflow on narrow screens without changing logo geometry.
+- Pending release: makes `/technocore/` the public landing destination and
+  replaces the old field-kit navigation with the competition submission, brand
+  kit, and source only.

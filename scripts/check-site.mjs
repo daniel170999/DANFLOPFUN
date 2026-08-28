@@ -28,6 +28,9 @@ for (const match of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/giu)) {
 assert(inlineCount > 0, "no inline application script was found");
 
 assert(Array.isArray(vercel.rewrites) && vercel.rewrites.length > 0, "vercel.json must define fixed rewrites");
+assert(Array.isArray(vercel.redirects) && vercel.redirects.length > 0, "vercel.json must define the public landing redirect");
+const homeRedirect = vercel.redirects.find((redirect) => redirect.source === "/");
+assert.deepEqual(homeRedirect, { source: "/", destination: "/technocore/", permanent: false }, "the public home must redirect safely to the Technocore submission");
 const sources = vercel.rewrites.map((rewrite) => rewrite.source);
 assert.equal(new Set(sources).size, sources.length, "vercel.json contains duplicate rewrite sources");
 for (const rewrite of vercel.rewrites) {
@@ -53,6 +56,10 @@ await access(join(root, "technocore", "technocore-brand-kit.zip"));
 assert(technocoreHtml.includes('<link rel="icon" href="/technocore/technocore-favicon.svg"'), "Technocore route must use its own favicon");
 assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use Error Red");
 assert(technocoreHtml.includes('href="/technocore/technocore-brand-kit.zip" download'), "Technocore route must provide the complete kit download");
+assert(technocoreHtml.includes('href="#submission" aria-current="page">Submission</a>'), "Technocore route must make the competition submission its primary navigation item");
+assert(technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must preserve a direct brand-kit destination");
+assert.match(technocoreHtml, /<section id="delivery">\s*<p class="kicker">Delivery<\/p>/u, "the brand-kit destination must land on the Delivery section");
+assert(!technocoreHtml.includes('href="/#guide"') && !technocoreHtml.includes('href="/#signals"') && !technocoreHtml.includes('href="/#live-agent"'), "Technocore navigation must not expose the retired field-kit sections");
 assert(technocoreHtml.includes("@media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}"), "Technocore narrow layouts must confine wide lockups to specimen-level scrolling");
 const kitCheck = execFileSync(process.execPath, [join(root, "scripts", "build-technocore-kit.mjs"), "--check"], { cwd: root, encoding: "utf8" });
 assert.match(kitCheck, /"files":18/u, "Technocore brand kit must retain all 18 public files");
@@ -64,4 +71,4 @@ for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
 }
 assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, technocoreAssets: technocoreAssets.length, technocoreBundle: true, rewrites: vercel.rewrites.length }));
+console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));
