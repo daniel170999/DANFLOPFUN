@@ -55,5 +55,7 @@ bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
   source only. Production verification: `/` resolves to `/technocore/`; the
   Delivery anchor and checked 18-file ZIP remain reachable; 390 px has no page
   overflow.
-- Pending release: restores the full FLOP Relay workspace at `/relay/` and
-  exposes it through the Technocore submission header.
+- `431d1e2` restored the full FLOP Relay workspace at `/relay/` and exposed it
+  through the Technocore submission header. Production verification: the
+  canonical Relay page exposes Guide, Signals, Briefing, and Live Agent; each
+  tab selects its matching panel; `/index.html` redirects to `/relay/`.
