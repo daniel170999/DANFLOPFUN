@@ -34,3 +34,11 @@ interaction script, the checked 18-file bundle, and the absence of `#FF453A`
 from the route markup. The second command checks the working tree and Git
 history for sensitive literals. If a listed source asset changes, rebuild the
 bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
+
+## Release log
+
+- `68e91c0` published the static `/technocore/` route and the 18 direct files.
+- `c165be2` added the deterministic, stored ZIP bundle and its 18-file check.
+- `7239d60` exposed the visible **Download all · 18 files · ZIP** control.
+- `e8f96f4` confined wide lockups to their specimen wells below 720 px, removing
+  horizontal body overflow on narrow screens without changing logo geometry.
