@@ -328,8 +328,8 @@
       .live-agent-facts { display: grid; gap: 7px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 13px 0; }
       .live-agent-facts span { display: grid; gap: 4px; color: var(--faint); font: 9px var(--mono); }
       .live-agent-facts b { overflow-wrap: anywhere; color: var(--paper); font: 800 11px/1.45 var(--mono); }
-      .live-agent-messages { display: grid; gap: 9px; min-height: 304px; }
-      .live-agent-message { padding: 13px; border: 1px solid rgba(65, 91, 141, .72); border-radius: 8px; background: rgba(6, 11, 27, .55); }
+      .live-agent-messages { display: grid; gap: 9px; min-width: 0; min-height: 304px; }
+      .live-agent-message { min-width: 0; padding: 13px; border: 1px solid rgba(65, 91, 141, .72); border-radius: 8px; background: rgba(6, 11, 27, .55); }
       .live-agent-message .message-top { margin-bottom: 7px; }
 
       .briefing-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(290px, .82fr); gap: 18px; }
@@ -1773,7 +1773,7 @@
           setChip(ui.radarChip, "reading", "busy");
           setChip(ui.workChip, "reading", "busy");
           try {
-            var workPromise = readPublicJson("/api/kibble/board", 45000).then(
+            var workPromise = readPublicJson("/api/kibble/board", 12000).then(
               function (value) { return { status: "fulfilled", value: value }; },
               function (error) { return { status: "rejected", reason: error }; }
             );
@@ -2107,7 +2107,7 @@
               readPublicJson("/api/tc/room/lobby?limit=200"),
               readPublicText("/api/tc/kibble-proof/" + LIVE_AGENT_FINGERPRINT),
               readPublicJson("/api/agent/proof"),
-              readPublicJson("/api/kibble/board", 45000)
+              readPublicJson("/api/kibble/board", 12000)
             ]);
             var registryValid = false;
             var registryWarning = false;

@@ -65,3 +65,14 @@
 - Vercel is still serving the old UI at this timestamp. Worker `/proof` remains an old materialized
   record with only legacy rows and `passport:null`; Kibble reports `stats_engine_warm:false`.
   No live useful RESULT, franchise, passport or rank is claimed.
+
+## Production UI hardening checkpoint — 2026-08-29 16:40 +07:00 (local source)
+
+- Synchronized `index.html` and `relay/index.html`: Live Agent message grid/cards now allow
+  shrinking tracks (`min-width: 0`) so narrow screens do not overflow horizontally.
+- Kibble board reads in both refresh paths now fail fast after 12 seconds instead of leaving the
+  page waiting behind a slow upstream response; the UI still labels timeout as unavailable rather
+  than converting it into proof.
+- `node scripts/check-site.mjs`: PASS; `node scripts/audit-public.mjs --history`: current tree
+  credentials-clean with the same historical provider-choice notices. Changes are ready for the
+  authorized `main` push and Vercel production verification.
