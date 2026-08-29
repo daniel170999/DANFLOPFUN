@@ -10,8 +10,8 @@
 
 The submission header gives equal visual weight to **Logo submission** and
 **FLOP Relay tools**, with the latter linking to `/relay/`, the public canonical
-field-kit route. The header does not contain a Brand kit item; the checked ZIP
-download remains in the Delivery content section. `/relay/` retains the full
+field-kit route. The public route exposes individual files only; no ZIP archive
+is published. `/relay/` retains the full
 Guide, Signals, Briefing, and Live Agent workspace. `/index.html` redirects
 there so the older static file path does not create a second public entry point.
 
@@ -22,10 +22,9 @@ there so the older static file path does not create a second public entry point.
 - The 18 listed downloadable assets are served as ordinary static files under
   `/technocore/`; do not pass the PNGs through an image optimizer or rewrite the
   SVGs with SVGO/SVGR.
-- Daniel explicitly approved one exception to the original no-archive rule on
-  2026-08-28: `/technocore/technocore-brand-kit.zip`. It contains exactly the
-  18 listed public files and is built by `scripts/build-technocore-kit.mjs` with
-  raw source bytes preserved. Do not add any other archive or extra file to it.
+- The previously generated `technocore-brand-kit.zip` was removed from the public
+  route on 2026-08-30. Keep the no-archive boundary: publish individual assets
+  only and do not recreate or link a bundle.
 - Do not publish any local runtime/browser profile, log, `.env` file, private
   key, API key, or machine path.
 
@@ -39,23 +38,22 @@ node scripts/audit-public.mjs --history
 ```
 
 The first command checks the route favicon, the 18 required assets, the single
-interaction script, the checked 18-file bundle, and the absence of `#FF453A`
-from the route markup. The second command checks the working tree and Git
-history for sensitive literals. If a listed source asset changes, rebuild the
-bundle with `node scripts/build-technocore-kit.mjs` before running the gate.
+interaction script, the absence of a public ZIP archive, and the absence of
+`#FF453A` from the route markup. The second command checks the working tree and
+Git history for sensitive literals.
 
 ## Release log
 
 - `68e91c0` published the static `/technocore/` route and the 18 direct files.
-- `c165be2` added the deterministic, stored ZIP bundle and its 18-file check.
-- `7239d60` exposed the visible **Download all · 18 files · ZIP** control.
+- `c165be2` added a deterministic, stored ZIP bundle (historical; no longer public).
+- `7239d60` exposed the visible ZIP control (historical; removed 2026-08-30).
 - `e8f96f4` confined wide lockups to their specimen wells below 720 px, removing
   horizontal body overflow on narrow screens without changing logo geometry.
 - `2f35395` made `/technocore/` the public landing destination and replaced the
-  old field-kit navigation with the competition submission, brand kit, and
-  source only. Production verification: `/` resolves to `/technocore/`; the
-  Delivery anchor and checked 18-file ZIP remain reachable; 390 px has no page
-  overflow.
+  old field-kit navigation with the competition submission and source only.
+  Historical production verification: `/` resolved to `/technocore/`; the
+  Delivery anchor and 390 px no-overflow check passed. The former ZIP was
+  removed from the public route on 2026-08-30.
 - `431d1e2` restored the full FLOP Relay workspace at `/relay/` and exposed it
   through the Technocore submission header. Production verification: the
   canonical Relay page exposes Guide, Signals, Briefing, and Live Agent; each
