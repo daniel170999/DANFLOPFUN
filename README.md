@@ -8,7 +8,7 @@
 
 ## Technocore logo submission
 
-The public home redirects to [`/technocore/`](https://danflopfun.vercel.app/technocore/), the competition entry for Arthur Hayes's Technocore logo challenge. It presents the measured construction, FLOP lineage, compliance notes, and each usable public file as a direct download. The route intentionally keeps the navigation to the submission and source only; it publishes no private agent configuration, credentials, local runtime state, or archive.
+The public home redirects to [`/technocore/`](https://danflopfun.vercel.app/technocore/), the competition entry for Arthur Hayes's Technocore logo challenge. It presents the measured construction, FLOP lineage, compliance notes, and a checked 18-file brand-kit download alongside direct downloads for every public file. The route intentionally keeps the navigation to the submission and source only; it publishes no private agent configuration, credentials, or local runtime state.
 
 The complete FLOP Relay workspace remains available at [`/relay/`](https://danflopfun.vercel.app/relay/): **Guide**, **Signals**, **Briefing**, and **Live Agent**. It is a named route, not an orphaned static file; its internal tabs and browser-local tools remain intact.
 

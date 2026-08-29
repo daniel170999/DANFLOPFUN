@@ -188,6 +188,8 @@
     text-transform:uppercase;background:var(--cyan);color:#04212B;border:0;
     padding:8px 14px;cursor:pointer;font-weight:700;text-decoration:none;white-space:nowrap}
   .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.download{display:inline-flex;align-items:center;gap:8px}
+  .btn.download::before{content:'↓';font-size:15px;line-height:1;letter-spacing:0}
 
   .dlgroup{background:var(--chip);font-family:'Space Mono',monospace;font-size:10.5px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);
@@ -200,6 +202,7 @@
   .bundle-copy b{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--ink)}
   .bundle-copy span{color:var(--ink-2);font-size:12px}
   .bundle + .dl{margin-top:1px}
+  .agent-note{border-left:2px solid var(--cyan);padding:4px 0 4px 16px;color:var(--ink)}
   @media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}
   .fine{font-size:12.5px;max-width:78ch;margin-top:22px;color:var(--ink-2)}
   .fine .sep{color:var(--line);margin:0 6px}
@@ -238,8 +241,15 @@
     <p class="lede">
       Technocore logo competition, announced by @CryptoHayes on 28 August 2026.
       Entry by <strong>@daniel_sats</strong>. Eighteen files, all vector or
-      vector-rendered. Inspect and download each public file on its own.
+      vector-rendered. Download the checked bundle at once or inspect each public
+      file on its own.
     </p>
+
+    <div class="bundle">
+      <div class="bundle-copy"><b>Download all &middot; 18 files &middot; ZIP</b>
+        <span>The deterministic brand kit, kept byte-for-byte with the individual masters.</span></div>
+      <a class="btn download" href="/technocore/technocore-brand-kit.zip" download>Download all</a>
+    </div>
 
     <div class="dl" id="manifest"></div>
 
@@ -274,6 +284,10 @@
       to hold its own shape while standing next to the word it belongs to. Nothing in
       the Latin alphabet is an O open at the bottom.
     </p>
+    <p class="agent-note"><strong>Agent reading.</strong> The open centre can also be read as a
+      small head profile looking right — an agent-robot looking into the ring. That is a
+      reading of the negative space, not an added eye or illustration, so the aperture stays
+      open and the mark keeps its one locked path.</p>
 
     <div class="cards">
       <div class="card"><b>Communicate</b>
@@ -761,7 +775,7 @@
   document.getElementById('manifest').innerHTML=MANIFEST.map(function(f){
     if(f[0]==='g') return '<div class="dlgroup">'+f[1]+'</div>';
     return '<div class="dlrow"><span class="t">'+f[0]+'<small>'+f[2]+'</small></span>'
-      +'<a class="btn ghost" href="/technocore/'+f[0]+'" download>'+f[1]+'</a></div>'
+      +'<a class="btn ghost download" href="/technocore/'+f[0]+'" download>'+f[1]+'</a></div>'
   }).join('');
 
   var FILES_UNUSED=[['technocore-mark-primary.svg','958 B','The mark, FLOP Cyan — the master'],

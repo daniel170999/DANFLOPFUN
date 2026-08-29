@@ -143,12 +143,16 @@ const technocoreAssets = [
   "technocore-mark-onecolor-ice.svg", "technocore-mark-64.png", "technocore-mark-onecolor-base.svg",
   "technocore-mark-32.png", "technocore-favicon.svg", "technocore-social-card.png",
   "technocore-appicon-light.svg", "technocore-avatar.svg", "brand.json",
-  "src/technocore.js", "src/build.mjs", "src/tokens.css",
+  "src/technocore.js", "src/build.mjs", "src/tokens.css", "technocore-brand-kit.zip",
 ];
 for (const asset of technocoreAssets) await access(join(root, "technocore", asset));
 assert(technocoreHtml.includes('<link rel="icon" href="/technocore/technocore-favicon.svg"'), "Technocore route must use its own favicon");
 assert(!technocoreHtml.includes("#FF453A"), "Technocore page markup must not use Error Red");
-assert(!technocoreHtml.includes("technocore-brand-kit.zip"), "Technocore route must not publish a ZIP archive");
+assert(technocoreHtml.includes('href="/technocore/technocore-brand-kit.zip" download'), "Technocore route must expose the Download all bundle");
+assert(technocoreHtml.includes("Download all &middot; 18 files &middot; ZIP"), "Technocore route must label the complete bundle");
+assert(technocoreHtml.includes(".btn.download::before"), "Technocore download controls must carry a download symbol");
+assert(technocoreHtml.includes("class=\"btn ghost download\""), "Every generated file download must use the download control style");
+assert(technocoreHtml.includes("class=\"agent-note\""), "Technocore route must document the right-facing agent reading");
 assert(!technocoreHtml.includes('href="/technocore-favicon.svg"'), "Technocore copy snippet must use the route-scoped favicon");
 assert(technocoreHtml.includes('href="#submission" aria-current="page">Logo submission</a>'), "Technocore route must make the competition submission its clear primary navigation item");
 assert(!technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must not clutter its primary navigation with the brand-kit anchor");
@@ -166,4 +170,4 @@ for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
 }
 assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, relay: true, technocoreNav: "prominent", technocoreAssets: technocoreAssets.length, technocoreBundle: false, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));
+console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, relay: true, technocoreNav: "prominent", technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));
