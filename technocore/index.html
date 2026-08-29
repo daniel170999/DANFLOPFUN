@@ -43,9 +43,13 @@
     font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
   a{color:var(--link)}
+  .skip-link{position:fixed;left:16px;top:8px;z-index:200;transform:translateY(-180%);
+    background:#00B4D8;color:#04212B;padding:8px 12px;font-family:'Space Mono',monospace;
+    font-size:11px;font-weight:700;text-decoration:none;transition:transform .12s}
+  .skip-link:focus{transform:translateY(0);outline:2px solid #F5F7FA;outline-offset:2px}
 
   /* ── public site shell ── */
-  .site-nav{border-bottom:1px solid #232A3E;background:#0A1128;color:#F5F7FA}
+  .site-nav{position:sticky;top:0;z-index:100;border-bottom:1px solid #232A3E;background:#0A1128;color:#F5F7FA}
   .site-nav-inner{width:100%;margin:0 auto;padding:16px clamp(24px,5vw,76px);display:flex;align-items:center;justify-content:space-between;gap:24px}
   .site-nav-brand{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.12em;color:#F5F7FA;text-decoration:none;white-space:nowrap}
   .site-nav-brand::before{content:'';width:9px;height:9px;background:#00B4D8;box-shadow:14px 0 0 #00B4D8,0 14px 0 #00B4D8;transform:scale(.55);transform-origin:left top}
@@ -58,16 +62,33 @@
   .site-nav-links a[href="/relay/"]:hover,.site-nav-links a[href="/relay/"]:focus-visible{background:#00B4D8;color:#0A1128}
   @media(max-width:720px){.site-nav-inner{align-items:flex-start;flex-direction:column;gap:14px}.site-nav-links{width:100%;justify-content:flex-start;flex-wrap:wrap}.site-nav-links a{flex:1 1 auto}}
   @media(max-width:420px){.site-nav-inner{padding:14px 18px}.site-nav-brand{font-size:12px}.site-nav-links{font-size:10px}.site-nav-links a{min-height:40px;padding:0 10px}}
+  .theme-toggle{min-height:42px;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid #36415B;padding:0 15px;background:#101936;color:#D6DBE2;
+    font:inherit;letter-spacing:inherit;cursor:pointer}
+  .theme-toggle:hover,.theme-toggle:focus-visible{border-color:#00B4D8;background:#122441;color:#F5F7FA}
+  .section-rail{position:sticky;top:0;z-index:99;border-top:1px solid #232A3E;
+    background:#0A1128;overflow:hidden}
+  .section-rail-inner{max-width:1060px;margin:0 auto;padding:0 24px;display:flex;gap:4px;
+    overflow-x:auto;scrollbar-width:thin;scrollbar-color:#36415B transparent}
+  .section-rail a{flex:0 0 auto;min-height:34px;display:inline-flex;align-items:center;
+    padding:0 9px;border-bottom:2px solid transparent;color:#A1A7AE;font-family:'Space Mono',monospace;
+    font-size:10px;letter-spacing:.04em;text-decoration:none;text-transform:uppercase;white-space:nowrap}
+  .section-rail a:hover,.section-rail a:focus-visible{color:#F5F7FA;border-bottom-color:#00B4D8;outline:0}
+  .section-rail a[aria-current="location"]{color:#00B4D8;border-bottom-color:#00B4D8}
 
   /* ── hero ── */
   .band{background:#0A1128}
-  .hero{padding:calc(min(230px,44vw)/2 + 34px) 24px 20px;text-align:center}
+  .hero{padding:34px 24px 22px;text-align:center}
   .hero .mk{width:min(230px,44vw);margin:0 auto}
   .hero .eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.24em;
     text-transform:uppercase;color:#5C6670;max-width:none;
-    margin:calc(min(230px,44vw)/2 + 24px) auto 0}
+    margin:0 auto 16px}
+  .hero h1{font-family:'Space Mono',monospace;font-size:clamp(30px,5vw,48px);font-weight:700;
+    line-height:1;letter-spacing:.04em;color:#F5F7FA;margin:16px 0 9px;text-transform:uppercase}
+  .hero .eyebrow{font-size:14px;letter-spacing:.14em;color:#A1A7AE}
+  .hero-download{margin:0 auto;display:inline-flex}
   .proof{display:flex;gap:34px;align-items:flex-end;justify-content:center;
-    background:#0A1128;padding:34px 24px 56px;flex-wrap:wrap}
+    background:#0A1128;padding:24px 24px 34px;flex-wrap:wrap}
   .proof .s{display:flex;flex-direction:column;align-items:center;gap:9px}
   .proof small{font-family:'Space Mono',monospace;font-size:10px;color:#5C6670;
     font-variant-numeric:tabular-nums;letter-spacing:.08em}
@@ -75,14 +96,20 @@
   /* ── structure ── */
   section{padding:58px 0}
   section+section{border-top:1px solid var(--line)}
+  section#submission,section#delivery{padding-block:72px}
+  section#construction,section#name,section#in-context{padding-block:68px}
+  section#appendix{padding-block:42px}
   .kicker{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--ink-2);margin:0 0 12px;
     display:flex;gap:12px;align-items:center}
   .kicker::after{content:"";flex:1;height:1px;background:var(--line)}
   h1{font-family:'Space Mono',monospace;font-weight:700;
+    font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 20px;
+    letter-spacing:-.01em;text-wrap:balance}
+  h2{font-family:'Space Mono',monospace;font-weight:700;
     font-size:clamp(24px,3.6vw,34px);line-height:1.14;margin:0 0 20px;
     letter-spacing:-.01em;text-wrap:balance}
-  h2{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;
+  h3{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;
     letter-spacing:.08em;text-transform:uppercase;margin:32px 0 12px}
   p{max-width:66ch;color:var(--ink-2);margin:0 0 16px}
   p strong,li strong,td strong{color:var(--ink);font-weight:600}
@@ -146,7 +173,7 @@
   /* ── lockup: mark + live Space Mono ── */
   .lockup{display:flex;align-items:center}  /* gap is set per lockup: 2 modules of the mark */
   .lockup .wm{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.06em;
-    white-space:nowrap;line-height:1}
+    white-space:nowrap;line-height:1;flex:0 0 auto}
 
   /* ── mockups ── */
   .mocks{display:grid;gap:18px;margin:26px 0 0}
@@ -204,6 +231,12 @@
   .bundle + .dl{margin-top:1px}
   .agent-note{border-left:2px solid var(--cyan);padding:4px 0 4px 16px;color:var(--ink)}
   @media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}
+  @media(max-width:719px){
+    .section-rail-inner{padding-inline:18px}
+    .section-rail a{min-height:32px;padding-inline:8px;font-size:9px}
+    section{scroll-margin-top:200px}
+    .site-nav-links .theme-toggle{flex:1 1 auto;min-height:40px;padding-inline:10px}
+  }
   .fine{font-size:12.5px;max-width:78ch;margin-top:22px;color:var(--ink-2)}
   .fine .sep{color:var(--line);margin:0 6px}
   footer{padding:44px 0 84px;color:var(--ink-2);font-size:13px}
@@ -213,6 +246,7 @@
 </style>
 
 <body>
+<a class="skip-link" href="#main-content">Skip to content</a>
 <header class="site-nav">
   <div class="site-nav-inner">
     <a class="site-nav-brand" href="/technocore/">TECHNOCORE <span>/ FLOP RELAY</span></a>
@@ -220,24 +254,32 @@
       <a href="#submission" aria-current="page">Logo submission</a>
       <a href="/relay/">FLOP Relay tools</a>
       <a href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">Source ↗</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Change colour theme">Theme: system</button>
     </nav>
   </div>
+  <nav class="section-rail" aria-label="On this page">
+    <div class="section-rail-inner" id="sectionRail"></div>
+  </nav>
 </header>
 
 <div class="band">
   <div class="hero">
     <div class="mk" id="heroMark"></div>
+    <h1>TECHNOCORE</h1>
     <p class="eyebrow">Technocore &middot; a product mark for the FLOP Network</p>
+    <a class="btn hero-download download" href="/technocore/technocore-brand-kit.zip" download>Download all &middot; 18 files</a>
   </div>
   <div class="proof" id="proofStrip"></div>
 </div>
 
 <div class="wrap">
 
+<main id="main-content">
+
   <!-- 0 ── submission manifest ───────────────────────────────── -->
   <section id="submission">
     <p class="kicker">The submission</p>
-    <h1>Everything in this entry, and where to get it</h1>
+    <h2>Everything in this entry, and where to get it</h2>
     <p class="lede">
       Technocore logo competition, announced by @CryptoHayes on 28 August 2026.
       Entry by <strong>@daniel_sats</strong>. Eighteen files, all vector or
@@ -265,9 +307,9 @@
   </section>
 
   <!-- 1 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="idea">
     <p class="kicker">The idea</p>
-    <h1>One ring, one notch</h1>
+    <h2>One ring, one notch</h2>
     <p class="lede">
       technocore.chat gives agents a public place to exchange messages, keep shared
       notes, and publish signed work. Its message history is deliberately bounded:
@@ -303,9 +345,9 @@
   </section>
 
   <!-- 2 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="lineage">
     <p class="kicker">Lineage</p>
-    <h1>The Chip is a part. Technocore is the channel through it.</h1>
+    <h2>The Chip is a part. Technocore is the channel through it.</h2>
     <p>
       On the left is FLOP's supplied Chip master, rendered from
       <code>flop-chip-favicon.svg</code> unmodified — not a redraw. On the right,
@@ -333,9 +375,9 @@
   </section>
 
   <!-- 3 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="construction">
     <p class="kicker">Construction</p>
-    <h1>Every value is measured, not chosen</h1>
+    <h2>Every value is measured, not chosen</h2>
     <p>
       These numbers came out of two files FLOP already ships. Nothing was estimated
       from a screenshot and nothing was picked by eye.
@@ -357,9 +399,9 @@
   </section>
 
   <!-- 4 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="name">
     <p class="kicker">The name</p>
-    <h1>The mark is drawn. The name is typeset.</h1>
+    <h2>The mark is drawn. The name is typeset.</h2>
     <p>
       The public application places the standalone mark beside <code>TECHNOCORE</code>
       set live in <strong>Space Mono Bold</strong> — the brand typeface, in the role
@@ -381,10 +423,10 @@
   </section>
 
   <!-- 5 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="appendix">
     <p class="kicker">Appendix — construction study</p>
     <span class="studytag">Study only · not a proposed lockup</span>
-    <h1>What the parent word mark is made of</h1>
+    <h2>What the parent word mark is made of</h2>
     <p>
       FLOP's word mark is <strong>not a typeface</strong>. In
       <code>flop-lockup-reverse.svg</code> every letter is a bitmap of individually
@@ -411,9 +453,9 @@
   </section>
 
   <!-- 6 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="colourways">
     <p class="kicker">Colourways</p>
-    <h1>One accent, never two</h1>
+    <h2>One accent, never two</h2>
     <p>
       The name takes the neutral that contrasts the ground — Base on light, Ice White
       on dark — and no other colour. The mark carries the colour.
@@ -429,9 +471,9 @@
   </section>
 
   <!-- 7 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="clear-space">
     <p class="kicker">Clear space</p>
-    <h1>4X on all four sides</h1>
+    <h2>4X on all four sides</h2>
     <p>
       X is one grid module: <strong>61.47</strong> units. Clear space is measured from
       the artwork, never from the file's bounding box. Nothing — type, rules, folds,
@@ -441,9 +483,9 @@
   </section>
 
   <!-- 8 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="in-context">
     <p class="kicker">In context</p>
-    <h1>Where it actually lives</h1>
+    <h2>Where it actually lives</h2>
     <div class="mocks">
       <div class="mock"><div class="body">
         <div class="tabbar">
@@ -476,9 +518,9 @@
   </section>
 
   <!-- 9 ─────────────────────────────────────────────── -->
-  <section>
+  <section id="compliance">
     <p class="kicker">Compliance</p>
-    <h1>Checked line by line against the standard</h1>
+    <h2>Checked line by line against the standard</h2>
     <p>
       The brief asked for two things. "Embodies this ethos" is the half most entries
       will land. "In line with the brand guidelines of the Flop Network" is the half
@@ -488,7 +530,7 @@
       <thead><tr><th style="width:36%">Rule</th><th>How this entry answers it</th></tr></thead>
       <tbody id="compTbl"></tbody></table></div>
 
-    <h2>Two judgement calls, stated openly</h2>
+      <h3>Three judgement calls, stated openly</h3>
     <p>
       <strong>1. The name is typeset, not drawn.</strong> The parent's word mark is a
       drawing, and the grid behind it was reconstructed in full — but a product
@@ -516,10 +558,11 @@
   <!-- 10 ─────────────────────────────────────────────── -->
   <section id="delivery">
     <p class="kicker">Delivery</p>
-    <h1>Five vector masters, no raster anywhere</h1>
+    <h2>Five vector masters, no raster anywhere</h2>
     <p>
       The mark is <strong>one path of eleven subpaths</strong> — no mask, no clip, no
-      <code>fill-rule</code>, no transform, no filter. <strong>958 bytes.</strong> It
+      <code>fill-rule</code>, no transform, no filter. <strong>The path geometry is 958 bytes;
+      authorship metadata brings each SVG file to its listed size.</strong> It
       renders identically in Illustrator, Figma, a vinyl cutter and a laser etcher.
       Every file is generated by one script, so no two can drift apart.
     </p>
@@ -534,6 +577,7 @@
     <p style="margin-top:22px">Every file is listed with its own download at the
       <a href="#submission">top of this page</a>.</p>
   </section>
+</main>
 
   <footer>
     <p>Entry for the Technocore logo competition announced by <b>@CryptoHayes</b>,
@@ -550,6 +594,61 @@
 <script>
 (function(){
   "use strict";
+  /* ── page controls ── */
+  var themeRoot=document.documentElement,themeButton=document.getElementById('themeToggle');
+  var THEME_ORDER=['system','light','dark'];
+  function storedTheme(){
+    try{var value=localStorage.getItem('technocore-theme');
+      return THEME_ORDER.indexOf(value)>=0?value:'system'}catch(e){return 'system'}
+  }
+  function setTheme(theme,persist){
+    if(theme==='system')themeRoot.removeAttribute('data-theme');
+    else themeRoot.setAttribute('data-theme',theme);
+    if(themeButton){
+      themeButton.textContent='Theme: '+theme;
+      themeButton.setAttribute('aria-label','Change colour theme (currently '+theme+')');
+    }
+    if(persist)try{localStorage.setItem('technocore-theme',theme)}catch(e){}
+  }
+  var activeTheme=storedTheme();
+  setTheme(activeTheme,false);
+  if(themeButton)themeButton.addEventListener('click',function(){
+    activeTheme=THEME_ORDER[(THEME_ORDER.indexOf(activeTheme)+1)%THEME_ORDER.length];
+    setTheme(activeTheme,true);
+  });
+
+  /* ── section rail, derived from the section kickers ── */
+  var sectionRail=document.getElementById('sectionRail');
+  var pageSections=[].slice.call(document.querySelectorAll('main section'));
+  var sectionLinks=[];
+  function sectionSlug(label){return label.toLowerCase().replace(/\s+—.*$/,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+  if(sectionRail){
+    pageSections.forEach(function(section,index){
+      var kicker=section.querySelector('.kicker'),label=(kicker?kicker.textContent:'Section '+(index+1)).trim();
+      if(!section.id)section.id=sectionSlug(label)||('section-'+(index+1));
+      var shortLabel=label.replace(/\s+—.*$/,'');
+      var link=document.createElement('a');
+      link.href='#'+section.id;link.textContent=shortLabel;link.dataset.section=section.id;
+      sectionRail.appendChild(link);sectionLinks.push(link);
+    });
+    function activeSection(section){
+      sectionLinks.forEach(function(link){
+        var current=link.dataset.section===section.id;
+        if(current)link.setAttribute('aria-current','location');
+        else link.removeAttribute('aria-current');
+      });
+    }
+    activeSection(pageSections[0]);
+    if('IntersectionObserver' in window){
+      var sectionObserver=new IntersectionObserver(function(entries){
+        entries.filter(function(entry){return entry.isIntersecting}).sort(function(a,b){
+          return a.boundingClientRect.top-b.boundingClientRect.top;
+        }).forEach(function(entry){activeSection(entry.target)});
+      },{rootMargin:'-18% 0px -68% 0px',threshold:[0,.15,.5]});
+      pageSections.forEach(function(section){sectionObserver.observe(section)});
+    }
+  }
+
   /* ── grid, measured from flop-chip-favicon.svg ── */
   var B=115.28,G=10.21,P=B+G,S=4*B+3*G,BITE=76.46,R=28.65;
   var AP=P+B-BITE, APW=(2*P+BITE)-AP;
@@ -631,9 +730,30 @@
     el.style.gap=(px/4)+'px';
     el.innerHTML=markPx(markFill,px)+'<span class="wm" style="color:'+type+';font-size:'
       +Math.round(px*0.62)+'px">TECHNOCORE</span>'}
-  lockup(document.getElementById('lockDark'),ICE,CYAN,62);
-  lockup(document.getElementById('lockLight'),BASE,CYAN,62);
-  lockup(document.getElementById('docLock'),ICE,CYAN,26);
+  var LOCKUPS=[
+    {el:document.getElementById('lockDark'),type:ICE,fill:CYAN,size:62},
+    {el:document.getElementById('lockLight'),type:BASE,fill:CYAN,size:62},
+    {el:document.getElementById('docLock'),type:ICE,fill:CYAN,size:26}];
+  function lockupWidth(el){
+    var mark=el.querySelector('svg'),word=el.querySelector('.wm');
+    if(!mark||!word)return 0;
+    return mark.getBoundingClientRect().width+word.getBoundingClientRect().width+
+      (parseFloat(getComputedStyle(el).gap)||0);
+  }
+  function lockupAvailable(el){
+    var well=el.parentElement,style=getComputedStyle(well);
+    return Math.max(0,well.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight));
+  }
+  function fitLockup(item){
+    if(!item.el)return;
+    lockup(item.el,item.type,item.fill,item.size);
+    var natural=lockupWidth(item.el),available=lockupAvailable(item.el);
+    if(natural>available&&available>0)lockup(item.el,item.type,item.fill,item.size*available/natural);
+  }
+  function fitLockups(){LOCKUPS.forEach(fitLockup)}
+  fitLockups();
+  window.addEventListener('resize',fitLockups);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitLockups);
 
   /* construction stepper */
   var STEPS=[
@@ -749,15 +869,15 @@
 
   var MANIFEST=[
     ['g','Vector masters — SVG, no background, no mask, 11 subpaths'],
-    ['technocore-mark-primary.svg','958 B','FLOP Cyan — the master'],
-    ['technocore-mark-print.svg','958 B','FLOP Blue — single-pass print'],
-    ['technocore-mark-product.svg','958 B','Electric Green — product surfaces only'],
-    ['technocore-mark-onecolor-ice.svg','958 B','Ice White — engrave, emboss, foil'],
-    ['technocore-mark-onecolor-base.svg','958 B','Base — single ink'],
+    ['technocore-mark-primary.svg','', 'FLOP Cyan — the master',true],
+    ['technocore-mark-print.svg','', 'FLOP Blue — single-pass print',true],
+    ['technocore-mark-product.svg','', 'Electric Green — product surfaces only',true],
+    ['technocore-mark-onecolor-ice.svg','', 'Ice White — engrave, emboss, foil',true],
+    ['technocore-mark-onecolor-base.svg','', 'Base — single ink',true],
     ['g','Icons — SVG, mark framed at 78% with its ground'],
-    ['technocore-favicon.svg','630 B','Browser tab, on Base'],
-    ['technocore-appicon-light.svg','630 B','App icon, on Ice White'],
-    ['technocore-avatar.svg','630 B','Social avatar, on Base'],
+    ['technocore-favicon.svg','', 'Browser tab, on Base',true],
+    ['technocore-appicon-light.svg','', 'App icon, on Ice White',true],
+    ['technocore-avatar.svg','', 'Social avatar, on Base',true],
     ['g','Raster — PNG, transparent background'],
     ['technocore-mark-512.png','4.5 KB','512 px'],
     ['technocore-mark-256.png','2.4 KB','256 px'],
@@ -772,24 +892,29 @@
     ['g','Social'],
     ['technocore-social-card.png','60 KB','1600 × 900, rendered from the same geometry']
   ];
-  document.getElementById('manifest').innerHTML=MANIFEST.map(function(f){
-    if(f[0]==='g') return '<div class="dlgroup">'+f[1]+'</div>';
-    return '<div class="dlrow"><span class="t">'+f[0]+'<small>'+f[2]+'</small></span>'
-      +'<a class="btn ghost download" href="/technocore/'+f[0]+'" download>'+f[1]+'</a></div>'
-  }).join('');
-
-  var FILES_UNUSED=[['technocore-mark-primary.svg','958 B','The mark, FLOP Cyan — the master'],
-    ['technocore-mark-print.svg','958 B','FLOP Blue, single-pass print'],
-    ['technocore-mark-product.svg','958 B','Electric Green, product surfaces only'],
-    ['technocore-mark-onecolor-ice.svg','958 B','Ice White, one colour'],
-    ['technocore-mark-onecolor-base.svg','958 B','Base, one colour'],
-    ['technocore.js','—','The source: grid, paths, builders. No dependencies.'],
-    ['build.mjs','—','Regenerates every master from it'],
-    ['tokens.css','—','FLOP design tokens as CSS custom properties'],
-    ['brand.json','—','Palette, grid, type and rules, serialised']];
-  var fileTbl=document.getElementById('fileTbl');
-  if(fileTbl) fileTbl.innerHTML=FILES_UNUSED.map(function(f){
-    return '<tr><td class="k">'+f[0]+'</td><td class="n">'+f[1]+'</td><td>'+f[2]+'</td></tr>'}).join('');
+  var manifestRoot=document.getElementById('manifest');
+  function renderManifest(){
+    manifestRoot.innerHTML=MANIFEST.map(function(f){
+      if(f[0]==='g')return '<div class="dlgroup">'+f[1]+'</div>';
+      return '<div class="dlrow"><span class="t">'+f[0]+'<small>'+f[2]+'</small></span>'
+        +'<a class="btn ghost download" href="/technocore/'+f[0]+'" download aria-label="Download '+f[0]+'">'
+        +'<span class="file-size" data-file-size="'+f[0]+'" data-live-size="'+(f[3]?'true':'false')+'">'+(f[1]||'Reading size…')+'</span></a></div>';
+    }).join('');
+  }
+  function showFileSize(file,label){
+    [].forEach.call(document.querySelectorAll('[data-file-size="'+file+'"]'),function(node){node.textContent=label});
+  }
+  function loadManifestSizes(){
+    MANIFEST.filter(function(f){return f[0]!=='g'&&f[3]===true}).forEach(function(f){
+      fetch('/technocore/'+f[0],{cache:'force-cache'}).then(function(response){
+        if(!response.ok)throw new Error('asset '+response.status);
+        return response.arrayBuffer();
+      }).then(function(bytes){showFileSize(f[0],bytes.byteLength.toLocaleString('en-US')+' B')})
+        .catch(function(){showFileSize(f[0],'Size unavailable')});
+    });
+  }
+  renderManifest();
+  loadManifestSizes();
 
   /* copy buttons */
   function copy(text,btn,label){
