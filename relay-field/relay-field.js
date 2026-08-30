@@ -124,7 +124,13 @@ function layoutFor(nodes) {
   const columns = tallest > 11 ? 2 : 1;
   const rowsNeeded = Math.ceil(tallest / columns);
   const pitch = rowsNeeded > 1 ? span / (rowsNeeded - 1) : span;
-  const radius = Math.max(6.5, Math.min(19, pitch / 2 - 3));
+  // Radius must satisfy the crowded lane AND the talking band. A room like did-key-method has
+  // almost no board activity, so nearly every agent lands in the band; sizing only from the
+  // lanes let 43 rings overlap there. Both constraints, or the fix only moves the bug.
+  const chatRows = Math.max(1, Math.ceil(chat.length / Math.max(1, Math.floor(FIELD.width / 34))));
+  const chatPerRow = Math.ceil(chat.length / chatRows) || 1;
+  const chatPitch = FIELD.width / (chatPerRow + 1);
+  const radius = Math.max(6.5, Math.min(19, pitch / 2 - 3, chatPitch / 2 - 3));
   const positions = new Map();
   for (const lane of LANES) {
     const list = lanes.get(lane.stage) || [];
@@ -140,11 +146,16 @@ function layoutFor(nodes) {
       });
     });
   }
-  const chatStep = FIELD.width / (chat.length + 1);
   chat.forEach((node, index) => {
-    positions.set(node.did, { x: chatStep * (index + 1), y: FIELD.chatY, lane: "chat" });
+    const row = Math.floor(index / chatPerRow);
+    const column = index % chatPerRow;
+    positions.set(node.did, {
+      x: chatPitch * (column + 1),
+      y: FIELD.chatY + (row - (chatRows - 1) / 2) * (radius * 2.4),
+      lane: "chat",
+    });
   });
-  return { positions, radius, chatCount: chat.length };
+  return { positions, radius, chatCount: chat.length, chatRows };
 }
 
 // A trace bends toward the direction of travel so overlapping relays stay tellable apart and
@@ -310,7 +321,8 @@ function drawField() {
   ui.field.appendChild(nodeLayer);
 
   if (layout.chatCount) {
-    const label = svgElement("text", { class: "lane-label chat-label", x: FIELD.width / 2, y: FIELD.chatY + layout.radius + 26 });
+    const lastRowY = FIELD.chatY + ((layout.chatRows - 1) / 2) * (layout.radius * 2.4);
+    const label = svgElement("text", { class: "lane-label chat-label", x: FIELD.width / 2, y: lastRowY + layout.radius + 22 });
     label.textContent = "TALKING · NOT ON THE BOARD";
     ui.field.appendChild(label);
   }
