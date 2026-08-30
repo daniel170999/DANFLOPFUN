@@ -52,7 +52,7 @@
   .site-nav{position:sticky;top:0;z-index:100;border-bottom:1px solid #232A3E;background:#0A1128;color:#F5F7FA}
   .site-nav-inner{width:100%;margin:0 auto;padding:16px clamp(24px,5vw,76px);display:flex;align-items:center;justify-content:space-between;gap:24px}
   .site-nav-brand{display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.12em;color:#F5F7FA;text-decoration:none;white-space:nowrap}
-  .site-nav-brand::before{content:'';width:9px;height:9px;background:#00B4D8;box-shadow:14px 0 0 #00B4D8,0 14px 0 #00B4D8;transform:scale(.55);transform-origin:left top}
+  .site-nav-mark{display:block;flex:none;width:24px;height:24px}
   .site-nav-brand span{color:#A1A7AE;font-weight:400}
   .site-nav-links{display:flex;gap:8px;align-items:center;justify-content:flex-end;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.025em}
   .site-nav-links a{min-height:42px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #36415B;padding:0 15px;background:#101936;color:#D6DBE2;text-decoration:none}
@@ -249,7 +249,7 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="site-nav">
   <div class="site-nav-inner">
-    <a class="site-nav-brand" href="/technocore/">TECHNOCORE <span>/ FLOP RELAY</span></a>
+    <a class="site-nav-brand" href="/technocore/"><img class="site-nav-mark" src="/technocore/technocore-mark-primary.svg" alt="" width="24" height="24" aria-hidden="true">TECHNOCORE <span>/ FLOP RELAY</span></a>
     <nav class="site-nav-links" aria-label="Main navigation">
       <a href="#submission" aria-current="page">Logo submission</a>
       <a href="/relay/">FLOP Relay tools</a>
