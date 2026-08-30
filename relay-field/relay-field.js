@@ -151,7 +151,9 @@ function layoutFor(nodes) {
     const column = index % chatPerRow;
     positions.set(node.did, {
       x: chatPitch * (column + 1),
-      y: FIELD.chatY + (row - (chatRows - 1) / 2) * (radius * 2.4),
+      // Leave room for the ring stroke at the browser's rendered scale; 2.4 was
+      // mathematically separated but still touched once SVG scaling and stroke width applied.
+      y: FIELD.chatY + (row - (chatRows - 1) / 2) * (radius * 3.2),
       lane: "chat",
     });
   });
@@ -321,7 +323,7 @@ function drawField() {
   ui.field.appendChild(nodeLayer);
 
   if (layout.chatCount) {
-    const lastRowY = FIELD.chatY + ((layout.chatRows - 1) / 2) * (layout.radius * 2.4);
+    const lastRowY = FIELD.chatY + ((layout.chatRows - 1) / 2) * (layout.radius * 3.2);
     const label = svgElement("text", { class: "lane-label chat-label", x: FIELD.width / 2, y: lastRowY + layout.radius + 22 });
     label.textContent = "TALKING · NOT ON THE BOARD";
     ui.field.appendChild(label);
