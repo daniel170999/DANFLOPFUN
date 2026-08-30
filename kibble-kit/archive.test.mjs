@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   archiveHasSufficientEvidence, archiveNoCoverageText, archiveQueryUrl, archiveStats,
-  classifyArchiveQuestion, detectGap, evaluateArchiveReply, groupByDay, highestSeq, isSigned,
+  archiveAggregateStats, archiveReplyPrompt, classifyArchiveQuestion, detectGap, evaluateArchiveReply, groupByDay, highestSeq, isSigned,
   mergeBucket, queryRecords, selectArchivable, selectArchiveEvidence,
 } from "./archive-core.mjs";
 
@@ -142,4 +142,32 @@ test("archive reply gate requires exact evidence and the archive URL", () => {
   assert.equal(evaluateArchiveReply(answer.replace("seq 121", "seq 999"), { room: "kibble", classification, records, queryUrl: url }).ok, false);
   assert.equal(evaluateArchiveReply(answer.replace(url, "https://example.com"), { room: "kibble", classification, records, queryUrl: url }).ok, false);
   assert.match(archiveNoCoverageText("kibble", url), /only started at 2026-08-27T10:50:00Z \(UTC\)/u);
+});
+
+test("aggregate archive questions require explicit scope and grounded computed counts", () => {
+  const classification = classifyArchiveQuestion({ text: "How many captured records, distinct DIDs and jobs are in this archive?" });
+  assert.equal(classification.kind, "aggregate");
+  assert.equal(classifyArchiveQuestion({ text: "How is reputation calculated with one room per DID?" }), null, "a self-referential room question is not an archive aggregate");
+  const records = [
+    { room: "kibble", seq: 120, ts: "2026-08-27T10:00:00.000Z", did: "did:key:a", text: "JOB v1 | k1234567890 | explain | A job | body" },
+    { room: "kibble", seq: 121, ts: "2026-08-27T10:00:01.000Z", did: "did:key:b", text: "CLAIM v1 | k1234567890 | worker" },
+    { room: "kibble", seq: 122, ts: "2026-08-27T10:00:02.000Z", did: "did:key:b", text: "RESULT v1 | k1234567890 | useful result" },
+    { room: "kibble", seq: 123, ts: "2026-08-27T10:00:03.000Z", did: "did:key:c", text: "ATTEST v1 | k1234567890 | useful | rh:0123456789abcdef | Success condition: body" },
+  ];
+  const stats = archiveAggregateStats(records);
+  assert.deepEqual(stats, {
+    scope: "captured_archive_rows",
+    capturedRecords: 4,
+    indexedRecords: null,
+    sampledBuckets: null,
+    distinctDids: 3,
+    distinctJobs: 1,
+    multiAgentJobs: 1,
+    kinds: { job: 1, claim: 1, deliver: 1, attest: 1, chat: 0 },
+  });
+  const url = archiveQueryUrl("https://agent.example", "kibble", classification, "2026-08-27");
+  const answer = JSON.stringify({ answer: `The captured archive sample contains 4 captured records, 3 distinct DIDs, 1 distinct job and 1 multi-agent job. The rows show seq 120 at 2026-08-27T10:00:00.000Z and seq 123 at 2026-08-27T10:00:03.000Z; reproduce the sample at ${url}.`, confident: true });
+  assert.equal(evaluateArchiveReply(answer, { room: "kibble", classification, records, queryUrl: url, stats }).ok, true);
+  assert.equal(evaluateArchiveReply(answer.replace("4 captured", "9 captured"), { room: "kibble", classification, records, queryUrl: url, stats }).reason, "aggregate_stat_not_grounded");
+  assert.match(archiveReplyPrompt("kibble", { text: classification.text }, records, url, stats), /AGGREGATE STATISTICS START/u);
 });

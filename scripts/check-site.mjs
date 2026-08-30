@@ -5,12 +5,19 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Script } from "node:vm";
+import { parseReceiptJsonl } from "../kibble-kit/receipts-core.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const html = await readFile(join(root, "index.html"), "utf8");
 const relayHtml = await readFile(join(root, "relay", "index.html"), "utf8");
+const relayFieldHtml = await readFile(join(root, "relay-field", "index.html"), "utf8");
+const relayFieldCss = await readFile(join(root, "relay-field", "relay-field.css"), "utf8");
+const relayFieldJs = await readFile(join(root, "relay-field", "relay-field.js"), "utf8");
 const technocoreHtml = await readFile(join(root, "technocore", "index.html"), "utf8");
 const workflow = await readFile(join(root, ".github", "workflows", "agent-pulse.yml"), "utf8");
+const receiptWorkflow = await readFile(join(root, ".github", "workflows", "proof-receipts.yml"), "utf8");
+const receipts = await readFile(join(root, "proof", "receipts.jsonl"), "utf8");
+const readme = await readFile(join(root, "README.md"), "utf8");
 const vercel = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
 
 function inlineFunctionSource(source, name) {
@@ -124,18 +131,63 @@ assert.equal(new Set(sources).size, sources.length, "vercel.json contains duplic
 for (const rewrite of vercel.rewrites) {
   assert.match(rewrite.destination, /^https:\/\//u, `${rewrite.source} must target HTTPS`);
 }
+assert.deepEqual(
+  vercel.rewrites.find((rewrite) => rewrite.source === "/api/agent/graph"),
+  { source: "/api/agent/graph", destination: "https://daniel-sats-agent.danielsatsflopagent.workers.dev/graph" },
+  "Relay Field must use the fixed public Worker graph rewrite",
+);
 
 assert(!/^\s*schedule\s*:/mu.test(workflow), "the public workflow must remain manual-only");
 assert.match(workflow, /^\s*workflow_dispatch\s*:/mu, "the public workflow needs a manual dispatch trigger");
 assert.match(workflow, /inputs:\s*[\s\S]*use_llm:/u, "the workflow needs an explicit model-call opt-in");
 assert(html.includes('var resultPrefix = "RESULT v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical RESULT v1 lines");
 assert(html.includes('var attestPrefix = "ATTEST v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical ATTEST v1 lines");
-assert.equal(relayHtml.replaceAll("https://danflopfun.vercel.app/relay/", "https://danflopfun.vercel.app/"), html, "Relay must retain the complete field-kit implementation, apart from its canonical public route");
+const relayComparableHtml = relayHtml
+  // Relay Field is a new sibling route; keep the legacy field-kit parity check
+  // focused on the copied implementation rather than its additive navigation link.
+  .replace('<a href="/relay-field/">Relay Field</a>', "")
+  .replaceAll("https://danflopfun.vercel.app/relay/", "https://danflopfun.vercel.app/");
+assert.equal(relayComparableHtml, html, "Relay must retain the complete field-kit implementation, apart from its canonical public route");
 assert(relayHtml.includes('<link rel="canonical" href="https://danflopfun.vercel.app/relay/"'), "Relay must declare its own canonical URL");
 for (const panel of ["guide", "signals", "briefing", "live-agent"]) {
   assert(relayHtml.includes(`data-tab="${panel}"`), `Relay must retain the ${panel} tab`);
   assert(relayHtml.includes(`data-panel="${panel}"`), `Relay must retain the ${panel} panel`);
 }
+
+assert(relayFieldHtml.includes('<link rel="stylesheet" href="./relay-field.css"'), "Relay Field must keep styling replaceable from its data code");
+assert(relayFieldHtml.includes('<script type="module" src="./relay-field.js"></script>'), "Relay Field must load its functional data layer");
+assert(relayFieldHtml.includes('href="https://danflopfun.vercel.app/relay-field/"'), "Relay Field must declare its canonical URL");
+// Guard the controls by the ids the data layer actually binds to, not by their button copy.
+// The original form of this assertion pinned the visible labels ("Play 40s", "Jump busiest"),
+// so a wording change during the UI pass failed the check while every control it protects was
+// present and working. Ids are the real contract between markup and behaviour.
+assert(relayFieldHtml.includes("Time scrubber"), "Relay Field must label the time scrubber");
+for (const control of ["scrubber-range", "play", "busiest", "live"]) {
+  assert(relayFieldHtml.includes(`id="${control}"`), `Relay Field must ship the ${control} control`);
+  assert(relayFieldJs.includes(`getElementById("${control}")`), `Relay Field must bind the ${control} control`);
+}
+assert(relayFieldHtml.includes('id="density"'), "Relay Field must expose the archive density strip beside the scrubber");
+assert(relayFieldJs.includes('const API_PATH = "/api/agent/graph"'), "Relay Field must read the Worker graph endpoint");
+assert(!relayFieldJs.includes("/archive"), "Relay Field browser code must not walk the public archive");
+assert(relayFieldJs.includes("scheduleLivePolling") && relayFieldJs.includes("30_000"), "Relay Field must refresh the live head through a bounded read-only poll");
+assert(relayFieldJs.includes("partnerByDid"), "Relay Field rings must orient toward their latest visible collaborator");
+new Script(relayFieldJs, { filename: "relay-field.js" });
+// Same reasoning: the property is that the field sits on a module-grid substrate defined in
+// CSS, not that the cell happens to be 2rem. Pinning the literal value made a legitimate
+// spacing change look like a regression.
+assert.match(relayFieldCss, /\.field-shell\s*\{[^}]*background-image:\s*linear-gradient/u, "Relay Field must expose a module-grid substrate");
+assert.match(relayFieldCss, /\.field-shell\s*\{[^}]*background-size:\s*[\d.]+rem\s+[\d.]+rem/u, "Relay Field module grid must set an explicit cell size");
+
+assert.match(receiptWorkflow, /^\s*schedule:\s*$/mu, "receipt workflow must run on a daily schedule");
+assert.match(receiptWorkflow, /permissions:\s*\n\s*contents:\s*write/u, "receipt workflow needs only repository contents write permission");
+assert(receiptWorkflow.includes("proof/receipts.jsonl"), "receipt workflow must publish the append-only JSONL ledger");
+const receiptRows = parseReceiptJsonl(receipts);
+assert(receiptRows.length > 0, "the public receipt ledger must contain at least one seeded row");
+for (const row of receiptRows) {
+  assert.deepEqual(Object.keys(row).sort(), ["did", "fingerprint", "nonce", "room", "sequence", "signature", "text", "timestamp"].sort(), "receipt rows must contain only the eight public fields");
+}
+assert(readme.includes("@UfukDegen") && readme.includes("https://github.com/UfukNode/Technocore-Live-Workstream"), "README must credit the prior Relay Field work");
+assert(readme.includes("shipped first") && readme.includes("crowd view is a good idea") && /time\s+half/u.test(readme), "README must state the complement plainly");
 
 const technocoreAssets = [
   "technocore-mark-primary.svg", "technocore-mark-512.png", "technocore-mark-print.svg",
@@ -157,6 +209,7 @@ assert(!technocoreHtml.includes('href="/technocore-favicon.svg"'), "Technocore c
 assert(technocoreHtml.includes('href="#submission" aria-current="page">Logo submission</a>'), "Technocore route must make the competition submission its clear primary navigation item");
 assert(!technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must not clutter its primary navigation with the brand-kit anchor");
 assert(technocoreHtml.includes('href="/relay/">FLOP Relay tools</a>'), "Technocore route must retain a prominent route back to the full FLOP Relay field kit");
+assert(technocoreHtml.includes('href="/relay-field/">Relay Field</a>'), "Technocore route must link the Relay Field next to the field kit");
 assert(technocoreHtml.includes('.site-nav-links a{min-height:42px;display:inline-flex;'), "Technocore navigation controls must have an explicit accessible hit area");
 assert(technocoreHtml.includes('.site-nav-links a[aria-current="page"]{border-color:#00B4D8;background:#00B4D8;color:#0A1128}'), "Technocore navigation must visibly highlight the active competition destination");
 assert.match(technocoreHtml, /<section id="delivery">\s*<p class="kicker">Delivery<\/p>/u, "the brand-kit destination must land on the Delivery section");

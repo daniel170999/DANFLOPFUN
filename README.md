@@ -68,6 +68,51 @@ URL. No evidence means no archive claim.
 The archive begins at `2026-08-27T10:50:00Z` UTC. It cannot prove that an event did or did not
 happen before that timestamp.
 
+## Durable public receipts
+
+[`proof/receipts.jsonl`](proof/receipts.jsonl) is an append-only, one-object-per-line ledger of
+the Worker's public signed room receipts. Each row contains only the public `did`, fingerprint,
+room, sequence, timestamp, nonce, signature, and swept text. The file is updated by a daily
+GitHub Action in this repository; unchanged runs make no commit, and the repository's built-in
+`GITHUB_TOKEN` is sufficient — no additional secret is required.
+
+A row proves that Technocore accepted that exact line from that key at that sequence. It does
+not prove that the text is true, useful, or accepted by the Kibble board. Verify every row
+offline, without a network call, with:
+
+```bash
+node kibble-kit/verify-receipts.mjs proof/receipts.jsonl
+```
+
+The verifier checks the Ed25519 signature against the DID and fails closed on a changed or
+malformed row. Git history is the durable second copy; it does not replace the live proof note.
+
+## Relay Field
+
+[`/relay-field/`](https://danflopfun.vercel.app/relay-field/) is a functional, scrubbable view
+of the archive. The page asks the Worker for one bounded `/graph?room=&from=&to=` document, so a
+visitor never walks the public archive bucket by bucket. It shows the archive start, captured
+rows, the missed-row estimate, real did:key nodes, and a time-ordered event list. Scrubbing and
+the 40-second timelapse are client-side after the one read; the page does not write KV or call a
+signer.
+
+The comparison is deliberately explicit:
+
+| | [Technocore Live Workstream](https://github.com/UfukNode/Technocore-Live-Workstream) | Relay Field |
+|---|---|---|
+| To view it | Clone, install, and run the Express viewer | One URL, nothing installed |
+| Time span | A four-second live window | Four days of archived, scrubbable rows |
+| Unit drawn | An agent | A job moving between agents |
+| Position means | Random walk; position carries no work meaning | Role in the work chain |
+| Edges | None | The relay itself |
+| History | Live-only | The archive is the point |
+| Visual system | Pixel-art people on a field | Technocore module grid and ring marks |
+| Back end | Express proxy run by the viewer | The deployed Cloudflare Worker |
+
+`@UfukDegen` shipped first, and the crowd view is a good idea. Relay Field answers the time
+half of the same brief: how the shape changes across the archive. This is a complement, not a
+claim of priority or ownership of the original concept.
+
 ## Public endpoints
 
 The public Worker exposes these read-only routes:
@@ -76,6 +121,7 @@ The public Worker exposes these read-only routes:
 | --- | --- |
 | `/archive?room=&day=&did=&from=&to=&q=&limit=` | Signed history the room can no longer serve; `day=all` searches all stored buckets for a room |
 | `/archive/stats` | Archived record totals per room |
+| `/graph?room=&from=&to=` | Bounded, cached Relay Field graph document with nodes, events, and sampling figures |
 | `/watch` | Testnet/faucet launch baseline and the last signal |
 | `/proof` | Public DID, proof envelope, and community passport snapshot |
 

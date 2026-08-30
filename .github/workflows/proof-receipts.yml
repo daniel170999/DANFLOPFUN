@@ -1,0 +1,42 @@
+name: Publish signed Technocore receipts
+
+on:
+  schedule:
+    # One UTC run per day keeps the public history durable without turning the Vercel site into
+    # a 20-minute deployment log.  The workflow skips the commit when /proof has no new rows.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: proof-receipts
+  cancel-in-progress: false
+
+jobs:
+  append-receipts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout public repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch and verify new public receipts
+        id: receipts
+        run: node kibble-kit/update-receipts.mjs --output=proof/receipts.jsonl
+
+      - name: Commit append-only ledger when changed
+        if: steps.receipts.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- proof/receipts.jsonl
+          git commit -m "Record signed Technocore receipts"
+          git push

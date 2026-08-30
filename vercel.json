@@ -60,6 +60,10 @@
     {
       "source": "/api/agent/news",
       "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/news/v2"
+    },
+    {
+      "source": "/api/agent/graph",
+      "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/graph"
     }
   ]
 }

@@ -1,0 +1,189 @@
+:root {
+  color-scheme: dark;
+  --base: #0a1128;
+  --deep: #060b1b;
+  --surface: #101d40;
+  --line: #2b416d;
+  --line-bright: #5272a5;
+  --paper: #f5f7fa;
+  --muted: #aab8d0;
+  --faint: #7185a8;
+  /* FLOP Network palette, taken from the same tokens the logo submission argues for:
+     Base #0A1128, FLOP Blue #0466C8, FLOP Cyan #00B4D8, Electric Green #32D74B, Grey #5C6670,
+     Ice White #F5F7FA. Electric Green is licensed for product surfaces, and this page is one.
+     The mint and amber this replaces were outside the palette entirely, which is hard to
+     defend on a site whose neighbouring page argues one accent and no invented colours. */
+  --cyan: #00b4d8;
+  --cyan-soft: #7fdcef;
+  --blue: #0466c8;
+  --green: #32d74b;
+  --red: #ff9b92;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; background: var(--base); }
+body { min-width: 320px; margin: 0; overflow-x: hidden; background: var(--base); color: var(--paper); font: 15px/1.5 var(--sans); }
+a { color: var(--cyan); text-underline-offset: 3px; }
+a:hover { color: var(--cyan-soft); }
+button, input, select { font: inherit; }
+button, select, input[type="range"] { accent-color: var(--cyan); }
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+.site-header { min-height: 4rem; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) max(var(--space-4), calc((100% - 1200px) / 2)); border-bottom: 1px solid var(--line); background: var(--deep); }
+.site-header nav { display: flex; flex-wrap: wrap; gap: var(--space-4); font: .7rem var(--mono); }
+.brand { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--paper); font: 800 .8rem var(--mono); letter-spacing: .08em; text-decoration: none; }
+.brand-mark { display: block; width: 1.5rem; height: 1.5rem; color: var(--cyan); }
+.page-shell { width: min(1320px, calc(100% - 2rem)); margin: 0 auto; }
+.intro { padding: var(--space-6) 0 var(--space-4); }
+.eyebrow { margin: 0 0 var(--space-2); color: var(--cyan); font: 800 .68rem var(--mono); letter-spacing: .12em; }
+h1, h2, p { margin-top: 0; }
+h1, h2 { font-family: var(--mono); letter-spacing: -.04em; }
+h1 { max-width: 42rem; margin-bottom: var(--space-3); font-size: clamp(1.75rem, 3.4vw, 2.75rem); line-height: 1.02; }
+h2 { margin-bottom: var(--space-3); font-size: clamp(1.1rem, 2vw, 1.5rem); line-height: 1.1; }
+.lede { max-width: 48rem; margin-bottom: 0; color: var(--muted); }
+.panel { border: 1px solid var(--line); background: var(--surface); }
+.controls { padding: var(--space-6); }
+.section-heading { margin-bottom: var(--space-4); }
+/* The window controls sit with the field they change, not in a wizard step above it. The room
+   picker leads because it is the choice that alters what you see most; the timestamps are a
+   refinement and are sized accordingly. */
+.range-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; margin-bottom: var(--space-4); }
+.field-room { flex: 1 1 15rem; min-width: 0; }
+.field-time { flex: 0 1 11rem; min-width: 0; }
+.field-time input { font-size: .8rem; }
+label { display: grid; gap: var(--space-2); color: var(--muted); font: .72rem var(--mono); }
+select, input[type="datetime-local"] { width: 100%; min-width: 0; min-height: 2.5rem; border: 1px solid var(--line-bright); border-radius: .25rem; padding: 0 var(--space-3); background: var(--deep); color: var(--paper); }
+.form-actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.button { min-height: 2.5rem; border: 1px solid var(--line-bright); border-radius: .25rem; padding: 0 var(--space-4); background: transparent; color: var(--paper); font: 800 .7rem var(--mono); }
+.button:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan-soft); }
+.button.primary { border-color: var(--cyan); background: var(--cyan); color: var(--base); }
+.button.primary:hover:not(:disabled) { background: var(--cyan-soft); color: var(--base); }
+.button:disabled { cursor: not-allowed; opacity: .45; }
+.status { min-height: 1.5em; margin: var(--space-4) 0 0; color: var(--muted); font: .75rem var(--mono); }
+
+.field-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(16rem, .75fr); gap: var(--space-4); margin-top: var(--space-4); }
+.field-panel { min-width: 0; padding: var(--space-4); }
+.panel-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+.panel-heading h2 { margin-bottom: 0; }
+.tag { flex: 0 0 auto; border: 1px solid var(--line-bright); padding: var(--space-1) var(--space-2); color: var(--cyan-soft); font: .65rem var(--mono); }
+/* The substrate is the Technocore module grid from the logo submission: block 115.28 with a
+   10.21 gutter, so the ratio of rule to cell is the mark's own, not an arbitrary graph paper. */
+.field-shell { position: relative; min-width: 0; border: 1px solid var(--line); background-color: var(--deep); background-image: linear-gradient(rgba(0,180,216,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,216,.07) 1px, transparent 1px); background-size: 2.6rem 2.6rem; }
+#field { display: block; width: 100%; height: auto; min-height: 22rem; }
+.empty { position: absolute; inset: 50% var(--space-4) auto; transform: translateY(-50%); color: var(--muted); text-align: center; font: .75rem var(--mono); }
+.scrubber { display: grid; gap: var(--space-2); margin-top: var(--space-4); }
+.density { display: block; width: 100%; height: 2.5rem; border: 1px solid var(--line); background: var(--deep); }
+.density-baseline { stroke: var(--line-bright); stroke-width: 1; }
+.density-line { fill: none; stroke: var(--cyan); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.density-marker { stroke: var(--green); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.scrubber input { width: 100%; min-width: 0; }
+.scrubber-meta { display: flex; justify-content: space-between; gap: var(--space-2); color: var(--faint); font: .65rem var(--mono); }
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0 0; }
+.legend-item { border-left: .25rem solid currentColor; padding: 0 var(--space-2); color: var(--muted); font: .62rem var(--mono); }
+.stage-job { color: var(--paper); }
+.stage-claim { color: var(--blue); }
+.stage-deliver { color: var(--cyan); }
+.stage-attest { color: var(--green); }
+.stage-chat { color: var(--faint); }
+.inspector { display: grid; align-content: start; gap: var(--space-4); min-width: 0; }
+.info-panel { min-width: 0; padding: var(--space-4); }
+.info-panel h2 { margin-bottom: var(--space-2); }
+.info-panel p { color: var(--muted); font-size: .8rem; }
+.facts { display: grid; gap: var(--space-2); margin: var(--space-4) 0 0; }
+.facts div { display: flex; justify-content: space-between; gap: var(--space-3); border-top: 1px solid var(--line); padding-top: var(--space-2); }
+.facts dt, .facts dd { margin: 0; font: .68rem var(--mono); }
+.facts dt { color: var(--faint); }
+.facts dd { color: var(--paper); text-align: right; }
+.selection { min-height: 8rem; max-height: 26rem; overflow: auto; color: var(--muted); font-size: .8rem; }
+.selection p { margin-bottom: var(--space-2); }
+.selection dl { display: grid; gap: var(--space-2); margin: 0; }
+.selection dt { color: var(--faint); font: .65rem var(--mono); }
+.selection dd { margin: 0; overflow-wrap: anywhere; color: var(--paper); font: .72rem var(--mono); }
+.selection a { font: .68rem var(--mono); }
+
+.events { margin: var(--space-4) 0; padding: var(--space-4); }
+.event-list { display: grid; gap: var(--space-2); max-height: 24rem; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.event-row { width: 100%; display: grid; grid-template-columns: 10rem 5rem minmax(0, 1fr); gap: var(--space-3); align-items: baseline; border: 1px solid transparent; padding: var(--space-2); background: var(--deep); color: var(--paper); text-align: left; }
+.event-row:hover, .event-row[aria-current="true"] { border-color: var(--cyan); }
+.event-time, .event-seq, .event-job { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: .68rem var(--mono); }
+.event-time { color: var(--muted); }
+.event-seq { color: var(--faint); }
+.event-job { color: var(--cyan-soft); }
+.event-kind { margin-right: var(--space-2); }
+.page-footer { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-6) 0 var(--space-8); color: var(--faint); font-size: .75rem; }
+.page-footer p { max-width: 48rem; margin: 0; }
+
+/* The visual layer is intentionally replaceable: all data and interaction state lives in JS. */
+
+/* Lane guides. The horizontal axis is the relay order, so the rules are labelled and the eye
+   is told what left-to-right means before it looks at a single ring. */
+.lane-rule { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 6; }
+.lane-label { fill: var(--faint); font: 800 13px var(--mono); letter-spacing: .16em; text-anchor: middle; }
+.chat-label { fill: var(--line-bright); font-size: 11px; }
+
+.trace { fill: none; stroke: var(--line-bright); stroke-width: 1.5; opacity: .38; cursor: pointer; }
+.trace:hover { opacity: .9; }
+.trace.stage-claim { stroke: var(--blue); }
+.trace.stage-deliver { stroke: var(--cyan); }
+.trace.stage-attest { stroke: var(--green); }
+.trace[data-selected="true"] { stroke-width: 3; opacity: 1; }
+#field[data-focus] .trace:not([data-selected="true"]) { opacity: .07; }
+#field[data-focus="job"] .node:not([data-selected="true"]) { opacity: .38; }
+#field[data-focus="did"] .node:not([data-selected="true"]) { opacity: .3; }
+
+.node { cursor: pointer; }
+/* One ring, one notch — the mark itself, drawn as a single gapped stroke so it stays true at
+   every size the lane density produces. */
+.node-ring { fill: none; stroke: var(--line-bright); stroke-width: 2.5; stroke-linecap: butt; transition: stroke .12s; }
+.node-core { fill: var(--cyan-soft); opacity: .55; }
+.node.lane-job .node-ring { stroke: var(--paper); }
+.node.lane-claim .node-ring { stroke: var(--blue); }
+.node.lane-deliver .node-ring { stroke: var(--cyan); }
+.node.lane-attest .node-ring { stroke: var(--green); }
+.node.lane-chat .node-ring { stroke: var(--faint); stroke-width: 1.5; }
+.node.lane-chat .node-core { opacity: .25; }
+.node:hover .node-ring { stroke: var(--paper); }
+.node[data-selected="true"] .node-ring { stroke: var(--paper); stroke-width: 4; }
+.node[data-selected="true"] .node-core { fill: var(--paper); opacity: 1; }
+.node[data-active="true"] .node-core { fill: var(--paper); opacity: 1; }
+
+/* The baton. It travels the trace instead of sitting on it, because a handover is the one
+   thing on this page that is genuinely an event rather than a state. */
+.pulse { stroke: var(--base); stroke-width: 1.5; fill: var(--cyan); }
+.pulse.stage-job { fill: var(--paper); }
+.pulse.stage-claim { fill: var(--blue); }
+.pulse.stage-deliver { fill: var(--cyan); }
+.pulse.stage-attest { fill: var(--green); }
+.pulse.stage-chat { fill: var(--faint); }
+
+@media (max-width: 760px) {
+  .site-header { align-items: start; flex-direction: column; }
+  .field-layout { grid-template-columns: 1fr; }
+  .page-footer { align-items: start; flex-direction: column; }
+  .event-row { grid-template-columns: 8.5rem 4rem minmax(0, 1fr); }
+  /* On a phone the controls must not push the field off the screen. The two timestamps share
+     a row and the actions form a 2x2 grid, which brings the field roughly 250px higher. */
+  .intro { padding: var(--space-4) 0 var(--space-3); }
+  .lede { font-size: .9rem; }
+  .field-room { flex: 1 1 100%; }
+  .field-time { flex: 1 1 calc(50% - var(--space-3)); }
+  .form-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .button { padding: 0 var(--space-2); font-size: .65rem; }
+}
+
+@media (max-width: 420px) {
+  .page-shell { width: min(100% - 1rem, 1200px); }
+  .controls, .field-panel, .info-panel, .events { padding: var(--space-3); }
+  #field { min-height: 14rem; }
+  .event-row { grid-template-columns: 1fr 3.5rem; }
+  .event-job { grid-column: 1 / -1; }
+}
