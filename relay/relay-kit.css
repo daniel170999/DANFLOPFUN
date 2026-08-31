@@ -1,0 +1,142 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Field Kit — skin.
+
+   The kit is a 91KB inline application with 120 bound element ids and 269
+   layout-bearing CSS rules. Rewriting that markup to match the rest of the
+   site would risk the application to change how it looks, which is a bad
+   trade. This file loads AFTER the page's own stylesheet and re-skins it
+   instead: every layout rule is inherited untouched, and only the design
+   language is replaced.
+
+   What made it read as a different website, measured:
+     radii     11 distinct values up to 16px and 999px pills, against 2px
+     body      Inter, against Space Grotesk
+     mono      SFMono/Consolas, against Space Mono, FLOP's brand face
+     green     #84e7b9 mint, against Electric Green #32D74B
+     amber     #ffd074, which is not in the FLOP palette at all
+     surfaces  #0e1b3d / #132247, lighter and bluer than the site's
+
+   Tokens are remapped rather than overridden per rule, so the 269 inherited
+   rules resolve to the system's values on their own.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* the kit's own token names, pointed at the design system's values */
+  --ink: rgb(var(--background));
+  --base: rgb(var(--background));
+  --surface: rgb(var(--card));
+  --surface-raised: rgb(var(--card-elevated));
+  --surface-deep: rgb(var(--background));
+  --line: rgb(var(--border));
+  --line-bright: rgb(var(--border-strong));
+  --paper: rgb(var(--foreground));
+  --muted: rgb(var(--muted-foreground));
+  --faint: rgb(var(--subtle-foreground));
+  --cyan: rgb(var(--primary));
+  --cyan-soft: rgb(var(--primary));
+  --green: rgb(var(--success));
+  --amber: rgb(var(--accent-blue));
+  --red: rgb(var(--danger));
+  --mono: "Space Mono", ui-monospace, Consolas, monospace;
+  --sans: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ── square the corners ────────────────────────────────────────────────────
+   The mark is built from squares and 45° chamfers, so the site is square.
+   Circles stay circles; everything else drops to the system radius. */
+[class]:not(.orbit-ring):not(.proof-core):not(.status-dot):not(.route-node b):not(.step-number):not(.qs-num):not(.agent-step-number) {
+  border-radius: var(--radius) !important;
+}
+.orbit-ring, .proof-core, .status-dot, .route-node b, .step-number, .qs-num, .agent-step-number { border-radius: 50% !important; }
+
+/* ── typography ───────────────────────────────────────────────────────── */
+body { background: rgb(var(--background)); color: rgb(var(--foreground)); font-family: var(--sans); }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.022em; text-wrap: balance; }
+h1 { font-size: clamp(2.25rem, 4.6vw, 3.75rem); line-height: .98; }
+h2 { font-size: clamp(1.5rem, 2.4vw, 2.125rem); line-height: 1.06; }
+h3 { font-size: clamp(1.0625rem, 1.4vw, 1.25rem); line-height: 1.15; }
+.lede { font-size: clamp(1rem, 1.15vw, 1.0625rem); line-height: 1.6; color: rgb(var(--muted-foreground)); }
+.eyebrow, .desk-kicker, .panel-label, .pulse-kicker { font-family: var(--font-mono); letter-spacing: .2em; color: rgb(var(--primary)); text-transform: uppercase; }
+code, kbd, samp, pre, .mono, .did-line, .signer-line, .summary-did, .directory-path { font-family: var(--font-mono); }
+
+/* ── controls, matched to the system's button anatomy ─────────────────── */
+.button {
+  min-height: 44px; padding: 0 var(--sp-5);
+  font: 700 12px/1 var(--font-mono); letter-spacing: .08em;
+  background: rgb(var(--primary)); color: rgb(var(--primary-foreground));
+  border: 1px solid transparent;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+              color var(--dur-1) var(--ease), translate var(--dur-1) var(--ease),
+              box-shadow var(--dur-1) var(--ease);
+}
+.button:hover:not(:disabled) { background: rgb(var(--primary) / .86); border-color: transparent; translate: 0 -1px; box-shadow: 0 6px 26px -6px rgb(var(--primary) / .65); }
+.button:active:not(:disabled) { translate: 0 1px; }
+.button.secondary { background: none; color: rgb(var(--foreground)); border-color: rgb(var(--border-strong)); }
+.button.secondary:hover:not(:disabled) { background: rgb(var(--card-elevated)); border-color: rgb(var(--primary)); box-shadow: none; }
+.button.warn { background: none; color: rgb(var(--accent-blue)); border-color: rgb(var(--accent-blue)); }
+.button.warn:hover:not(:disabled) { background: rgb(var(--accent-blue) / .12); border-color: rgb(var(--accent-blue)); box-shadow: none; }
+.button:disabled { opacity: .42; cursor: not-allowed; }
+.button:focus-visible { outline: 2px solid rgb(var(--ring)); outline-offset: 2px; }
+
+input, textarea, select {
+  font-family: var(--font-mono); font-size: 13px;
+  background: rgb(var(--background)); color: rgb(var(--foreground));
+  border: 1px solid rgb(var(--border-strong));
+  min-height: 44px; padding: 0 var(--sp-3);
+}
+textarea { min-height: 96px; padding: var(--sp-3); line-height: 1.6; }
+input::placeholder, textarea::placeholder { color: rgb(var(--subtle-foreground)); }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid rgb(var(--ring)); outline-offset: 2px; border-color: rgb(var(--primary)); }
+
+/* ── tabs: a segmented control, matching the shell's navigation ───────── */
+.tabs { padding: 4px; background: rgb(var(--card) / .6); border-color: rgb(var(--border)); }
+.tab {
+  min-height: 40px; padding: 0 var(--sp-4);
+  font: 500 13px/1 var(--font-mono); letter-spacing: .04em;
+  color: rgb(var(--muted-foreground)); background: none;
+  transition: color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.tab:hover { color: rgb(var(--foreground)); background: rgb(var(--card-elevated)); }
+.tab[aria-selected="true"] { background: rgb(var(--primary)); color: rgb(var(--primary-foreground)); border-color: transparent; font-weight: 700; }
+.tab-index { opacity: .7; }
+
+/* ── surfaces ─────────────────────────────────────────────────────────── */
+.tab-panel, .brief-card, .signal-card, .protocol-card, .verifier-card, .composer-card,
+.reader-card, .directory-card, .live-agent-card, .tool-panel, .agent-kit, .route-board,
+.proof-monument, .safety-lens, .news-desk, .community-pulse, .quickstart {
+  background: rgb(var(--card));
+  border-color: rgb(var(--border));
+}
+.panel-top, .desk-head, .signal-head, .protocol-head, .verify-head, .monument-top, .block-head { border-color: rgb(var(--border)); }
+.topbar { background: rgb(var(--background) / .78); backdrop-filter: blur(16px) saturate(140%); border-color: rgb(var(--border)); }
+
+/* ── status ───────────────────────────────────────────────────────────── */
+.status-chip { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 6px var(--sp-3); }
+.status-chip.ok { border-color: rgb(var(--success) / .35); background: rgb(var(--success) / .08); color: rgb(var(--success)); }
+.status-chip.busy { border-color: rgb(var(--accent-blue) / .4); background: rgb(var(--accent-blue) / .1); color: rgb(var(--primary)); }
+.status-chip.bad { border-color: rgb(var(--danger) / .4); background: rgb(var(--danger) / .08); color: rgb(var(--danger)); }
+.notice.ok { color: rgb(var(--success)); }
+.notice.warn { color: rgb(var(--accent-blue)); }
+.notice.bad { color: rgb(var(--danger)); }
+
+/* ── the hero reads like the front page's ─────────────────────────────── */
+.hero { border-color: rgb(var(--border)); }
+.hero-grid > * { animation: rise .7s var(--ease) both; }
+.hero-grid > *:nth-child(2) { animation-delay: .1s; }
+.hero-note { border-color: rgb(var(--border)); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; }
+
+/* ── motion, all of it off under reduced-motion ───────────────────────── */
+@keyframes rise { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+.route-step, .qs-step, .brief-card, .signal-card, .protocol-card { transition: border-color var(--dur-2) var(--ease), translate var(--dur-2) var(--ease); }
+.brief-card:hover, .signal-card:hover, .protocol-card:hover { border-color: rgb(var(--border-strong)); translate: 0 -2px; }
+.orbit-ring { animation: spin 34s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-grid > * { animation: none; }
+  .orbit-ring { animation: none; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
+
+/* ── the passphrase suggestion sits with the create action ────────────── */
+#passphrase-suggest { font-weight: 400; }

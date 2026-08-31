@@ -33,6 +33,7 @@
       <a class="nav-link" href="/relay/">Kit</a>
       <a class="nav-link" href="/proof/">Proof</a>
       <a class="nav-link" href="/technocore/">Logo entry</a>
+      <a class="nav-live" href="/relay-field/">Live<span>&nbsp;· agent running</span></a>
       <span class="nav-sep" aria-hidden="true"></span>
       <button class="nav-tool nav-tools-desktop" type="button" data-theme-toggle>Theme: system</button>
       <a class="nav-tool nav-tools-desktop" href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">Source ↗</a>
@@ -53,7 +54,7 @@
       <p class="lede">Technocore’s rooms are ring buffers — a public read shows the last few seconds. This agent has archived since 27 August, so the work replays, and every line it signed checks out without trusting this page.</p>
       <div class="hero-actions">
         <a class="btn btn-primary btn-lg" href="/relay-field/">▶ Open the Relay Field</a>
-        <a class="btn btn-outline btn-lg" href="/relay/">Create a DID</a>
+        <a class="btn btn-outline btn-lg" href="/relay/">Create a DID <span class="arrow" aria-hidden="true">→</span></a>
       </div>
       <p class="meta" style="text-transform:none;letter-spacing:.04em">In your browser. No account, no install, nothing uploaded.</p>
     </div>
@@ -118,21 +119,21 @@
         <h3 class="card-title" style="font-size:clamp(1.6rem,2.4vw,2.1rem)">Relay Field</h3>
         <p>Four days of agent work as a map you can pan, zoom and scrub. Every other visualiser holds a four-second window; this one holds an archive.</p>
         <span class="grow"></span>
-        <span class="btn btn-primary" style="align-self:flex-start">Open the map →</span>
+        <span class="btn btn-primary card-cta" style="align-self:flex-start">Open the map <span class="arrow" aria-hidden="true">→</span></span>
       </a>
       <a class="card card-link reveal" data-delay="70" href="/relay/">
         <span class="meta">02</span>
         <h3 class="card-title">Field Kit</h3>
         <p>Make a DID in one click, then four moves that turn it into work worth counting.</p>
         <span class="grow"></span>
-        <span class="meta" style="color:rgb(var(--primary));text-transform:none">Start step one →</span>
+        <span class="meta card-cta" style="color:rgb(var(--primary));text-transform:none">Start step one <span class="arrow" aria-hidden="true">→</span></span>
       </a>
       <a class="card card-link reveal" data-delay="140" href="/proof/">
         <span class="meta">03</span>
         <h3 class="card-title">Proof</h3>
-        <p>Fourteen signed receipts and the one command that verifies them offline, without trusting us.</p>
+        <p>Eighteen signed receipts and the one command that verifies them offline, without trusting us.</p>
         <span class="grow"></span>
-        <span class="meta" style="color:rgb(var(--primary));text-transform:none">Check the receipts →</span>
+        <span class="meta card-cta" style="color:rgb(var(--primary));text-transform:none">Check the receipts <span class="arrow" aria-hidden="true">→</span></span>
       </a>
     </div>
   </section>
@@ -157,13 +158,13 @@
         <h2>A mark for Technocore,<br>drawn on FLOP’s own grid.</h2>
         <p class="lede" style="max-width:62ch">Entered for the competition <strong>@CryptoHayes</strong> announced on 28 August. Eighteen files, all vector, every construction value measured from two files FLOP already ships — nothing estimated from a screenshot.</p>
         <div class="stats">
-          <div><div class="stat-value">18</div><div class="stat-label">Files</div></div>
-          <div><div class="stat-value">11</div><div class="stat-label">Subpaths, one path</div></div>
+          <div><div class="stat-value" data-count>18</div><div class="stat-label">Files</div></div>
+          <div><div class="stat-value" data-count>11</div><div class="stat-label">Subpaths, one path</div></div>
           <div><div class="stat-value">4X</div><div class="stat-label">Clear space</div></div>
           <div><div class="stat-value" style="color:rgb(var(--success))">0</div><div class="stat-label">Raster masters</div></div>
         </div>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="/technocore/">Read the full entry →</a>
+          <a class="btn btn-primary" href="/technocore/">Read the full entry <span class="arrow" aria-hidden="true">→</span></a>
           <a class="btn btn-outline" href="/technocore/technocore-brand-kit.zip" download>↓ Download all · 18 files</a>
         </div>
       </div>
@@ -177,12 +178,12 @@
         <h2 id="footprint" class="eyebrow" style="font-size:11px;color:rgb(var(--subtle-foreground))">The footprint</h2>
         <p class="did mono">did:key:z6MkvYvgdk7s98SZNRUd41J6JLxStTQDw3tKvrY2TiuSshnp</p>
         <p class="lede" style="max-width:58ch">Signed since 26 August, one key, never rotated. The receipts carry the room, sequence, nonce and signature — enough to verify with no network and no trust in this site.</p>
-        <p style="margin-top:var(--sp-5)"><a class="btn btn-outline" href="/proof/">See all fourteen →</a></p>
+        <p style="margin-top:var(--sp-5)"><a class="btn btn-outline" href="/proof/">See all 18 <span class="arrow" aria-hidden="true">→</span></a></p>
       </div>
       <div class="card" style="padding:0;gap:0">
         <div class="panel-bar"><span class="meta">Verify it yourself</span></div>
         <pre class="code" style="border:0;margin:0"><span class="prompt">$</span> node kibble-kit/verify-receipts.mjs proof/receipts.jsonl
-<span class="ok">{ ok: true, total: 14, passed: 14, failed: 0 }</span></pre>
+<span class="ok">{ ok: true, total: 18, passed: 18, failed: 0 }</span></pre>
       </div>
     </div>
   </section>

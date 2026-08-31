@@ -301,10 +301,47 @@ p { margin: 0; }
    away with them. */
 @media (min-width: 1240px) {
   #field { position: absolute; inset: 0 366px 0 336px; width: auto; height: auto; }
-  .map-status { bottom: auto; top: var(--sp-5); }
 }
 @media (min-width: 901px) and (max-width: 1239px) {
   #field { position: absolute; inset: 0 var(--sp-4) 0 var(--sp-4); width: auto; height: auto; }
   .panel { background: rgb(var(--card) / .82); }
-  .map-status { bottom: auto; top: var(--sp-5); }
+}
+
+/* ── transport: a fixed control that never has a word written into it ──── */
+.transport-play { width: 46px; min-height: 46px; padding: 0; font-size: 14px; letter-spacing: 0; }
+
+/* ── LIVE is the answer to "is there a live version?", so it says so ───── */
+#live {
+  border-color: rgb(var(--success) / .4); color: rgb(var(--success));
+  background: rgb(var(--success) / .08);
+}
+#live:hover:not(:disabled) { background: rgb(var(--success) / .18); border-color: rgb(var(--success)); }
+#live[data-live="true"] { background: rgb(var(--success)); color: rgb(var(--background)); border-color: rgb(var(--success)); }
+#live::before { content: ""; width: 6px; height: 6px; background: currentColor; margin-right: 6px; animation: pulse-dot 2.2s ease-in-out infinite; }
+#live:disabled::before { animation: none; opacity: .4; }
+
+/* ── traces flow in the direction work moves ───────────────────────────── */
+@keyframes trace-flow { to { stroke-dashoffset: -240; } }
+#field .trace { stroke-dasharray: 6 10; animation: trace-flow 6s linear infinite; }
+#field .trace.stage-deliver { animation-duration: 5s; }
+#field .trace.stage-attest { animation-duration: 7s; }
+#field .trace[data-selected="true"] { stroke-dasharray: none; animation: none; }
+@media (prefers-reduced-motion: reduce) { #field .trace { stroke-dasharray: none; animation: none; } }
+
+/* ── a ring lights up before you click it ──────────────────────────────── */
+.node { transition: opacity var(--dur-2) var(--ease); }
+.node:hover .node-core { fill: rgb(var(--foreground)); }
+.node:hover { filter: drop-shadow(0 0 6px rgb(var(--primary) / .8)); }
+
+/* ── the canvas gets a soft vignette so the panels sit on something ────── */
+.map-canvas::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 40%, rgb(var(--background) / .55) 100%);
+}
+
+/* The status line sits in the clear bottom channel: the layers panel is anchored
+   bottom-left and the zoom/overview bottom-right, so the centre is free. Putting
+   it at the top ran it straight through the lane labels. */
+@media (min-width: 901px) {
+  .map-status { top: auto; bottom: var(--sp-5); max-width: min(520px, 46vw); }
 }

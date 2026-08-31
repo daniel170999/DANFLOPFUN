@@ -325,3 +325,113 @@ phone width on every page.
   the shared shell but has not been rebuilt on the design system.
 - The one-click DID generator on the kit is the existing implementation; the mockup's version
   was not built.
+
+---
+
+## Second UI pass — 2026-08-31 (Claude, built)
+
+Scored 6.5/10 on six specific complaints. Each one measured, then fixed.
+
+**1 · The menu disappeared.** It was 12px mono in muted-foreground on a transparent bar —
+technically fine, read as decoration. Now: 13px at weight 500 in a recessed segmented group,
+current page as a filled cyan pill with the Chip's notch beneath it, and a pulsing
+**LIVE · AGENT RUNNING** chip in the shell on every page. Nav height 60 → 68px.
+
+**2 · Cards underlined every word.** `a:hover { text-decoration: underline }` applied to the
+whole-card anchors, so hovering a card underlined its heading, its label and its paragraph.
+Measured after: `textDecorationLine: "none"` on both the card and its paragraph. Card heights
+equal at 281/281/281; every `.shell` still resolves to the single axis x=73.
+
+**3 · The Kit demanded a passphrase before it would make a DID.** The passphrase encrypts the
+local backup only — `crypto.subtle.generateKey` runs regardless — so the friction was
+presentational. It now offers **Suggest a strong passphrase**, which fills and reveals a
+20-character value from `crypto.getRandomValues` so the field is one click, not a decision. The
+deliberate `pkcs8.fill(0)` wipe immediately after encryption is untouched: making the key
+extractable for later backup would have removed a real protection to save a click, and that
+trade was not worth taking.
+
+**4 · No motion.** Added, all of it tied to something real and all of it off under
+`prefers-reduced-motion`: an aurora keyed to the accent, entrance choreography across the hero,
+counters that animate to the number already in the markup, traces that flow in the direction
+work moves, rings that breathe out of phase, an instrument scan across the panel, section rules
+that draw themselves in, button sweep and arrow travel, lit card edges instead of colour swaps.
+
+**5 · "Is there no live version?"** There was — behind a grey button called *Live*. It now
+carries the success colour, a pulsing dot and a `data-live` state, and the shell chip says the
+agent is running from every page.
+
+**6 · The transport button was clipped.** `relay-field.js` wrote `Play 40s` into a 44px fixed
+control. Measured after: 46×46, `playClipped: false`, `collidesWithLayers: false`; the run
+length moved to the accessible name. The status line had also been pushed to the top where it
+ran through the lane labels — moved to the clear bottom channel, `labelsHit: 0`.
+
+### A number that had started lying
+
+The daily receipts workflow appended four rows, so `proof/receipts.jsonl` held **18** while both
+pages said fourteen in eight places. Both are now derived from the file — the proof page
+regenerates wholesale, the home page from the same count — so it cannot drift again. Codex's
+mobile-overflow fix (`b6e3a66`) was folded into the generator so a regeneration cannot drop it.
+
+### New: `scripts/sync-shell.mjs`
+
+`check-site` asserts every page carries a byte-identical shell, which catches drift but cannot
+fix it. Adding the LIVE chip to one page immediately failed that assertion — as designed. This
+script pushes the canonical shell from the front page onto the other four; `--write` applies,
+bare reports and exits non-zero on drift.
+
+### Verified
+
+`check-site status:ok pages:5 shell:identical receipts:18` · `sync-shell inSync:true` ·
+public tests **59/59** · verifier **18/18** · `audit clean` · `node --check` on both scripts ·
+`git diff --check` clean · zero occurrences of the stale count.
+
+### Still not done
+
+`/relay/` is the original 176KB inline application wearing the shared shell. Its passphrase
+friction is fixed and its navigation matches, but its internals have not been rebuilt on the
+design system. That is the largest remaining gap between this site and the ones it is being
+compared to.
+
+---
+
+## Field Kit skin — 2026-08-31 (Claude, built)
+
+The last gap: `/relay/` wore the shared shell but its internals still looked like a different
+website. Measured against the rest of the site, that was five specific things:
+
+| | site | kit before |
+|---|---|---|
+| corner radius | 2px | **11 distinct values**, up to 16px and 999px pills |
+| body face | Space Grotesk | **Inter** |
+| mono face | Space Mono, FLOP's brand face | SFMono / Consolas |
+| green | Electric Green `#32D74B` | `#84e7b9` mint, off-palette |
+| amber | not in the palette | `#ffd074`, not in the palette |
+| surfaces | `#060B1B` / `#0A1128` | `#0e1b3d` / `#132247`, lighter and bluer |
+
+### Skinned, not rewritten
+
+The kit is 91KB of inline application across 120 bound element ids and 269 layout-bearing CSS
+rules. Rewriting that markup to change how it looks would have risked the application for a
+visual result, which is the wrong trade. `relay/relay-kit.css` loads **after** the page's own
+stylesheet and re-skins it: the 269 layout rules are inherited untouched, and the kit's own
+token names are remapped to the design system's values, so every inherited rule resolves to the
+right colour on its own.
+
+Component anatomy is matched for the parts that carry the visual weight — buttons, tabs, inputs,
+status chips, surfaces, the topbar — plus the hero entrance and card hover from the system.
+
+Measured after: `distinctRadii: ["2px", "50%"]` across the whole page, down from eleven values;
+`bodyFont: "Space Grotesk"`, `h1Font: "Chakra Petch"`, mono `"Space Mono"`; the active tab is the
+same cyan pill as the navigation.
+
+### The application is provably intact
+
+Diffed against `HEAD`: **zero element ids lost**, one gained (`passphrase-suggest`), and the only
+inline-JS change is the 860-byte handler for it. `check-site` still reports `kitIds:120`,
+`kitInlineScripts:2`, and every parser, tab, panel and lobby-wording assertion passes unchanged.
+
+### Verified
+
+`check-site status:ok pages:5 shell:identical receipts:18` · `sync-shell inSync:true` ·
+tests **59/59** · verifier **18/18** · `audit clean` · `node --check` both scripts ·
+`git diff --check` clean · no horizontal overflow at 1440 or 375.

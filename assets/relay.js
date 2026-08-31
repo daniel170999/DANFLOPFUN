@@ -70,3 +70,61 @@
   }, { rootMargin: "0px 0px -8% 0px", threshold: .08 });
   Array.prototype.forEach.call(targets, function (node) { observer.observe(node); });
 })();
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Depth and motion. Progressive enhancement only — every number below is
+   already correct in the markup before this runs, so a blocked script costs
+   the animation and nothing else.
+   ───────────────────────────────────────────────────────────────────────── */
+(function polish() {
+  "use strict";
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // one aurora behind the fold; injected rather than authored into every page
+  if (!document.querySelector(".aurora") && document.body) {
+    const aurora = document.createElement("div");
+    aurora.className = "aurora";
+    aurora.setAttribute("aria-hidden", "true");
+    document.body.prepend(aurora);
+  }
+
+  // Counters animate to the value already written in the markup, so the page
+  // never displays a number it did not already claim.
+  const counters = document.querySelectorAll("[data-count]");
+  if (counters.length && !reduced && typeof IntersectionObserver === "function") {
+    const run = (node) => {
+      const target = Number(String(node.textContent).replace(/[^\d.]/gu, ""));
+      if (!Number.isFinite(target) || target === 0) return;
+      const suffix = String(node.textContent).replace(/[\d,.\s]/gu, "");
+      const started = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - started) / 900);
+        const eased = 1 - Math.pow(1 - t, 3);
+        node.textContent = Math.round(target * eased).toLocaleString("en-US") + suffix;
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+    const counterObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        run(entry.target);
+        counterObserver.unobserve(entry.target);
+      }
+    }, { threshold: .6 });
+    for (const node of counters) counterObserver.observe(node);
+  }
+
+  // Section rules draw themselves in when their heading arrives.
+  const heads = document.querySelectorAll(".section-head");
+  if (heads.length && typeof IntersectionObserver === "function") {
+    const headObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.setAttribute("data-shown", "true");
+        headObserver.unobserve(entry.target);
+      }
+    }, { threshold: .4 });
+    for (const head of heads) headObserver.observe(head);
+  }
+})();

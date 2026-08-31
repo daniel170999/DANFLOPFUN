@@ -247,3 +247,116 @@ code, .mono { font-family: var(--font-mono); font-variant-ligatures: none; }
   transition: top var(--dur-1) var(--ease);
 }
 .skip-link:focus { top: var(--sp-3); text-decoration: none; }
+
+/* ═════════════════════════════════════════════════════════════════════════
+   MOTION AND DEPTH
+   The first pass was correct and flat. Everything below exists to make the
+   page feel like software rather than a document — but every effect is tied
+   to something real: the aurora tracks the accent, the counters count the
+   numbers the page is actually claiming, the traces flow in the direction
+   work moves. Nothing here animates for its own sake, and all of it stops
+   under prefers-reduced-motion.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── a whole-card link must not underline every word inside it ─────────── */
+.card-link, .card-link:hover { text-decoration: none; }
+.card-link :where(p, span, h1, h2, h3, h4) { text-decoration: none; }
+
+/* ── depth: one slow aurora behind the fold, keyed to the accent ───────── */
+.aurora {
+  position: fixed; inset: -30% -10% auto -10%; height: 90vh; z-index: -1;
+  pointer-events: none; opacity: .5;
+  background:
+    radial-gradient(48% 42% at 22% 18%, rgb(var(--primary) / .16), transparent 70%),
+    radial-gradient(40% 38% at 78% 8%, rgb(var(--accent-blue) / .16), transparent 70%),
+    radial-gradient(36% 34% at 58% 40%, rgb(var(--success) / .07), transparent 72%);
+  filter: blur(24px);
+  animation: drift 24s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  from { translate: -2% 0; scale: 1; }
+  to   { translate: 3% 2%; scale: 1.08; }
+}
+:root[data-theme="light"] .aurora { opacity: .35; }
+@media (prefers-reduced-motion: reduce) { .aurora { animation: none; } }
+
+/* ── buttons: weight, glow and an arrow that moves ─────────────────────── */
+.btn { position: relative; overflow: hidden; isolation: isolate; }
+.btn-primary { box-shadow: 0 0 0 0 rgb(var(--primary) / .5); }
+.btn-primary:hover { box-shadow: 0 6px 26px -6px rgb(var(--primary) / .7); translate: 0 -1px; }
+.btn-outline:hover { translate: 0 -1px; }
+/* a light sweep on hover, once, in the accent — not a permanent shimmer */
+.btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(100deg, transparent 20%, rgb(var(--foreground) / .16) 50%, transparent 80%);
+  translate: -120% 0;
+}
+.btn:hover::before { transition: translate .6s var(--ease); translate: 120% 0; }
+.btn .arrow { display: inline-block; transition: translate var(--dur-2) var(--ease); }
+.btn:hover .arrow { translate: 4px 0; }
+@media (prefers-reduced-motion: reduce) { .btn::before { display: none; } }
+
+/* ── cards: a lit edge instead of a colour change ──────────────────────── */
+.card { position: relative; isolation: isolate; }
+.card::before {
+  content: ""; position: absolute; inset: -1px; z-index: -1; opacity: 0;
+  background: linear-gradient(140deg, rgb(var(--primary) / .55), transparent 42%, rgb(var(--accent-blue) / .35));
+  transition: opacity var(--dur-2) var(--ease);
+}
+.card-link:hover::before { opacity: 1; }
+.card-link:hover { translate: 0 -3px; border-color: transparent; }
+.card-cta { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.card-cta .arrow { display: inline-block; transition: translate var(--dur-2) var(--ease); }
+.card-link:hover .card-cta .arrow { translate: 4px 0; }
+
+/* ── numbers that count up when they scroll into view ──────────────────── */
+.stat-value { font-variant-numeric: tabular-nums; }
+.stat-value[data-count] { transition: none; }
+
+/* ── the relay traces flow in the direction work moves ─────────────────── */
+@keyframes flow { to { stroke-dashoffset: -220; } }
+.mini-field .trace path { stroke-dasharray: 5 9; animation: flow 5s linear infinite; }
+.mini-field .trace path[data-stage="deliver"] { animation-duration: 4.2s; }
+.mini-field .trace path[data-stage="attest"] { animation-duration: 6s; }
+@media (prefers-reduced-motion: reduce) { .mini-field .trace path { stroke-dasharray: none; animation: none; } }
+
+/* rings breathe very slightly, out of phase, so the field is never dead */
+@keyframes breathe { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
+.mini-field .ring circle { animation: breathe 4s ease-in-out infinite; }
+.mini-field .ring circle:nth-child(3n) { animation-delay: -1.3s; }
+.mini-field .ring circle:nth-child(3n+1) { animation-delay: -2.6s; }
+@media (prefers-reduced-motion: reduce) { .mini-field .ring circle { animation: none; } }
+
+/* ── the panel gets a faint scan, once per pass, like an instrument ────── */
+.hero-panel { position: relative; overflow: hidden; }
+.hero-panel::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgb(var(--primary) / .07), transparent);
+  height: 40%; translate: 0 -100%;
+  animation: scan 7s var(--ease) infinite;
+}
+@keyframes scan { 0% { translate: 0 -100%; } 55%, 100% { translate: 0 340%; } }
+@media (prefers-reduced-motion: reduce) { .hero-panel::after { display: none; } }
+
+/* ── section headings get a rule that draws itself in ──────────────────── */
+.section-head .rule { transform-origin: left center; }
+.reveal[data-shown="true"] .rule, .section-head[data-shown="true"] .rule { animation: draw .8s var(--ease) both; }
+@keyframes draw { from { scale: 0 1; } to { scale: 1 1; } }
+
+/* ── entrance choreography ─────────────────────────────────────────────── */
+.hero-copy > * { animation: rise .7s var(--ease) both; }
+.hero-copy > *:nth-child(1) { animation-delay: .02s; }
+.hero-copy > *:nth-child(2) { animation-delay: .09s; }
+.hero-copy > *:nth-child(3) { animation-delay: .16s; }
+.hero-copy > *:nth-child(4) { animation-delay: .23s; }
+.hero-copy > *:nth-child(5) { animation-delay: .3s; }
+
+/* ── a live chip anywhere in body copy ─────────────────────────────────── */
+.chip-live {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: 6px var(--sp-3); border: 1px solid rgb(var(--success) / .35);
+  background: rgb(var(--success) / .08);
+  font: 400 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase;
+  color: rgb(var(--success));
+}
+.chip-live::before { content: ""; width: 6px; height: 6px; background: currentColor; animation: pulse-dot 2.2s ease-in-out infinite; }

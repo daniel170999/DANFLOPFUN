@@ -1,3 +1,5 @@
+const PLAY_LABEL = "▶";
+const PAUSE_LABEL = "‖";
 const API_PATH = "/api/agent/graph";
 const ARCHIVE_START = "2026-08-27T10:50:00.000Z";
 const state = {
@@ -453,8 +455,14 @@ function stopPlayback() {
   state.playing = false;
   if (state.playFrame !== null) cancelAnimationFrame(state.playFrame);
   state.playFrame = null;
+  // The transport is a fixed-size control in the timeline bar, so the run length
+  // goes to the accessible name rather than into the button, where the word
+  // overflowed the 44px control and was clipped.
   const seconds = 40 / Math.max(1, Number(state.playbackSpeed) || 1);
-  ui.play.textContent = `Play ${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)}s`;
+  const label = `Play the archive in ${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)} seconds`;
+  ui.play.textContent = PLAY_LABEL;
+  ui.play.setAttribute("aria-label", label);
+  ui.play.setAttribute("title", label);
 }
 
 function renderDensity() {
@@ -502,6 +510,7 @@ function densityCursor(event) {
 }
 
 function stopLivePolling() {
+  ui.live?.removeAttribute("data-live");
   state.live = false;
   if (state.liveTimer !== null) window.clearTimeout(state.liveTimer);
   state.liveTimer = null;
@@ -522,7 +531,9 @@ function play() {
   if (!state.events.length) return;
   if (state.playing) { stopPlayback(); return; }
   state.playing = true;
-  ui.play.textContent = "Pause";
+  ui.play.textContent = PAUSE_LABEL;
+  ui.play.setAttribute("aria-label", "Pause");
+  ui.play.setAttribute("title", "Pause");
   const start = performance.now();
   const initial = state.cursor >= 0 && state.cursor < state.events.length - 1 ? state.cursor : 0;
   const span = Math.max(1, state.events.length - 1 - initial);
@@ -614,6 +625,7 @@ async function loadGraph(event) {
 }
 
 async function activateLive() {
+  ui.live.setAttribute("data-live", "true");
   stopLivePolling();
   stopPlayback();
   state.live = true;

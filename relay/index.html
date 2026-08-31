@@ -443,6 +443,7 @@
         window.twttr._e.push(callback);
       };
     </script>
+<link rel="stylesheet" href="./relay-kit.css">
   </head>
   <body>
     <a class="skip-link" href="#desk-title">Skip to the field guide</a>
@@ -459,6 +460,7 @@
       <a class="nav-link" href="/relay/" aria-current="page">Kit</a>
       <a class="nav-link" href="/proof/">Proof</a>
       <a class="nav-link" href="/technocore/">Logo entry</a>
+      <a class="nav-live" href="/relay-field/">Live<span>&nbsp;· agent running</span></a>
       <span class="nav-sep" aria-hidden="true"></span>
       <button class="nav-tool nav-tools-desktop" type="button" data-theme-toggle>Theme: system</button>
       <a class="nav-tool nav-tools-desktop" href="https://github.com/daniel170999/DANFLOPFUN" target="_blank" rel="noreferrer">Source ↗</a>
@@ -589,7 +591,7 @@
                 <div class="form-grid" aria-label="Create or restore DID">
                   <label>Backup passphrase<input id="create-passphrase" type="password" autocomplete="new-password" placeholder="At least 12 characters" /></label>
                   <label>Confirm passphrase<input id="create-confirm" type="password" autocomplete="new-password" placeholder="Repeat it" /></label>
-                  <div class="full action-row"><button class="button" id="identity-create" type="button">Create local identity</button><button class="button secondary" id="backup-download" type="button" disabled>Download encrypted backup</button></div>
+                  <div class="full action-row"><button class="button secondary" id="passphrase-suggest" type="button">Suggest a strong passphrase</button><button class="button" id="identity-create" type="button">Create local identity</button><button class="button secondary" id="backup-download" type="button" disabled>Download encrypted backup</button></div>
                   <label class="full">Restore encrypted backup<input id="backup-file" type="file" accept="application/json,.json" /></label>
                   <label class="full">Backup passphrase<input id="restore-passphrase" type="password" autocomplete="current-password" placeholder="Passphrase for the selected backup" /></label>
                   <div class="full action-row"><button class="button secondary" id="identity-restore" type="button">Restore into this tab</button></div>
@@ -2368,6 +2370,21 @@
         ui.roomLoad.addEventListener("click", fetchRoom);
         ui.roomFollow.addEventListener("change", applyRoomFollow);
         ui.createIdentity.addEventListener("click", createIdentity);
+        var passphraseSuggest = document.getElementById("passphrase-suggest");
+        if (passphraseSuggest) {
+          passphraseSuggest.addEventListener("click", function () {
+            var alphabet = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            var bytes = new Uint8Array(20);
+            crypto.getRandomValues(bytes);
+            var value = "";
+            for (var i = 0; i < bytes.length; i += 1) value += alphabet[bytes[i] % alphabet.length];
+            ui.createPassphrase.value = value;
+            ui.createConfirm.value = value;
+            ui.createPassphrase.type = "text";
+            ui.createConfirm.type = "text";
+            setNotice(ui.identityNotice, "Passphrase filled and shown so you can save it. It encrypts your local backup; the key itself never leaves this tab.", "warn");
+          });
+        }
         ui.backupDownload.addEventListener("click", startBackupDownload);
         ui.identityRestore.addEventListener("click", restoreIdentity);
         ui.copyDid.addEventListener("click", copyDid);
