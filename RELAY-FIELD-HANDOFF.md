@@ -506,3 +506,79 @@ routes 200 · no horizontal overflow at 1440 or 375 on either new page.
 
 `assets/social/relay-field.gif` — 900×440, 64 frames, looping, drawn from the same `/graph`
 document rather than screen-recorded, so every ring is a key that actually posted.
+
+---
+
+## Testnet readiness — 2026-08-31 (Claude)
+
+### The finding that reordered everything
+
+FLOP Labs has publicly stated the airdrop criterion, and it is not in the protocol spec — which
+is why an earlier pass, searching only `agent.json`, concluded there was none. Arthur Hayes has
+said allocation **follows testnet activity**, the faucet runs **through technocore.chat**, and
+**only did:key agents can reach it**. Roughly 20% of a 17.2 billion supply, reviewed for
+October 2026, genesis Q1 2027. No VC, no presale.
+
+Both `/faucet` and `/testnet` answer **404** today, so the testnet has not opened.
+
+That confirms three earlier calls and voids one: one durable DID was right, dropping Kibble from
+the critical path was right, watching those two endpoints was right — and optimising for room
+presence was not, because it is not what gets measured.
+
+### 1 · The watcher can now reach someone
+
+It recorded launch signals into a log nobody reads. With the airdrop about a month out and gated
+on an endpoint that is 404 until it isn't, that was the largest gap in the project.
+
+`pushAlert()` POSTs one JSON body to `ALERT_WEBHOOK_URL` on **launch signals only** — a version
+bump stays a log line. At most once an hour for the same headline. It adds **no scheduled KV
+write**: the de-duplication stamp rides the watch record that is written anyway, which is why
+the alert is sent before the write rather than after. A dead or missing webhook is a no-op and
+can never cost the watch its state.
+
+**Manual step, and nothing alerts until it is done:**
+```
+wrangler secret put ALERT_WEBHOOK_URL
+```
+
+### 2 · `/testnet/` — the page that flips itself
+
+Reads the agent's own watcher through a new `/api/agent/watch` rewrite and shows what the two
+endpoints actually answer. If the watcher cannot be reached it says so rather than guessing —
+verified by running it against a fixture with no watch proxy, where it printed *"this page will
+not guess"*. With the proxy in place it renders `404 · not yet`, `404 · not yet`, `0.11.1` and a
+live timestamp.
+
+`check-site` asserts the markup ships **no** pre-set open state, that the page reads the live
+watcher rather than a constant, and that it disclaims eligibility. Promoted into the navigation,
+which is now six destinations — for as long as the faucet is the stated gate, it is not a footer
+link.
+
+### 3 · A finding worth sending upstream, with the tool to reproduce it
+
+`kibble-kit/signature-exposure-report.mjs` · `FINDINGS.md`
+
+Room reads began returning `sig` between **05:06:49Z and 05:07:56Z on 2026-08-31** — a
+**67-second** bound, corroborated by the watcher seeing `agent.json 0.10.0 → 0.11.0` thirteen
+minutes later.
+
+The method needs no privileged access and no writes: a nonce is only accepted on the signed
+path, so a `did:key` row carrying one came through `say_signed`, and whether it also carries
+`sig` says which side of the deploy it was written on. Every row before the boundary lacks the
+signature and every row after has it, in every room — which is what rules out decay-with-age and
+sampling.
+
+This is **not** reported as a bug. It shipped in the right direction. What is worth recording is
+the consequence: every signed message written before this morning is server-attested but not
+independently verifiable from the public API, so anyone reasoning about agent history from
+before then is trusting attribution rather than checking a signature. This repository kept its
+own signatures at write time, so its receipts verify where the public API's cannot.
+
+`check-site` strips the tool's comments and then asserts the code issues no non-GET request and
+constructs no write path — proven to fail when a `method: "POST"` was injected, then reverted.
+
+### Verified
+
+site `check-site status:ok pages:6` · `sync-shell inSync:true` · tests **61/61** · verifier
+**18/18** · `audit clean` · worker **177/177** · `node --check` on six scripts · all **eight**
+routes 200 · one shell axis, no horizontal overflow.

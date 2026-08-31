@@ -16,6 +16,7 @@ const proofHtml = await readFile(join(root, "proof", "index.html"), "utf8");
 const apiHtml = await readFile(join(root, "data", "index.html"), "utf8");
 const agentsHtml = await readFile(join(root, "agents", "index.html"), "utf8");
 const agentsJs = await readFile(join(root, "agents", "agents.js"), "utf8");
+const testnetHtml = await readFile(join(root, "testnet", "index.html"), "utf8");
 const navCss = await readFile(join(root, "assets", "relay-nav.css"), "utf8");
 const relayCss = await readFile(join(root, "assets", "relay.css"), "utf8");
 const relayShellJs = await readFile(join(root, "assets", "relay.js"), "utf8");
@@ -231,6 +232,9 @@ const SHELL_PAGES = [
   ["/relay/", relayHtml],
   ["/proof/", proofHtml],
   ["/technocore/", technocoreHtml],
+  // The faucet is the stated gate on airdrop allocation, so its watch page is a primary
+  // destination for as long as that is true — not a footer link.
+  ["/testnet/", testnetHtml],
 ];
 // The Archive API and agent profiles are secondary destinations: they wear the same
 // shell but are reached from the footer and from the map, so the navigation stays at
@@ -286,9 +290,33 @@ assert(agentsJs.includes('const API = "/api/agent/graph"'), "agent profiles must
 assert(!/#[0-9a-fA-F]{3,6}/u.test(agentsJs), "agent profile code must carry no colour literals");
 assert(relayFieldJs.includes("/agents/?did="), "the map must link a selected ring to its profile");
 assert(apiHtml.includes("missedEstimate"), "the API page must document the sampling contract, not hide it");
+// A finding nobody can reproduce is an opinion. The tool ships with the writeup.
+const findings = await readFile(join(root, "FINDINGS.md"), "utf8");
+const exposureTool = await readFile(join(root, "kibble-kit", "signature-exposure-report.mjs"), "utf8");
+assert(findings.includes("signature-exposure-report.mjs"), "every finding must name the command that reproduces it");
+assert(exposureTool.includes("say-signed"), "the reproduction must explain the method it relies on");
+// Reporting on someone else's service must never write to it. Comments in the tool discuss
+// the write paths by name, so the check strips them first and then looks at the code alone:
+// every fetch must be a default GET, and no write path may be constructed.
+const exposureCode = exposureTool
+  .replace(/\/\*[\s\S]*?\*\//gu, "")
+  .split("\n")
+  .filter((line) => !line.trim().startsWith("*") && !line.trim().startsWith("//"))
+  .join("\n");
+assert(!exposureCode.includes("method:"), "the reproduction must issue no non-GET request");
+for (const path of ["say-signed", "/say/", "/set/"]) {
+  assert(!exposureCode.includes(path), `the reproduction must not construct a write path (${path})`);
+}
+assert(exposureCode.includes("format=json"), "the reproduction must read rooms through the public read endpoint");
+assert(testnetHtml.includes("/api/agent/watch"), "the testnet page must read the live watcher, not a hardcoded status");
+// The markup must ship no open state; the stylesheet is allowed to describe what one
+// looks like, so the style block comes out before this is checked.
+const testnetMarkup = testnetHtml.replace(/<style[\s\S]*?<\/style>/giu, "");
+assert(!/<[^>]+\sdata-state="open"/u.test(testnetMarkup), "the testnet page must not ship a pre-set open state");
+assert(testnetHtml.includes("does not claim an allocation") || testnetHtml.includes("claims an allocation"), "the testnet page must disclaim eligibility");
 
 for (const [, source] of SHELL_PAGES) {
-  for (const route of ["/", "/relay-field/", "/relay/", "/proof/", "/technocore/"]) {
+  for (const route of ["/", "/relay-field/", "/relay/", "/proof/", "/testnet/", "/technocore/"]) {
     assert(source.includes(`href="${route}"`), `every page must link ${route}`);
   }
 }

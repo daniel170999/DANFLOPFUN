@@ -32,6 +32,7 @@ const pages = [
   { file: "proof/index.html", route: "/proof/" },
   { file: "data/index.html", route: "/data/" },
   { file: "agents/index.html", route: "/agents/" },
+  { file: "testnet/index.html", route: "/testnet/" },
   { file: "relay-field/index.html", route: "/relay-field/" },
   { file: "relay/index.html", route: "/relay/" },
   { file: "technocore/index.html", route: "/technocore/" },
