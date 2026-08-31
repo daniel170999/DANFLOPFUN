@@ -242,7 +242,7 @@
   .entry-mark svg { width: min(196px, 62%); height: auto; }
   .entry-copy { display: flex; flex-direction: column; gap: var(--sp-4); padding: clamp(var(--sp-6), 3vw, var(--sp-10)); }
 
-  .footprint { display: grid; gap: clamp(var(--sp-6), 3vw, var(--sp-10)); padding-top: var(--sp-8); }
+  .footprint { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(var(--sp-6), 3vw, var(--sp-10)); padding-top: var(--sp-8); }
   @media (min-width: 900px) { .footprint { grid-template-columns: minmax(0, 1fr) minmax(0, 480px); align-items: start; } }
   .did { font-size: clamp(13px, 1.4vw, 15px); color: rgb(var(--primary)); word-break: break-all; margin: var(--sp-3) 0 var(--sp-4); line-height: 1.5; }
   .footer .credit { max-width: 64ch; }
