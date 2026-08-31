@@ -7,6 +7,7 @@ const state = {
   selectedDid: null,
   selectedJob: null,
   playing: false,
+  playbackSpeed: 4,
   playFrame: null,
   live: false,
   liveTimer: null,
@@ -452,7 +453,8 @@ function stopPlayback() {
   state.playing = false;
   if (state.playFrame !== null) cancelAnimationFrame(state.playFrame);
   state.playFrame = null;
-  ui.play.textContent = "Play 40s";
+  const seconds = 40 / Math.max(1, Number(state.playbackSpeed) || 1);
+  ui.play.textContent = `Play ${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)}s`;
 }
 
 function renderDensity() {
@@ -524,9 +526,10 @@ function play() {
   const start = performance.now();
   const initial = state.cursor >= 0 && state.cursor < state.events.length - 1 ? state.cursor : 0;
   const span = Math.max(1, state.events.length - 1 - initial);
+  const duration = 40_000 / Math.max(1, Number(state.playbackSpeed) || 1);
   const frame = (now) => {
     if (!state.playing) return;
-    const progress = Math.min(1, (now - start) / 40_000);
+    const progress = Math.min(1, (now - start) / duration);
     state.cursor = Math.min(state.events.length - 1, initial + Math.floor(span * progress));
     render();
     if (progress >= 1) { stopPlayback(); return; }
@@ -643,3 +646,166 @@ fetchGraph().then(() => {
   state.cursor = 0;
   play();
 });
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Map controls — zoom, pan, layers, search, speed and the overview.
+
+   Deliberately bolted on rather than woven in: none of this touches the graph
+   fetch, the replay pipeline or the selection model. It reads the rendered SVG
+   through a MutationObserver and drives presentation attributes, so a change
+   here can never alter what the page claims about the archive.
+   ───────────────────────────────────────────────────────────────────────── */
+(function mapControls() {
+  const canvas = document.getElementById("mapCanvas");
+  const svg = document.getElementById("field");
+  if (!canvas || !svg) return;
+
+  const view = { scale: 1, x: 0, y: 0 };
+  const MIN = 0.6;
+  const MAX = 6;
+
+  function applyView() {
+    svg.style.scale = String(view.scale);
+    svg.style.translate = `${view.x}px ${view.y}px`;
+    drawOverview();
+  }
+  function zoomBy(factor, originX, originY) {
+    const next = Math.min(MAX, Math.max(MIN, view.scale * factor));
+    if (next === view.scale) return;
+    if (typeof originX === "number") {
+      // keep the point under the cursor fixed while the scale changes
+      const rect = canvas.getBoundingClientRect();
+      const dx = originX - rect.left - rect.width / 2;
+      const dy = originY - rect.top - rect.height / 2;
+      view.x = dx - ((dx - view.x) * next) / view.scale;
+      view.y = dy - ((dy - view.y) * next) / view.scale;
+    }
+    view.scale = next;
+    applyView();
+  }
+
+  document.getElementById("zoom-in")?.addEventListener("click", () => zoomBy(1.35));
+  document.getElementById("zoom-out")?.addEventListener("click", () => zoomBy(1 / 1.35));
+  document.getElementById("zoom-reset")?.addEventListener("click", () => {
+    view.scale = 1; view.x = 0; view.y = 0; applyView();
+  });
+
+  canvas.addEventListener("wheel", (event) => {
+    if (!event.ctrlKey) return;
+    event.preventDefault();
+    zoomBy(event.deltaY < 0 ? 1.12 : 1 / 1.12, event.clientX, event.clientY);
+  }, { passive: false });
+
+  let dragging = null;
+  canvas.addEventListener("pointerdown", (event) => {
+    if (event.target.closest(".panel, .map-tools, a, button, input, select, summary")) return;
+    dragging = { id: event.pointerId, x: event.clientX - view.x, y: event.clientY - view.y };
+    canvas.setPointerCapture(event.pointerId);
+    canvas.setAttribute("data-panning", "true");
+  });
+  canvas.addEventListener("pointermove", (event) => {
+    if (!dragging || dragging.id !== event.pointerId) return;
+    view.x = event.clientX - dragging.x;
+    view.y = event.clientY - dragging.y;
+    applyView();
+  });
+  const endPan = () => { dragging = null; canvas.removeAttribute("data-panning"); };
+  canvas.addEventListener("pointerup", endPan);
+  canvas.addEventListener("pointercancel", endPan);
+
+  /* ── layers ─────────────────────────────────────────────────────────── */
+  const layers = [
+    ["layer-traces", "data-layer-traces"],
+    ["layer-agents", "data-layer-agents"],
+    ["layer-chat", "data-layer-chat"],
+  ];
+  for (const [id, attribute] of layers) {
+    const box = document.getElementById(id);
+    if (!box) continue;
+    box.addEventListener("change", () => {
+      if (box.checked) svg.removeAttribute(attribute);
+      else svg.setAttribute(attribute, "off");
+    });
+  }
+  const gridBox = document.getElementById("layer-grid");
+  gridBox?.addEventListener("change", () => {
+    canvas.setAttribute("data-grid", gridBox.checked ? "on" : "off");
+  });
+
+  /* ── search ─────────────────────────────────────────────────────────── */
+  const find = document.getElementById("find");
+  function applySearch() {
+    const term = (find?.value || "").trim().toLowerCase();
+    for (const node of svg.querySelectorAll("g.node")) {
+      if (!term) { node.removeAttribute("data-match"); continue; }
+      const label = (node.getAttribute("aria-label") || "").toLowerCase();
+      node.setAttribute("data-match", label.includes(term) ? "true" : "false");
+    }
+    for (const trace of svg.querySelectorAll("path.trace")) {
+      if (!term) { trace.style.removeProperty("opacity"); continue; }
+      trace.style.opacity = (trace.getAttribute("data-job") || "").toLowerCase().includes(term) ? "1" : ".05";
+    }
+  }
+  find?.addEventListener("input", applySearch);
+
+  /* ── speed ──────────────────────────────────────────────────────────── */
+  for (const button of document.querySelectorAll(".speed-btn")) {
+    button.addEventListener("click", () => {
+      const nextSpeed = Number(button.dataset.speed);
+      if (!Number.isFinite(nextSpeed) || nextSpeed <= 0) return;
+      const wasPlaying = state.playing;
+      if (wasPlaying) stopPlayback();
+      state.playbackSpeed = nextSpeed;
+      for (const sibling of document.querySelectorAll(".speed-btn")) sibling.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-pressed", "true");
+      if (wasPlaying) play();
+    });
+  }
+
+  /* ── overview ───────────────────────────────────────────────────────── */
+  const overview = document.getElementById("overview");
+  function drawOverview() {
+    if (!overview) return;
+    while (overview.firstChild) overview.removeChild(overview.firstChild);
+    const make = (name, attributes) => {
+      const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+      for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+      return element;
+    };
+    for (const lane of [{ x: 60 }, { x: 310 }, { x: 560 }, { x: 810 }]) {
+      overview.appendChild(make("rect", { class: "ov-lane", x: lane.x, y: 90, width: 140, height: 340 }));
+    }
+    const w = 1000 / view.scale;
+    const h = 560 / view.scale;
+    overview.appendChild(make("rect", {
+      class: "ov-view",
+      x: 500 - w / 2 - (view.x / view.scale) * (1000 / Math.max(1, canvas.clientWidth)),
+      y: 280 - h / 2 - (view.y / view.scale) * (560 / Math.max(1, canvas.clientHeight)),
+      width: w, height: h,
+    }));
+  }
+
+  /* ── counts and capture, read back after each render ────────────────── */
+  const ratio = document.getElementById("capture-ratio");
+  const fill = document.getElementById("capture-fill");
+  const captured = document.getElementById("captured");
+  const missed = document.getElementById("missed");
+  function sync() {
+    const set = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = String(value); };
+    set("count-traces", svg.querySelectorAll("path.trace").length);
+    set("count-agents", svg.querySelectorAll("g.node").length);
+    set("count-chat", svg.querySelectorAll("g.node.lane-chat").length);
+    applySearch();
+
+    const capturedValue = Number(String(captured?.textContent || "").replace(/[^\d]/gu, ""));
+    const missedValue = Number(String(missed?.textContent || "").replace(/[^\d]/gu, ""));
+    const total = capturedValue + missedValue;
+    if (ratio && Number.isFinite(capturedValue) && total > 0) {
+      ratio.textContent = `${capturedValue.toLocaleString("en-US")} / ${total.toLocaleString("en-US")}`;
+      if (fill) fill.style.width = `${Math.round((capturedValue / total) * 100)}%`;
+    }
+  }
+  new MutationObserver(sync).observe(svg, { childList: true, subtree: false });
+  applyView();
+  sync();
+})();

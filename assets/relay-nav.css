@@ -1,0 +1,151 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   FLOP Relay — shared shell only (nav, brand mark, credit line).
+
+   Deliberately carries NO global reset, no body rule and no heading sizes, so
+   it can be dropped onto pages that already own their typography — the logo
+   submission and the field kit — without restyling a single thing they built.
+   /assets/relay.css imports this file and adds the full system on top.
+
+   Token names follow shadcn/ui; the values are FLOP's own palette. None of
+   them collide with the tokens those two pages already define.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+
+:root {
+  --background: 6 11 27;
+  --foreground: 245 247 250;
+  --card: 10 17 40;
+  --card-elevated: 16 26 51;
+  --muted: 27 34 55;
+  --muted-foreground: 113 133 168;
+  --subtle-foreground: 92 102 112;
+  --border: 35 42 62;
+  --border-strong: 54 65 91;
+  --primary: 0 180 216;
+  --primary-foreground: 4 33 43;
+  --accent-blue: 4 102 200;
+  --success: 50 215 75;
+  --danger: 255 155 146;
+  --ring: 0 180 216;
+
+  --radius: 2px;
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
+
+  --font-display: "Chakra Petch", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Space Mono", ui-monospace, Consolas, monospace;
+
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --dur-1: .14s;
+  --dur-2: .24s;
+  --dur-3: .5s;
+
+  --shell: 1280px;
+  --gutter: clamp(20px, 4vw, 60px);
+  --nav-h: 60px;
+}
+
+:root[data-theme="light"] {
+  --background: 245 247 250;
+  --foreground: 10 17 40;
+  --card: 255 255 255;
+  --card-elevated: 238 241 245;
+  --muted: 231 234 238;
+  --muted-foreground: 92 102 112;
+  --subtle-foreground: 122 131 141;
+  --border: 217 221 225;
+  --border-strong: 185 192 201;
+  --primary-foreground: 245 247 250;
+}
+
+/* ── shell ────────────────────────────────────────────────────────────── */
+.shell { width: min(var(--shell), 100% - var(--gutter) * 2); margin-inline: auto; }
+.grow { flex: 1 1 auto; min-width: 0; }
+
+/* ── the FLOP Chip ────────────────────────────────────────────────────── */
+.chip { display: block; width: 26px; height: 26px; flex: 0 0 auto; }
+.chip path { fill: rgb(var(--primary)); }
+
+/* ── nav ──────────────────────────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgb(var(--background) / .86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgb(var(--border));
+}
+.nav-inner { display: flex; align-items: center; gap: var(--sp-4); min-height: var(--nav-h); }
+.nav :where(a):focus-visible, .nav :where(button):focus-visible { outline: 2px solid rgb(var(--ring)); outline-offset: 2px; }
+.brand { display: inline-flex; align-items: center; gap: var(--sp-3); color: rgb(var(--foreground)); text-decoration: none; }
+.brand:hover { text-decoration: none; }
+.brand-name { font: 700 12px/1 var(--font-mono); letter-spacing: .16em; white-space: nowrap; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.nav-link {
+  position: relative; display: inline-flex; align-items: center;
+  min-height: 40px; padding: 0 var(--sp-4);
+  font: 400 12px/1 var(--font-mono); letter-spacing: .1em;
+  color: rgb(var(--muted-foreground)); text-decoration: none; white-space: nowrap;
+  transition: color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.nav-link:hover { color: rgb(var(--foreground)); background: rgb(var(--card-elevated)); text-decoration: none; }
+.nav-link[aria-current="page"] { color: rgb(var(--foreground)); font-weight: 700; }
+/* the Chip's own notch marks position, so the nav needs no second accent */
+.nav-link[aria-current="page"]::after {
+  content: ""; position: absolute; left: 50%; bottom: -1px; translate: -50% 0;
+  width: 18px; height: 9px;
+  background: rgb(var(--primary));
+  clip-path: polygon(0 100%, 50% 0, 100% 100%, 100% 100%, 50% 34%, 0 100%);
+}
+.nav-sep { width: 1px; height: 16px; background: rgb(var(--border)); margin-inline: var(--sp-2); }
+.nav-tool {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  min-height: 40px; padding: 0 var(--sp-3);
+  font: 400 11px/1 var(--font-mono); letter-spacing: .08em;
+  color: rgb(var(--subtle-foreground)); background: none; border: 0; cursor: pointer;
+  transition: color var(--dur-1) var(--ease);
+}
+.nav-tool:hover { color: rgb(var(--foreground)); text-decoration: none; }
+.nav-burger {
+  display: none; width: 44px; height: 44px; align-items: center; justify-content: center;
+  border: 1px solid rgb(var(--border-strong)); background: none; cursor: pointer;
+}
+.nav-burger span { display: block; width: 16px; height: 2px; background: rgb(var(--foreground)); box-shadow: 0 -5px 0 rgb(var(--foreground)), 0 5px 0 rgb(var(--foreground)); }
+.nav-tools { display: none; }
+
+@media (max-width: 900px) {
+  .nav-inner { flex-wrap: wrap; padding-block: var(--sp-2); }
+  .nav-burger { display: inline-flex; margin-left: auto; }
+  .nav-links {
+    order: 3; width: 100%; margin-left: 0; gap: var(--sp-2);
+    overflow-x: auto; scrollbar-width: none; padding-bottom: var(--sp-2);
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-link { min-height: 44px; border: 1px solid rgb(var(--border)); }
+  .nav-link[aria-current="page"] { background: rgb(var(--card-elevated)); }
+  .nav-sep, .nav-tools-desktop { display: none; }
+  .nav-tools { order: 4; width: 100%; gap: var(--sp-2); padding-bottom: var(--sp-2); }
+  .nav-tools[data-open="true"] { display: flex; }
+}
+
+/* ── credit line for third-party artwork ──────────────────────────────── */
+.credit { font: 400 11px/1.6 var(--font-mono); letter-spacing: .02em; color: rgb(var(--subtle-foreground)); max-width: 64ch; }
+.credit strong { color: rgb(var(--muted-foreground)); font-weight: 400; }
+.credit a { color: rgb(var(--primary)); }
+
+/* ── skip link ────────────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute; left: var(--sp-4); top: -60px; z-index: 100;
+  padding: var(--sp-3) var(--sp-4);
+  background: rgb(var(--primary)); color: rgb(var(--primary-foreground));
+  font: 700 12px/1 var(--font-mono); text-decoration: none;
+  transition: top var(--dur-1) var(--ease);
+}
+.skip-link:focus { top: var(--sp-3); text-decoration: none; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

@@ -172,3 +172,156 @@ listener.
 - Lane widths are fixed quarters. A lane holding two agents takes the same width as one holding
   fourteen. Weighting them by occupancy would use the canvas better and is worth doing once the
   real room mix is visible in production.
+
+---
+
+## Claude pass 2 — 2026-08-31, after the bucket-cap raise
+
+Raising `FREE_TIER_SAFE_ARCHIVE_BUCKET_RECORDS` 50 → 1,200 was the right call and the parse
+measurement supporting it was the right way to make it. Live `/graph?room=kibble` now returns
+**3,100 of 3,770 indexed rows (82.2%)**, 390 agents, and **388 job chains with more than one
+stage** — against 12 before. That is the page's whole reason to exist, so this mattered.
+
+It also broke the layout, in my code, in the same place twice.
+
+### The floor was the bug
+
+`radius = Math.max(6.5, Math.min(19, …))`. When the geometry needed a radius below 6.5 the
+clamp raised it back up, which guarantees collision. Measured live at 348 agents: radius 6.5,
+minimum centre distance **7.22px**, **252 overlapping pairs**.
+
+A lower bound on ring size inside a fixed canvas is a promise the geometry cannot keep. Removed.
+
+### Grid packing replaces it
+
+Each lane is now packed as a grid inside its own box, and one radius is chosen as the largest
+that lets the worst-packed box hold its agents:
+
+```
+r ≈ sqrt(boxWidth * boxHeight / count) / 2.3, then stepped down until columns * rows >= count
+```
+
+Verified headless before touching the browser, worst case with every agent in one lane:
+
+| agents | radius | min centre | needed | overlaps |
+|---|---|---|---|---|
+| 10 | 19.00 | 43.70 | 38.0 | 0 |
+| 43 | 15.91 | 36.60 | 31.8 | 0 |
+| 120 | 9.52 | 21.91 | 19.0 | 0 |
+| 348 | 5.59 | 12.86 | 11.2 | 0 |
+| 700 | 3.94 | 9.07 | 7.9 | 0 |
+| 1500 | 2.69 | 6.20 | 5.4 | 0 |
+
+Live, at 390 agents and 1,655 traces: radius 9.86, minimum centre **22.68** against 19.72
+needed, **0 overlaps**, every ring inside the canvas. Same at 375px wide.
+
+### The page now lands on the timelapse, not on its last frame
+
+With four days resolved, arriving at the finished state showed 390 rings and 1,655 traces at
+once — a wall, not work moving. The page now plays on first load, so the field builds itself
+from 27 August. That is the reference video's actual experience and the one thing a four-second
+live window cannot reproduce. `prefers-reduced-motion` goes straight to the end state; Pause is
+one click.
+
+### Verified
+
+`check-site status:ok` · public **59/59** · receipt verifier **14/14** · `audit clean` ·
+`node --check` pass · render **4.5 ms/frame** at 390 nodes · mobile `scrollWidth === 375`,
+0 overflow, 0 overlaps · zero colour or px literals in the JS outside comments.
+
+`relay-field/relay-field.js` is modified and uncommitted.
+
+### Still open
+
+Lane widths are still fixed quarters, so a lane holding three agents is as wide as one holding
+two hundred. At this density that is now visible and worth weighting by occupancy.
+
+---
+
+## Site unification — 2026-08-31 (Claude, built)
+
+The three pages carried three lockups, three link sets and three names for the same
+destination; `/` redirected to the competition entry, and the signed receipts appeared in no
+navigation at all. That is fixed structurally rather than page by page.
+
+### Design system
+
+`assets/relay-nav.css` — shared shell only. `assets/relay.css` imports it and adds the full
+system. Token names, component anatomy, radius scale, focus-ring treatment and motion curve
+follow **shadcn/ui**; the values are FLOP's palette.
+
+It is plain CSS, not React, on purpose. shadcn/ui needs React + Tailwind + a bundler; this site
+is static HTML, and the Worker rewrites, the inline field-kit application and `check-site.mjs`
+are all built around that. Porting to React would rewrite the whole site and every test without
+making a single page look better — shadcn's value here is its design decisions, not its
+runtime. The full React migration remains available as its own decision; nothing here blocks it.
+
+`relay-nav.css` deliberately carries no reset, no `body` rule and no heading sizes, so it drops
+onto the logo submission and the field kit without restyling anything they built. A check
+enforces that.
+
+### The mark
+
+The header now carries the **official FLOP Chip**, fetched from
+`flop.finance/assets/flop-chip-favicon.svg` and stored unmodified at
+`assets/brand/flop-chip-favicon.svg` (2,131 bytes, provenance comment intact). Its path data
+matches the copy already embedded in the logo submission **byte for byte** — verified, 1,367
+characters, identical. Every page credits FLOP Labs by name and links the source; `check-site`
+asserts the rendered path matches the official geometry so an approximation cannot creep in.
+
+### Structure
+
+| | before | after |
+|---|---|---|
+| front door | `/` → 307 → `/technocore/` | `/` is a real home page |
+| lockups | 3 different, one a letter `F` in a box | 1, the official Chip |
+| nav sets | 5 / 2 / 7 items | 5 destinations, identical everywhere |
+| the receipts | in no navigation | `/proof/`, generated from the real 14 |
+| root `index.html` | stale duplicate of `/relay/`, 0 unique ids, unreachable behind both redirects | removed (recoverable via `git show HEAD:index.html`) |
+
+Current page is marked by the Chip's own notch, so the nav needs no second accent colour.
+
+### Alignment
+
+Measured at 1440×900: every `.shell` on the home page resolves to **one** left edge, x=73, nav
+through footer — `shellLeftEdges: [73]`. The three "start here" cards are equal height (281px)
+on a 4px spacing scale. Same single axis on `/proof/`.
+
+### Relay Field
+
+Rebuilt as a map: full-bleed canvas, floating panels (search + room + capture bar, layer
+toggles with live counts, inspector), zoom/pan with pointer capture and ctrl-wheel, an overview
+minimap, and a transport bar with the density track, scrubber and 1×/4×/20× speed.
+
+All 25 ids the data layer binds to survive the rewrite — checked mechanically, not by eye. The
+map controls are bolted on through a `MutationObserver` and drive presentation attributes only,
+so nothing here can change what the page claims about the archive.
+
+Panels initially covered the POSTED and ATTESTED lanes. The field is now inset to the clear
+channel between them above 1240px; measured `anyLabelUnderPanel: false`, lanes at 410–992
+inside a channel of 320–1075.
+
+### Assertions rewritten, not deleted
+
+Seven per-page navigation assertions pinned one page's private markup each. They are replaced
+by one guard that every page carries a **byte-identical** shell, marks itself current, shows the
+official Chip path, credits FLOP Labs and loads the shared stylesheet and behaviour — stronger
+than what it replaced, and the thing that was actually broken. The routing assertions that
+pinned the old redirects now assert the front door is not redirected away. The root-vs-`/relay/`
+copy-parity check was removed with its reason: it compared the root against the kit because the
+root *was* a copy of the kit, so with the duplicate gone it would only compare `/relay/` with
+itself.
+
+### Verified
+
+`check-site status:ok pages:5 shell:identical` · public tests **59/59** · offline receipt
+verifier **14/14** · `audit clean` · `node --check` on both scripts · `git diff --check` clean ·
+zero colour literals in either script · `scrollWidth === 375` with **0** overflowing elements at
+phone width on every page.
+
+### Not done
+
+- `/relay/` (the field kit) keeps its own typography and its 176KB inline application. It wears
+  the shared shell but has not been rebuilt on the design system.
+- The one-click DID generator on the kit is the existing implementation; the mockup's version
+  was not built.

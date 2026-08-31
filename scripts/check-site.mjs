@@ -8,7 +8,15 @@ import { Script } from "node:vm";
 import { parseReceiptJsonl } from "../kibble-kit/receipts-core.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const html = await readFile(join(root, "index.html"), "utf8");
+// `html` is the FLOP Relay field kit. It used to live at the site root; the root is now a
+// real front page, so the kit assertions below follow it to /relay/ rather than being rewritten.
+const html = await readFile(join(root, "relay", "index.html"), "utf8");
+const homeHtml = await readFile(join(root, "index.html"), "utf8");
+const proofHtml = await readFile(join(root, "proof", "index.html"), "utf8");
+const navCss = await readFile(join(root, "assets", "relay-nav.css"), "utf8");
+const relayCss = await readFile(join(root, "assets", "relay.css"), "utf8");
+const relayShellJs = await readFile(join(root, "assets", "relay.js"), "utf8");
+const flopChip = await readFile(join(root, "assets", "brand", "flop-chip-favicon.svg"), "utf8");
 const relayHtml = await readFile(join(root, "relay", "index.html"), "utf8");
 const relayFieldHtml = await readFile(join(root, "relay-field", "index.html"), "utf8");
 const relayFieldCss = await readFile(join(root, "relay-field", "relay-field.css"), "utf8");
@@ -121,11 +129,11 @@ assert(!html.includes("RECENT ROOM LINE"), "Relay must not present a lobby-only 
 assert(html.includes("not present in current lobby window"), "Relay must describe a missing lobby line without implying all rooms were checked");
 
 assert(Array.isArray(vercel.rewrites) && vercel.rewrites.length > 0, "vercel.json must define fixed rewrites");
-assert(Array.isArray(vercel.redirects) && vercel.redirects.length > 0, "vercel.json must define the public landing redirect");
-const homeRedirect = vercel.redirects.find((redirect) => redirect.source === "/");
-assert.deepEqual(homeRedirect, { source: "/", destination: "/technocore/", permanent: false }, "the public home must redirect safely to the Technocore submission");
-const legacyRelayRedirect = vercel.redirects.find((redirect) => redirect.source === "/index.html");
-assert.deepEqual(legacyRelayRedirect, { source: "/index.html", destination: "/relay/", permanent: false }, "the legacy field-kit page must resolve to its named Relay route");
+for (const source of ["/", "/index.html"]) {
+  const swallowed = (vercel.redirects || []).find((redirect) => redirect.source === source);
+  assert(!swallowed, `${source} must serve the front page, not redirect away from it`);
+}
+assert(homeHtml.includes("<title>"), "the front page must be a real document");
 const sources = vercel.rewrites.map((rewrite) => rewrite.source);
 assert.equal(new Set(sources).size, sources.length, "vercel.json contains duplicate rewrite sources");
 for (const rewrite of vercel.rewrites) {
@@ -142,12 +150,10 @@ assert.match(workflow, /^\s*workflow_dispatch\s*:/mu, "the public workflow needs
 assert.match(workflow, /inputs:\s*[\s\S]*use_llm:/u, "the workflow needs an explicit model-call opt-in");
 assert(html.includes('var resultPrefix = "RESULT v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical RESULT v1 lines");
 assert(html.includes('var attestPrefix = "ATTEST v1 | " + action.jobId + " | ";'), "the public verifier must recognise canonical ATTEST v1 lines");
-const relayComparableHtml = relayHtml
-  // Relay Field is a new sibling route; keep the legacy field-kit parity check
-  // focused on the copied implementation rather than its additive navigation link.
-  .replace('<a href="/relay-field/">Relay Field</a>', "")
-  .replaceAll("https://danflopfun.vercel.app/relay/", "https://danflopfun.vercel.app/");
-assert.equal(relayComparableHtml, html, "Relay must retain the complete field-kit implementation, apart from its canonical public route");
+// The old copy-parity check compared the site root with /relay/, because the root used to be a
+// byte-near duplicate of the kit. The root is a real front page now, so that comparison would
+// compare /relay/ with itself. What it actually guarded — that the kit is still whole — is
+// covered by the inline-script, parser, tab and panel assertions around it.
 assert(relayHtml.includes('<link rel="canonical" href="https://danflopfun.vercel.app/relay/"'), "Relay must declare its own canonical URL");
 for (const panel of ["guide", "signals", "briefing", "live-agent"]) {
   assert(relayHtml.includes(`data-tab="${panel}"`), `Relay must retain the ${panel} tab`);
@@ -175,8 +181,15 @@ new Script(relayFieldJs, { filename: "relay-field.js" });
 // Same reasoning: the property is that the field sits on a module-grid substrate defined in
 // CSS, not that the cell happens to be 2rem. Pinning the literal value made a legitimate
 // spacing change look like a regression.
-assert.match(relayFieldCss, /\.field-shell\s*\{[^}]*background-image:\s*linear-gradient/u, "Relay Field must expose a module-grid substrate");
-assert.match(relayFieldCss, /\.field-shell\s*\{[^}]*background-size:\s*[\d.]+rem\s+[\d.]+rem/u, "Relay Field module grid must set an explicit cell size");
+assert.match(relayFieldCss, /\.grid-substrate\s*\{[\s\S]*?background-image:[\s\S]*?linear-gradient/u, "Relay Field must expose a module-grid substrate");
+assert.match(relayFieldCss, /\.grid-substrate\s*\{[\s\S]*?background-size:\s*[\d.]+px\s+[\d.]+px/u, "Relay Field module grid must set an explicit cell size");
+// The map is only "better than a chart" if it actually behaves like one.
+for (const control of ["zoom-in", "zoom-out", "zoom-reset", "find", "layer-traces", "layer-agents", "layer-chat", "layer-grid", "overview"]) {
+  assert(relayFieldHtml.includes(`id="${control}"`), `Relay Field must ship the ${control} map control`);
+  assert(relayFieldJs.includes(`"${control}"`), `Relay Field must bind the ${control} map control`);
+}
+assert(relayFieldJs.includes("pointerdown") && relayFieldJs.includes("wheel"), "Relay Field must support pan and zoom");
+assert(!/#[0-9a-fA-F]{3,6}/u.test(relayFieldJs), "Relay Field data code must carry no colour literals");
 
 assert.match(receiptWorkflow, /^\s*schedule:\s*$/mu, "receipt workflow must run on a daily schedule");
 assert.match(receiptWorkflow, /permissions:\s*\n\s*contents:\s*write/u, "receipt workflow needs only repository contents write permission");
@@ -206,14 +219,67 @@ assert(technocoreHtml.includes(".btn.download::before"), "Technocore download co
 assert(technocoreHtml.includes("class=\"btn ghost download\""), "Every generated file download must use the download control style");
 assert(technocoreHtml.includes("class=\"agent-note\""), "Technocore route must document the right-facing agent reading");
 assert(!technocoreHtml.includes('href="/technocore-favicon.svg"'), "Technocore copy snippet must use the route-scoped favicon");
-assert(technocoreHtml.includes('href="#submission" aria-current="page">Logo submission</a>'), "Technocore route must make the competition submission its clear primary navigation item");
-assert(!technocoreHtml.includes('href="#delivery">Brand kit</a>'), "Technocore route must not clutter its primary navigation with the brand-kit anchor");
-assert(technocoreHtml.includes('href="/relay/">FLOP Relay tools</a>'), "Technocore route must retain a prominent route back to the full FLOP Relay field kit");
-assert(technocoreHtml.includes('href="/relay-field/">Relay Field</a>'), "Technocore route must link the Relay Field next to the field kit");
-assert(technocoreHtml.includes('.site-nav-links a{min-height:42px;display:inline-flex;'), "Technocore navigation controls must have an explicit accessible hit area");
-assert(technocoreHtml.includes('.site-nav-links a[aria-current="page"]{border-color:#00B4D8;background:#00B4D8;color:#0A1128}'), "Technocore navigation must visibly highlight the active competition destination");
+// One shell, byte-identical on every page. This is what the per-page navigation assertions
+// were reaching for individually, and what the site did not have: three pages carried three
+// different lockups, three different link sets, and three names for the same destination.
+const SHELL_PAGES = [
+  ["/", homeHtml],
+  ["/relay-field/", relayFieldHtml],
+  ["/relay/", relayHtml],
+  ["/proof/", proofHtml],
+  ["/technocore/", technocoreHtml],
+];
+const shellOf = (source) => {
+  const match = source.match(/<header class="nav">[\s\S]*?<\/header>/u);
+  assert(match, "every page must carry the shared shell header");
+  return match[0];
+};
+const canonicalShell = shellOf(homeHtml).replace(/ aria-current="page"/gu, "");
+for (const [route, source] of SHELL_PAGES) {
+  assert.equal(
+    shellOf(source).replace(/ aria-current="page"/gu, ""),
+    canonicalShell,
+    `${route} must carry the identical shared shell`,
+  );
+  assert(
+    shellOf(source).includes(`href="${route}" aria-current="page"`),
+    `${route} must mark itself as the current destination`,
+  );
+  assert(source.includes('aria-label="FLOP Chip"'), `${route} must show the official FLOP Chip`);
+  assert(source.includes('class="credit"'), `${route} must credit FLOP Labs for the Chip artwork`);
+  // Pages that own their typography link the shell directly; the pages built on the full
+  // design system get it through relay.css, which imports it.
+  assert(
+    source.includes("/assets/relay-nav.css") || source.includes("/assets/relay.css"),
+    `${route} must load the shared shell stylesheet`,
+  );
+  assert(source.includes("/assets/relay.js"), `${route} must load the shared shell behaviour`);
+}
+for (const [, source] of SHELL_PAGES) {
+  for (const route of ["/", "/relay-field/", "/relay/", "/proof/", "/technocore/"]) {
+    assert(source.includes(`href="${route}"`), `every page must link ${route}`);
+  }
+}
+
+// The Chip is FLOP Labs' artwork. It ships unmodified and the credit names them and the source.
+assert(flopChip.includes('viewBox="179.91 181.41 637.18 637.18"'), "the FLOP Chip must keep its official viewBox");
+const chipPath = flopChip.match(/ d="([^"]+)"/u)?.[1] || "";
+assert(chipPath.length > 1200, "the FLOP Chip path must be the official geometry, not a redraw");
+for (const [route, source] of SHELL_PAGES) {
+  assert(source.includes(chipPath.slice(0, 120)), `${route} must render the official Chip path, not an approximation`);
+  assert(source.includes("flop.finance/assets/flop-chip-favicon.svg"), `${route} must cite where the Chip came from`);
+  assert(/FLOP Labs<\/strong>/u.test(source), `${route} must name FLOP Labs as the artwork's author`);
+}
+
+// Accessible hit areas and a visible current-page marker now live in one stylesheet.
+assert(navCss.includes("min-height: 40px"), "shared navigation links need an explicit hit area");
+assert(navCss.includes('.nav-link[aria-current="page"]::after'), "the shared shell must mark the current page visually");
+assert(navCss.includes("min-height: 44px"), "navigation targets must reach 44px on a phone");
+assert(!navCss.includes("body {"), "the shell stylesheet must not restyle pages that own their typography");
+assert(relayShellJs.includes("prefers-reduced-motion"), "shared motion must honour reduced-motion");
+assert(relayCss.includes("prefers-reduced-motion"), "the design system must honour reduced-motion");
+assert(!homeHtml.includes("#FF453A") && !proofHtml.includes("#FF453A"), "Error Red stays semantic, never decorative");
 assert.match(technocoreHtml, /<section id="delivery">\s*<p class="kicker">Delivery<\/p>/u, "the brand-kit destination must land on the Delivery section");
-assert(!technocoreHtml.includes('href="/#guide"') && !technocoreHtml.includes('href="/#signals"') && !technocoreHtml.includes('href="/#live-agent"'), "Technocore navigation must not expose the retired field-kit sections");
 assert(technocoreHtml.includes("@media(max-width:719px){.duo,.spec,.well{min-width:0}.duo .well{overflow-x:auto}}"), "Technocore narrow layouts must confine wide lockups to specimen-level scrolling");
 let technocoreInlineCount = 0;
 for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/giu)) {
@@ -223,4 +289,16 @@ for (const match of technocoreHtml.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
 }
 assert.equal(technocoreInlineCount, 1, "Technocore route must keep its single inline interaction script");
 
-console.log(JSON.stringify({ status: "ok", ids: ids.length, referencedIds: referencedIds.length, inlineScripts: inlineCount, relay: true, technocoreNav: "prominent", technocoreAssets: technocoreAssets.length, technocoreBundle: true, redirects: vercel.redirects.length, rewrites: vercel.rewrites.length }));
+console.log(JSON.stringify({
+  status: "ok",
+  pages: SHELL_PAGES.length,
+  shell: "identical",
+  chip: "official FLOP Labs artwork, credited",
+  kitIds: ids.length,
+  kitReferencedIds: referencedIds.length,
+  kitInlineScripts: inlineCount,
+  receipts: parseReceiptJsonl(receipts).length,
+  technocoreAssets: technocoreAssets.length,
+  redirects: (vercel.redirects || []).length,
+  rewrites: vercel.rewrites.length,
+}));

@@ -1,17 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/technocore/",
-      "permanent": false
-    },
-    {
-      "source": "/index.html",
-      "destination": "/relay/",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/tc/health",
