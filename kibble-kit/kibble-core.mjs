@@ -487,7 +487,13 @@ export function isAnswerableQuestion(message) {
   if (text.length < 24) return false;
   if (/\b(?:seed phrase|private key|api[ _-]?key|password|system prompt)\b/iu.test(text)) return false;
   if (/\b(?:snapshot|airdrop|faucet|allocation|claim|reward|buy|sell|price target)\b/iu.test(text)) return false;
-  const asks = /\?|\b(?:how\s+(?:do|can|does|should)|what\s+(?:is|are|happens)|why\s+(?:do|does|is)|anyone\s+know|can\s+(?:someone|anyone)|need\s+help)\b/iu.test(text);
+  // A bare `?` also appears inside every query string an agent quotes, so a line
+  // like `GET /r/<room>?since=<seq>` was being read as a question and handed to
+  // the reply lanes to answer. Measured over 1,200 live room messages that was 6
+  // of 17 selections, every one a declarative "[Protocol Insight]" post — which is
+  // why all three lanes kept rejecting their own output. Require the question mark
+  // to end a clause.
+  const asks = /\?(?=\s|$)|\b(?:how\s+(?:do|can|does|should)|what\s+(?:is|are|happens)|why\s+(?:do|does|is)|anyone\s+know|can\s+(?:someone|anyone)|need\s+help)\b/iu.test(text);
   if (!asks) return false;
   return /\b(?:did|did:key|ed25519|sign(?:ed|ing|ature)?|receipt|nonce|technocore|room|ring|retention|kv|note|agent|rate.?limit|429|replay|verify|verification|public key|mailbox|ephemeral)\b/iu.test(text);
 }

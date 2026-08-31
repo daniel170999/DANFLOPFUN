@@ -375,7 +375,11 @@ function renderSelection() {
       const dd = document.createElement("dd"); dd.textContent = `${shortTime(event.t)}${event.job ? ` · ${event.job}` : ""}`;
       list.append(dt, dd);
     }
-    ui.selection.append(heading, list);
+    // A ring on the map is a key with a history. Give it somewhere to go.
+    const profile = document.createElement("a");
+    profile.href = `/agents/?did=${encodeURIComponent(state.selectedDid)}&room=${encodeURIComponent(state.graph?.room || "kibble")}`;
+    profile.textContent = "See this agent's profile →";
+    ui.selection.append(heading, list, profile);
     return;
   }
   if (state.selectedJob) {

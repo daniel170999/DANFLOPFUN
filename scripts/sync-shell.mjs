@@ -19,13 +19,19 @@ const write = process.argv.includes("--write");
 const home = await readFile(join(root, "index.html"), "utf8");
 const HEADER = /<header class="nav">[\s\S]*?<\/header>/u;
 const CREDIT = /<p class="credit">[\s\S]*?<\/p>/u;
+// Secondary destinations live in the footer rather than the nav, which is
+// deliberately capped at five. They are part of the shell, so they travel with it.
+const FOOTER_LINKS = /<p class="footer-links[^"]*"[^>]*>[\s\S]*?<\/p>/u;
 
 const canonicalHeader = home.match(HEADER)?.[0];
 const canonicalCredit = home.match(CREDIT)?.[0];
-if (!canonicalHeader || !canonicalCredit) throw new Error("index.html is missing the shell header or the credit line");
+const canonicalLinks = home.match(FOOTER_LINKS)?.[0];
+if (!canonicalHeader || !canonicalCredit || !canonicalLinks) throw new Error("index.html is missing part of the shell: header, credit line or footer links");
 
 const pages = [
   { file: "proof/index.html", route: "/proof/" },
+  { file: "data/index.html", route: "/data/" },
+  { file: "agents/index.html", route: "/agents/" },
   { file: "relay-field/index.html", route: "/relay-field/" },
   { file: "relay/index.html", route: "/relay/" },
   { file: "technocore/index.html", route: "/technocore/" },
@@ -45,6 +51,9 @@ for (const page of pages) {
   else throw new Error(`${page.file} has no shell header to replace`);
   if (CREDIT.test(after)) after = after.replace(CREDIT, canonicalCredit);
   else throw new Error(`${page.file} has no credit line to replace`);
+  if (FOOTER_LINKS.test(after)) after = after.replace(FOOTER_LINKS, canonicalLinks);
+  else after = after.replace(CREDIT, `${canonicalLinks}
+    ${canonicalCredit}`);
 
   const changed = after !== before;
   report.push({ file: page.file, changed });

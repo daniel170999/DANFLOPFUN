@@ -435,3 +435,74 @@ inline-JS change is the 860-byte handler for it. `check-site` still reports `kit
 `check-site status:ok pages:5 shell:identical receipts:18` · `sync-shell inSync:true` ·
 tests **59/59** · verifier **18/18** · `audit clean` · `node --check` both scripts ·
 `git diff --check` clean · no horizontal overflow at 1440 or 375.
+
+---
+
+## Next directions, built — 2026-08-31 (Claude)
+
+### The brain was never broken — the question picker was
+
+Three reply lanes exist (`archive`, `official_docs`, `room`) and Codex's §3 work shipped. In the
+24 hours to 14:00Z the model was consulted and declined every time:
+
+```
+room / verified            5   all provider: deterministic_official_fact
+room / weak_protocol_match 4
+official_docs / model_not_confident  3
+archive / unfilled_template_slot     2
+```
+
+The cause is one character. `isAnswerableQuestion` treated a bare `?` as a question mark, and a
+bare `?` appears inside every query string an agent quotes — so
+`GET /r/<room>?since=<seq>` was selected as a question and handed to the lanes to answer.
+They were rejecting their own output because they were being asked to answer statements.
+
+Measured across **1,200 live room messages**: 17 selections, of which **6 were declarative
+`[Protocol Insight]` posts**. Requiring the question mark to end a clause removes exactly those
+six and keeps all eleven real questions. Two regression tests added; suite is 61/61.
+
+One expectation of mine was wrong and the code was right: `How do I verify a signed receipt
+without holding the private key?` is correctly rejected, because `private key` is on the secrets
+filter. That filter is deliberate and stays.
+
+### `/data/` — the archive as documented infrastructure
+
+Nobody else has four days of Technocore history, and until now `/graph` was a private endpoint
+for one page. It is now documented: what each field means, the bounds, copy-paste `curl` and
+browser snippets, a live response fetched on load, and three cards stating plainly what it does
+**not** claim — that it is a sample, that it proves server observation rather than signature
+validity, and that no agent is ever invented.
+
+**Not at `/api/`.** Vercel treats a root `api/` directory as Serverless Functions with no opt-out
+in this project's config, and a static page there is not worth gambling a live route on.
+
+### `/agents/` — a profile for any did:key
+
+Paste a DID, or arrive from a ring on the map. Shows what it posted, which jobs it touched, who
+it handed work to, and when it was first and last seen — read from the same public endpoint, so
+the page can never show a number the API does not serve. Peers link to each other, so the graph
+is walkable.
+
+Verified against real data rather than by eye: a key showing "no handovers" was checked and its
+job chains genuinely contain one DID each in that window, while the busiest key resolves 39
+peers. The logic is right and the empty state is honest.
+
+### The navigation stayed at five
+
+Both are secondary destinations reached from the footer and from the map. `sync-shell.mjs` now
+carries a `.footer-links` element as part of the shell, so they propagate with it; `check-site`
+asserts the two pages wear the identical shell, do **not** claim a current destination, and are
+linked from every page — an unreachable page is just an orphan file.
+
+`scripts/build-pages.mjs` regenerates both from the canonical shell.
+
+### Verified
+
+`check-site status:ok` · `sync-shell inSync:true` · tests **61/61** · verifier **18/18** ·
+`audit clean` · `node --check` on all three scripts · `git diff --check` clean · all seven
+routes 200 · no horizontal overflow at 1440 or 375 on either new page.
+
+### Also in this change
+
+`assets/social/relay-field.gif` — 900×440, 64 frames, looping, drawn from the same `/graph`
+document rather than screen-recorded, so every ring is a key that actually posted.

@@ -13,6 +13,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const html = await readFile(join(root, "relay", "index.html"), "utf8");
 const homeHtml = await readFile(join(root, "index.html"), "utf8");
 const proofHtml = await readFile(join(root, "proof", "index.html"), "utf8");
+const apiHtml = await readFile(join(root, "data", "index.html"), "utf8");
+const agentsHtml = await readFile(join(root, "agents", "index.html"), "utf8");
+const agentsJs = await readFile(join(root, "agents", "agents.js"), "utf8");
 const navCss = await readFile(join(root, "assets", "relay-nav.css"), "utf8");
 const relayCss = await readFile(join(root, "assets", "relay.css"), "utf8");
 const relayShellJs = await readFile(join(root, "assets", "relay.js"), "utf8");
@@ -229,6 +232,13 @@ const SHELL_PAGES = [
   ["/proof/", proofHtml],
   ["/technocore/", technocoreHtml],
 ];
+// The Archive API and agent profiles are secondary destinations: they wear the same
+// shell but are reached from the footer and from the map, so the navigation stays at
+// five. They are checked for shell parity, not for marking themselves current.
+const SECONDARY_PAGES = [
+  ["/data/", apiHtml],
+  ["/agents/", agentsHtml],
+];
 const shellOf = (source) => {
   const match = source.match(/<header class="nav">[\s\S]*?<\/header>/u);
   assert(match, "every page must carry the shared shell header");
@@ -255,6 +265,28 @@ for (const [route, source] of SHELL_PAGES) {
   );
   assert(source.includes("/assets/relay.js"), `${route} must load the shared shell behaviour`);
 }
+for (const [route, source] of SECONDARY_PAGES) {
+  assert.equal(
+    shellOf(source).replace(/ aria-current="page"/gu, ""),
+    canonicalShell,
+    `${route} must carry the identical shared shell`,
+  );
+  assert(!/aria-current="page"/u.test(shellOf(source)), `${route} is not a primary destination and must not claim one`);
+  assert(source.includes('aria-label="FLOP Chip"'), `${route} must show the official FLOP Chip`);
+  assert(source.includes('class="credit"'), `${route} must credit FLOP Labs for the Chip artwork`);
+  assert(source.includes("/assets/relay.css"), `${route} must load the design system`);
+}
+// Both secondary pages must be reachable, or they are just orphan files.
+for (const [, source] of [...SHELL_PAGES, ...SECONDARY_PAGES]) {
+  assert(source.includes('href="/data/"'), "every page must link the Archive API");
+  assert(source.includes('href="/agents/"'), "every page must link agent profiles");
+}
+// The profile page reads the documented public endpoint, never a private one.
+assert(agentsJs.includes('const API = "/api/agent/graph"'), "agent profiles must read the public graph endpoint");
+assert(!/#[0-9a-fA-F]{3,6}/u.test(agentsJs), "agent profile code must carry no colour literals");
+assert(relayFieldJs.includes("/agents/?did="), "the map must link a selected ring to its profile");
+assert(apiHtml.includes("missedEstimate"), "the API page must document the sampling contract, not hide it");
+
 for (const [, source] of SHELL_PAGES) {
   for (const route of ["/", "/relay-field/", "/relay/", "/proof/", "/technocore/"]) {
     assert(source.includes(`href="${route}"`), `every page must link ${route}`);

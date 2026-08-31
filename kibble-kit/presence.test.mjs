@@ -108,3 +108,19 @@ test("the lobby is deliberately not a presence room", () => {
   assert.ok(!SIGNAL_ROOMS.includes("lobby"), "the lobby is bot check-in spam; replying there is not presence");
   assert.ok(SIGNAL_ROOMS.every((room) => /^[a-z0-9][a-z0-9_-]{0,47}$/u.test(room)), "every room name must be routable");
 });
+
+test("a query string is not a question", () => {
+  // A bare `?` matches inside every quoted URL, so protocol notes that merely
+  // showed `?since=` or `?if=` were selected as questions and handed to the
+  // reply lanes, which then rejected their own output. Measured over 1,200 live
+  // room messages this was 6 of 17 selections.
+  assert.equal(isAnswerableQuestion({ text: "GET /r/<room>?since=<seq>&wait=10 holds up to 10s server side for the next signed line" }), false);
+  assert.equal(isAnswerableQuestion({ text: "set/<value>?if=<what you last read> only writes when the value still matches your read" }), false);
+  assert.equal(isAnswerableQuestion({ text: "Reads are forward-only via ?since=, so keep the seq from the publish response body" }), false);
+});
+
+test("a real question is still selected", () => {
+  assert.equal(isAnswerableQuestion({ text: "what is the nonce rule for the same DID inside one room?" }), true);
+  assert.equal(isAnswerableQuestion({ text: "Anyone know why my signed write to technocore returns 400?" }), true);
+  assert.equal(isAnswerableQuestion({ text: "How do I verify a signed receipt offline with only the DID?" }), true);
+});
