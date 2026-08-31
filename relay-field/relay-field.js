@@ -112,6 +112,56 @@ function dominantStage(node) {
 // radius as agents were added, so the busiest and most interesting rooms drew the tightest and
 // least readable field. Measured at 38 agents it produced a 2.3px centre distance between
 // 36px rings and used 11.9% of the canvas.
+// Rings are packed into each lane's own box as a grid, and the radius is whatever lets the
+// worst-packed box hold its agents. There is deliberately no useful lower bound: a floor on
+// ring size inside a fixed canvas is a promise the geometry cannot keep, so clamping upward
+// just reintroduces the collisions it claims to prevent. Measured at 348 agents, a 6.5 floor
+// produced 252 overlapping pairs at a 7.2px centre distance.
+// The selected ring is 4 SVG units wide. Packing must reserve its outer edge, not merely the
+// mathematical circle's radius; otherwise small rings overlap again as the fixed stroke starts
+// to dominate their diameter.
+const MAX_RING_STROKE = 4;
+const RING_GAP = .8;
+const LANE_BOX_WIDTH = 224;
+const CHAT_BOX = { top: 468, height: 84 };
+
+function gridStep(radius) {
+  return radius * 2 + MAX_RING_STROKE + RING_GAP;
+}
+
+function gridColumns(width, radius) {
+  return Math.max(1, Math.floor(width / gridStep(radius)));
+}
+
+function packBox(count, width, height) {
+  if (count <= 0) return { radius: 19, columns: 1, rows: 1 };
+  // Largest r whose stroke-aware grid still fits `count` cells in width x height.
+  const ideal = Math.sqrt((width * height) / count) / 2.3;
+  let radius = Math.min(19, ideal);
+  for (let guard = 0; guard < 80; guard += 1) {
+    const columns = gridColumns(width, radius);
+    const rows = Math.max(1, Math.floor(height / gridStep(radius)));
+    if (columns * rows >= count) return { radius, columns: Math.min(columns, count), rows };
+    radius *= .94;
+  }
+  return { radius, columns: gridColumns(width, radius), rows: 1 };
+}
+
+function placeGrid(list, positions, lane, centreX, centreY, radius, width) {
+  const columns = Math.max(1, Math.min(list.length, gridColumns(width, radius)));
+  const rows = Math.ceil(list.length / columns);
+  const step = gridStep(radius);
+  list.forEach((node, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    positions.set(node.did, {
+      x: centreX + (column - (columns - 1) / 2) * step,
+      y: centreY + (row - (rows - 1) / 2) * step,
+      lane,
+    });
+  });
+}
+
 function layoutFor(nodes) {
   const lanes = new Map(LANES.map((lane) => [lane.stage, []]));
   const chat = [];
@@ -119,44 +169,21 @@ function layoutFor(nodes) {
   for (const list of [...lanes.values(), chat]) {
     list.sort((left, right) => Date.parse(left.firstSeen) - Date.parse(right.firstSeen));
   }
-  const tallest = Math.max(1, ...[...lanes.values()].map((list) => list.length));
   const span = FIELD.bottom - FIELD.top;
-  const columns = tallest > 11 ? 2 : 1;
-  const rowsNeeded = Math.ceil(tallest / columns);
-  const pitch = rowsNeeded > 1 ? span / (rowsNeeded - 1) : span;
-  // Radius must satisfy the crowded lane AND the talking band. A room like did-key-method has
-  // almost no board activity, so nearly every agent lands in the band; sizing only from the
-  // lanes let 43 rings overlap there. Both constraints, or the fix only moves the bug.
-  const chatRows = Math.max(1, Math.ceil(chat.length / Math.max(1, Math.floor(FIELD.width / 34))));
-  const chatPerRow = Math.ceil(chat.length / chatRows) || 1;
-  const chatPitch = FIELD.width / (chatPerRow + 1);
-  const radius = Math.max(6.5, Math.min(19, pitch / 2 - 3, chatPitch / 2 - 3));
+  // One radius for the whole field, set by whichever box is hardest to pack, so a ring means
+  // the same thing in every lane.
+  const radius = Math.min(
+    ...[...lanes.values()].map((list) => packBox(list.length, LANE_BOX_WIDTH, span).radius),
+    packBox(chat.length, FIELD.width - 40, CHAT_BOX.height).radius,
+  );
   const positions = new Map();
   for (const lane of LANES) {
-    const list = lanes.get(lane.stage) || [];
-    const rows = Math.ceil(list.length / columns);
-    list.forEach((node, index) => {
-      const column = index % columns;
-      const row = Math.floor(index / columns);
-      const y = rows > 1 ? FIELD.top + (row / (rows - 1)) * span : FIELD.top + span / 2;
-      positions.set(node.did, {
-        x: lane.x + (column - (columns - 1) / 2) * (radius * 2.4),
-        y,
-        lane: lane.stage,
-      });
-    });
+    placeGrid(lanes.get(lane.stage) || [], positions, lane.stage, lane.x, FIELD.top + span / 2, radius, LANE_BOX_WIDTH);
   }
-  chat.forEach((node, index) => {
-    const row = Math.floor(index / chatPerRow);
-    const column = index % chatPerRow;
-    positions.set(node.did, {
-      x: chatPitch * (column + 1),
-      // Leave room for the ring stroke at the browser's rendered scale; 2.4 was
-      // mathematically separated but still touched once SVG scaling and stroke width applied.
-      y: FIELD.chatY + (row - (chatRows - 1) / 2) * (radius * 3.2),
-      lane: "chat",
-    });
-  });
+  placeGrid(chat, positions, "chat", FIELD.width / 2, CHAT_BOX.top + CHAT_BOX.height / 2, radius, FIELD.width - 40);
+  const chatRows = chat.length
+    ? Math.ceil(chat.length / gridColumns(FIELD.width - 40, radius))
+    : 0;
   return { positions, radius, chatCount: chat.length, chatRows };
 }
 
@@ -323,8 +350,8 @@ function drawField() {
   ui.field.appendChild(nodeLayer);
 
   if (layout.chatCount) {
-    const lastRowY = FIELD.chatY + ((layout.chatRows - 1) / 2) * (layout.radius * 3.2);
-    const label = svgElement("text", { class: "lane-label chat-label", x: FIELD.width / 2, y: lastRowY + layout.radius + 22 });
+    const lastRowY = CHAT_BOX.top + CHAT_BOX.height / 2 + ((layout.chatRows - 1) / 2) * gridStep(layout.radius);
+    const label = svgElement("text", { class: "lane-label chat-label", x: FIELD.width / 2, y: Math.min(FIELD.height - 6, lastRowY + layout.radius + 18) });
     label.textContent = "TALKING · NOT ON THE BOARD";
     ui.field.appendChild(label);
   }
@@ -604,4 +631,15 @@ window.addEventListener("pagehide", () => { stopLivePolling(); stopPlayback(); }
 
 ui.from.value = localValue(ARCHIVE_START);
 ui.to.value = localValue(new Date().toISOString());
-fetchGraph();
+
+// Land on the timelapse, not on its last frame. Four days of archive resolve to ~390 agents
+// and ~1,650 handovers, and arriving at the finished state reads as a wall rather than as
+// work moving. Playing on first load makes the field build itself, which is the whole reason
+// the archive exists and the one thing a four-second live window cannot show. Anyone who
+// prefers the end state can press Pause, and reduced-motion visitors are taken straight there.
+fetchGraph().then(() => {
+  if (!state.events.length) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+  state.cursor = 0;
+  play();
+});
