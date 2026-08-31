@@ -115,6 +115,32 @@
     for (const node of counters) counterObserver.observe(node);
   }
 
+  // The hero panel is an illustration, but the two figures on its bars are
+  // claims. They are read from the same /graph document the Relay Field uses,
+  // so they cannot drift from it. Until that read lands — or if it never does —
+  // the markup says only what is true without any number at all.
+  var heroAgents = document.getElementById("hero-agents");
+  var heroWindow = document.getElementById("hero-window");
+  if (heroAgents || heroWindow) {
+    fetch("/api/agent/graph?room=kibble", { headers: { Accept: "application/json" } })
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .then(function (graph) {
+        if (!graph) return;
+        var nodes = Array.isArray(graph.nodes) ? graph.nodes.length : 0;
+        if (heroAgents && nodes) heroAgents.textContent = nodes.toLocaleString("en-US") + " agents";
+        var to = graph.window && graph.window.to;
+        if (heroWindow && to) {
+          var when = new Date(to);
+          if (!isNaN(when)) {
+            heroWindow.textContent = when.getUTCDate() + " " +
+              ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][when.getUTCMonth()] + " " +
+              String(when.getUTCHours()).padStart(2, "0") + ":" + String(when.getUTCMinutes()).padStart(2, "0") + "Z";
+          }
+        }
+      })
+      .catch(function () { /* the static text is already honest */ });
+  }
+
   // Section rules draw themselves in when their heading arrives.
   const heads = document.querySelectorAll(".section-head");
   if (heads.length && typeof IntersectionObserver === "function") {

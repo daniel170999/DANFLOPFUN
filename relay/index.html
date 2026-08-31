@@ -239,6 +239,12 @@
       .signal-badge { color: var(--green); font: 10px var(--mono); }
       .timeline-slot { min-height: 502px; padding: 0 7px; background: var(--surface-deep); }
       .timeline-slot .twitter-timeline { margin: 0 auto !important; }
+      .timeline-slot.is-unavailable { display: grid; place-items: center; min-height: 128px; padding: 20px 18px; }
+      .slot-fallback { display: grid; gap: 9px; justify-items: center; max-width: 340px; text-align: center; }
+      .slot-fallback p { margin: 0; color: var(--muted); font: 11px/1.6 var(--mono); }
+      .slot-fallback a { color: var(--cyan-soft); font: 800 11px var(--mono); text-decoration: none; }
+      .slot-fallback a:hover { color: var(--cyan); }
+      .signal-badge.is-off { color: var(--faint); }
       .signal-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; color: var(--faint); font: 10px var(--mono); }
       .signal-foot a { text-decoration: none; }
       .news-desk { margin-bottom: 18px; overflow: hidden; border: 1px solid rgba(0, 180, 216, .42); border-radius: 11px; background: radial-gradient(circle at 90% 0, rgba(0, 180, 216, .12), transparent 30%), var(--surface-deep); }
@@ -250,7 +256,7 @@
       .news-source { display: grid; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 11px; color: var(--paper); text-decoration: none; background: rgba(19, 34, 71, .38); }
       .news-source:hover { border-color: var(--cyan); background: rgba(0, 180, 216, .07); }
       .news-source b { color: var(--cyan-soft); font: 800 10px var(--mono); }
-      .news-source span { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+      .news-source span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--muted); font-size: 11px; line-height: 1.55; }
       .community-pulse { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(270px, .82fr); gap: 22px; margin-bottom: 18px; border: 1px solid var(--line-bright); border-radius: 11px; padding: 21px 22px; background: radial-gradient(circle at 92% 25%, rgba(0, 180, 216, .12), transparent 36%), var(--surface-deep); }
       .pulse-kicker { margin: 0 0 7px; color: var(--cyan); font: 800 10px var(--mono); letter-spacing: .1em; }
       .community-pulse h4 { margin: 0 0 7px; font: 800 18px/1.1 var(--mono); letter-spacing: -.05em; }
@@ -690,7 +696,7 @@
 
         <section class="tab-panel" id="panel-signals" role="tabpanel" aria-labelledby="tab-signals" data-panel="signals" hidden>
           <div class="panel-top">
-            <div><p class="panel-label">LIVE SOURCE DESK</p><h3>Official updates, plus the conversation around them.</h3><p>FLOP Labs and Arthur Hayes refresh here while the page is open. Community Pulse jumps straight to X’s own Top-results view for FLOP mentions.</p></div>
+            <div><p class="panel-label">LIVE SOURCE DESK</p><h3>Official updates, plus the conversation around them.</h3><p>The cached summary is read server-side and always renders; the two X widgets below appear only if your browser allows X&rsquo;s embed script. Community Pulse jumps straight to X’s own Top-results view for FLOP mentions.</p></div>
             <div class="signal-tools"><span class="signal-status" id="signals-status">Loading official X embeds…</span><button class="button secondary" id="signals-refresh" type="button">Refresh feeds</button></div>
           </div>
           <div class="panel-body">
@@ -1570,6 +1576,13 @@
 
         function renderTimeline(slotId, handle) {
           var slot = document.getElementById(slotId);
+          var card = slot.closest("article.signal-card");
+          var badge = card ? card.querySelector(".signal-badge") : null;
+          if (badge) {
+            badge.textContent = "LIVE";
+            badge.classList.remove("is-off");
+          }
+          slot.dataset.timelineGeneration = String((Number(slot.dataset.timelineGeneration) || 0) + 1);
           var anchor = document.createElement("a");
           anchor.className = "twitter-timeline";
           anchor.href = "https://x.com/" + handle;
@@ -1578,14 +1591,57 @@
           anchor.setAttribute("data-dnt", "true");
           anchor.setAttribute("data-chrome", "noheader nofooter noborders");
           anchor.setAttribute("data-height", "500");
+          slot.classList.remove("is-unavailable");
           slot.replaceChildren(anchor);
           loadXWidgets(slot);
+        }
+
+        function markSlotUnavailable(slot, handle) {
+          var card = slot.closest("article.signal-card");
+          var badge = card ? card.querySelector(".signal-badge") : null;
+          if (badge) {
+            badge.textContent = "EMBED BLOCKED";
+            badge.classList.add("is-off");
+          }
+          var wrap = document.createElement("div");
+          wrap.className = "slot-fallback";
+          var line = document.createElement("p");
+          line.textContent = "X's embed widget did not render here. It is routinely blocked by privacy extensions, and X serves it inconsistently. Nothing above depends on it \u2014 the summary is fetched server-side.";
+          var link = document.createElement("a");
+          link.href = "https://x.com/" + handle;
+          link.target = "_blank";
+          link.rel = "noreferrer";
+          link.textContent = "Read @" + handle + " on X \u2197";
+          wrap.append(line, link);
+          slot.classList.add("is-unavailable");
+          slot.replaceChildren(wrap);
+        }
+
+        // widgets.load() resolving is not evidence the timeline drew: the
+        // iframe is created either way and stays 0x0 when X declines to fill it.
+        function watchTimeline(slotId, handle) {
+          var slot = document.getElementById(slotId);
+          if (!slot) return;
+          var generation = slot.dataset.timelineGeneration;
+          var deadline = Date.now() + 6000;
+          (function poll() {
+            if (slot.dataset.timelineGeneration !== generation) return;
+            var frame = slot.querySelector("iframe");
+            if (frame && frame.getBoundingClientRect().height > 40) return;
+            if (Date.now() > deadline) {
+              markSlotUnavailable(slot, handle);
+              return;
+            }
+            window.setTimeout(poll, 400);
+          })();
         }
 
         function refreshSignals(manual) {
           ui.signalsRefresh.disabled = true;
           renderTimeline("signal-flop", "flop_labs");
           renderTimeline("signal-arthur", "CryptoHayes");
+          watchTimeline("signal-flop", "flop_labs");
+          watchTimeline("signal-arthur", "CryptoHayes");
           ui.signalsStatus.textContent = (manual ? "Refresh requested " : "Auto-refreshed ") + formatShortTime(new Date()) + " · official X feeds";
           window.setTimeout(function () { ui.signalsRefresh.disabled = false; }, 500);
         }

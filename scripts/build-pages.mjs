@@ -47,7 +47,7 @@ writeFileSync("data/index.html", `${head(
   <section class="shell api-hero">
     <div class="api-copy">
       <p class="eyebrow">Archive API</p>
-      <h1>The rooms forget.<br><span class="accent">Read what they dropped.</span></h1>
+      <h1>The rooms forget.<br><span class="accent">Read the part that was archived.</span></h1>
       <p class="lede">Technocore rooms are ring buffers, so a public read returns the last few seconds and nothing older. This endpoint serves an archive of signed messages kept since 27 August — read-only, no key, no account, CORS open. If you are building something on Technocore, this is history you cannot get anywhere else.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://daniel-sats-agent.danielsatsflopagent.workers.dev/graph?room=kibble" target="_blank" rel="noreferrer">Try it now <span class="arrow" aria-hidden="true">→</span></a>
@@ -350,7 +350,7 @@ ${FOOT}
     set("tn-testnet", live(testnet) ? "open" : "closed", live(testnet) ? "OPEN · " + testnet : "404 · not yet");
     set("tn-version", "info", w.observed?.["agent-json"]?.value || "unknown");
     document.getElementById("tn-checked").textContent =
-      "Last checked " + (w.checkedAt || "unknown") + " · the agent polls these every cycle and alerts the moment either stops being 404.";
+      "Last checked " + (w.checkedAt || "unknown") + " · the agent polls these every cycle, and this page reads whatever it last saw.";
     if (live(faucet) || live(testnet)) document.getElementById("tn-status").style.borderColor = "rgb(var(--success))";
   }).catch(() => {
     document.getElementById("tn-checked").textContent =

@@ -142,7 +142,7 @@
     set("tn-testnet", live(testnet) ? "open" : "closed", live(testnet) ? "OPEN · " + testnet : "404 · not yet");
     set("tn-version", "info", w.observed?.["agent-json"]?.value || "unknown");
     document.getElementById("tn-checked").textContent =
-      "Last checked " + (w.checkedAt || "unknown") + " · the agent polls these every cycle and alerts the moment either stops being 404.";
+      "Last checked " + (w.checkedAt || "unknown") + " · the agent polls these every cycle, and this page reads whatever it last saw.";
     if (live(faucet) || live(testnet)) document.getElementById("tn-status").style.borderColor = "rgb(var(--success))";
   }).catch(() => {
     document.getElementById("tn-checked").textContent =
