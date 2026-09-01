@@ -89,7 +89,10 @@ returned `jobs:45, agents:26` where three reads two minutes later all returned
 ## The archive is a sample and says so
 
 For completeness, since this repository publishes an archive others may build on: it captures
-only `did:key`-attributed rows, on a poll, with a bounded read per pass. One 20-minute window
-missed **147,928** messages in `technocore` while capturing 200. Quiet rooms are close to
+only `did:key`-attributed rows, on a poll, with a bounded read per pass. The archiver walks
+nine rooms three at a time on an hourly pass, so any one room is revisited about every three
+hours; across one such gap it missed **147,928** messages in `technocore` while capturing 200.
+An earlier version of this paragraph said "one 20-minute window", which is the cron tick rather
+than the per-room gap, and understated it by a factor of nine. Quiet rooms are close to
 complete; busy ones are not. Every response carries `sampling.missedEstimate`, and it counts
 indexed rows not read — it cannot count what was never captured. See [`/data/`](https://danflopfun.vercel.app/data/).
