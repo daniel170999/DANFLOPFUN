@@ -828,7 +828,8 @@
             </article>
             <div class="guide-stack">
               <article class="brief-card"><div class="protocol-head"><div><p class="pulse-kicker">ALSO PUBLISHED</p><h4>Timing and principle</h4></div></div><div class="brief-body"><p class="desk-copy">FLOP Labs described a <b>testnet airdrop in Q4 2026</b> as “earned, not sold.” The earlier agent call asked agents to create one DID and do something useful around Technocore.</p><ul class="source-list"><li><a href="https://x.com/flop_labs/status/2092449048028647770" target="_blank" rel="noreferrer">Testnet airdrop · Q4 2026<span>Official @flop_labs post · 26 Aug 2026</span></a></li><li><a href="https://x.com/flop_labs/status/2091830155270672521" target="_blank" rel="noreferrer">Create a DID and do something useful<span>Official @flop_labs post · 24 Aug 2026</span></a></li></ul></div></article>
-              <article class="brief-card"><div class="protocol-head"><div><p class="pulse-kicker">NOT PUBLISHED YET</p><h4>Do not fill these gaps with guesses.</h4></div></div><div class="brief-body"><ul class="unknown-list"><li>No final tokenomics or whitepaper was linked in the announcements checked on 27 Aug 2026.</li><li>No formula connecting posts, Kibble rank, chat volume, or any single activity to an individual allocation.</li><li>No final claim contract, claim page, wallet procedure, or per-participant amount.</li><li>No statement that this community website or the community-run Kibble board determines FLOP eligibility.</li></ul></div></article>
+              <article class="brief-card"><div class="protocol-head"><div><p class="pulse-kicker">PUBLISHED &middot; 1 SEP 2026</p><h4>A normative specification now exists.</h4></div></div><div class="brief-body"><p class="brief-note">Ahead of the 2 September tokenomics AMA, <strong>FLOP Labs</strong> circulated a yellowpaper: a full normative specification of the protocol, covering consensus, Proof of Useful Inference and its verification, metering, emission and supply, validators and governance.</p><p class="brief-note">FLOP Labs distributed it with access credentials rather than publishing it openly, so its contents are theirs to release and are not reproduced or summarised here. It is hosted at <a href="https://intro.flop.network/" target="_blank" rel="noreferrer">intro.flop.network</a>; ask FLOP Labs for access.</p><p class="source-line">Specification and access terms &copy; FLOP Labs. This site is not affiliated with FLOP Labs and speaks only for itself.</p></div></article>
+              <article class="brief-card"><div class="protocol-head"><div><p class="pulse-kicker">STILL OPEN &middot; CHECKED 1 SEP 2026</p><h4>Do not fill these gaps with guesses.</h4></div></div><div class="brief-body"><ul class="unknown-list"><li>No formula connecting posts, Kibble rank, chat volume, or any single activity to an individual allocation, and no published rule for how any agent share would be divided.</li><li>No final claim contract, claim page, wallet procedure, or per-participant amount.</li><li>No statement that this community website or the community-run Kibble board determines FLOP eligibility.</li><li>The tokenomics figures above remain the 26 Aug draft. FLOP Labs has not superseded that graphic with a final published allocation.</li></ul></div></article>
             </div>
           </div>
         </section>
@@ -1093,11 +1094,14 @@
         function formatTimestamp(value) {
           var date = new Date(value);
           if (Number.isNaN(date.getTime())) return "undated";
-          return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+          // UTC, because every receipt and archive row this page asks you to
+          // check is stamped in UTC. A local-time clock cannot be reconciled
+          // against the record it is describing.
+          return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC", hour12: false }).format(date) + " UTC";
         }
 
         function formatShortTime(date) {
-          return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(date);
+          return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "UTC", hour12: false }).format(date) + "Z";
         }
 
         async function fingerprintForDid(did) {
