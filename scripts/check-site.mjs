@@ -199,6 +199,41 @@ assert.match(receiptWorkflow, /^\s*schedule:\s*$/mu, "receipt workflow must run 
 assert.match(receiptWorkflow, /permissions:\s*\n\s*contents:\s*write/u, "receipt workflow needs only repository contents write permission");
 assert(receiptWorkflow.includes("proof/receipts.jsonl"), "receipt workflow must publish the append-only JSONL ledger");
 const receiptRows = parseReceiptJsonl(receipts);
+// The ledger is append-only, so every figure quoted from it drifts the moment it grows.
+// check-site reported the real total but never asserted the pages agreed with it, which is
+// how "18 signed receipts" survived on a 23-row ledger. Assert it.
+for (const [label, file] of [["proof page", "proof/index.html"], ["front page", "index.html"]]) {
+  const page = await readFile(join(root, file), "utf8");
+  // Every phrasing the pages use for the ledger size. The first version of this check
+  // only knew "N signed receipts" and "All N receipts", so "Check all 18, offline" and a
+  // sample verifier output reading total: 18 survived on a 23-row ledger and shipped into
+  // a screen recording. Match them all.
+  const quoted = [
+    ...page.matchAll(/(\d+) signed receipts/gu),
+    ...page.matchAll(/Check all (\d+), offline/gu),
+    ...page.matchAll(/See all (\d+) /gu),
+    ...page.matchAll(/All (\d+) receipts/gu),
+    ...page.matchAll(/total: (\d+), passed: (\d+)/gu),
+    ...page.matchAll(/>(\d+)\/(\d+)<\/div><div class="stat-label">Verify/gu),
+  ].flatMap((match) => match.slice(1)).map(Number);
+  for (const value of quoted) {
+    assert.equal(value, receiptRows.length, `${label} quotes ${value} signed receipts but the ledger holds ${receiptRows.length}`);
+  }
+}
+assert(
+  (await readFile(join(root, "proof", "index.html"), "utf8")).includes(`>All ${receiptRows.length} receipts</h2>`),
+  "the published receipt count must match the ledger",
+);
+// The rooms tile is derived from the same ledger and drifted the same way: it read 6 while
+// the ledger already covered 7 distinct rooms.
+{
+  const proofPage = await readFile(join(root, "proof", "index.html"), "utf8");
+  const rooms = new Set(receiptRows.map((row) => row.room)).size;
+  assert(
+    proofPage.includes(`<div class="stat-value">${rooms}</div><div class="stat-label">Rooms`),
+    `the proof page must show ${rooms} distinct rooms to match the ledger`,
+  );
+}
 assert(receiptRows.length > 0, "the public receipt ledger must contain at least one seeded row");
 for (const row of receiptRows) {
   assert.deepEqual(Object.keys(row).sort(), ["did", "fingerprint", "nonce", "room", "sequence", "signature", "text", "timestamp"].sort(), "receipt rows must contain only the eight public fields");
