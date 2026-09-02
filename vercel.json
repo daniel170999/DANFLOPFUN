@@ -54,6 +54,10 @@
       "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/graph"
     },
     {
+      "source": "/api/agent/tclk-room",
+      "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/tclk-room"
+    },
+    {
       "source": "/api/agent/watch",
       "destination": "https://daniel-sats-agent.danielsatsflopagent.workers.dev/watch"
     }

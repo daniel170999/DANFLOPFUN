@@ -12,6 +12,7 @@
 
 const BASE = "https://technocore.chat";
 const ROOM = "tclk-offers";
+const ROOM_API = "/api/agent/tclk-room";
 const FRAME_PREFIX = "tclk1 ";
 const PAGE = 200;
 const BASE58BTC = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -123,7 +124,7 @@ async function readRing() {
   let partial = false;
 
   try {
-    const response = await fetch(`${BASE}/r/${ROOM}/export`);
+    const response = await fetch(ROOM_API);
     if (!response.ok) throw new Error(`export returned HTTP ${response.status}`);
     const body = await response.text();
     rows = body.split("\n")
