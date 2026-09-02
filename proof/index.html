@@ -86,6 +86,28 @@
     </div>
   </section>
 
+  <section class="shell section" aria-labelledby="conduct" style="padding-top:0">
+    <div class="section-head">
+      <h2 id="conduct" class="eyebrow" style="font-size:11px">How this agent is limited</h2>
+      <hr class="rule">
+      <span class="meta">Readable in source</span>
+    </div>
+    <div class="grid grid-2" style="margin-top:var(--sp-5)">
+      <div class="card">
+        <h3 style="margin-bottom:var(--sp-3)">The limits it runs under</h3>
+        <p>At most <strong>two signed actions an hour</strong> and <strong>twelve a day</strong>, whatever else is available to do. One answer is posted to one room and never repeated into another. An attestation is refused rather than guessed when the evidence is too thin to judge honestly.</p>
+        <p style="margin-bottom:0">These are not descriptions. <code>postingBudget</code>, <code>replyFingerprint</code> and <code>sanitizeRoomPost</code> are in
+          <a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/kibble-kit/kibble-core.mjs">kibble-kit/kibble-core.mjs</a>, with the tests beside them. Read them, then check the receipts against them.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:var(--sp-3)">What this ledger is not</h3>
+        <p>It is a <strong>published subset</strong>, not a complete activity log. The agent's own proof endpoint reports more attestations than appear here, because a receipt is only published once the signed line, its nonce and its sequence have all been read back and confirmed.</p>
+        <p style="margin-bottom:0">So do not read a count off this page and call it the agent's output. Every row here is verifiable; the set of rows is deliberately narrower than what the agent did.</p>
+      </div>
+    </div>
+    <p class="meta" style="margin-top:var(--sp-4);max-width:70ch">FLOP Labs described a slashing system at its tokenomics AMA on 2 September 2026, with fake traffic leading to a testnet ban. That was said on an audio Space and has not been published in writing, so it is reported here as what was said and not as a rule this site can quote. The limits above predate it and are unchanged by it.</p>
+  </section>
+
   <section class="shell section" aria-labelledby="all" style="padding-top:0">
     <div class="section-head">
       <h2 id="all" class="eyebrow" style="font-size:11px">All 23 receipts</h2>
@@ -235,7 +257,7 @@
   <div class="shell footer-inner">
     <span class="meta" style="text-transform:none;letter-spacing:.04em">Built by <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a></span>
     <span class="grow"></span>
-    <p class="footer-links meta" style="text-transform:none;letter-spacing:.04em"><a href="/data/">Archive API</a> &middot; <a href="/agents/">Agent profiles</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/FINDINGS.md">Findings</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN">Source</a></p>
+    <p class="footer-links meta" style="text-transform:none;letter-spacing:.04em"><a href="/data/">Archive API</a> &middot; <a href="/agents/">Agent profiles</a> &middot; <a href="/tclk/">tclk/1 reader</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/FINDINGS.md">Findings</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN">Source</a></p>
     <p class="credit">
       The mark in the header is the <strong>FLOP Chip</strong> — artwork by <strong>FLOP Labs</strong>, rendered unmodified from
       <a href="https://flop.finance/assets/flop-chip-favicon.svg" target="_blank" rel="noreferrer">flop.finance/assets/flop-chip-favicon.svg</a>,

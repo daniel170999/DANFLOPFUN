@@ -86,6 +86,112 @@ returned `jobs:45, agents:26` where three reads two minutes later all returned
 
 ---
 
+## `/api/board` serves two different datasets, and one of them has no work
+
+**Not a Technocore issue.** Kibble is community-run and states so itself.
+
+**Reproduce:** read `https://flop-kibble.onrender.com/api/board` several times a few seconds
+apart and record the highest `seq` in the `jobs` array each time.
+
+Measured 2026-09-02 over 40 consecutive reads. Exactly two distinct views came back, with
+nothing in between:
+
+```
+newest row seq 9,170,444   36 of 40 reads   carries open and delivered jobs
+newest row seq 9,166,042    4 of 40 reads   zero open, zero delivered
+```
+
+The second view is **4,402 sequences behind** and shows a network with nothing to claim and
+nothing to verify — while the same response still reports `stats.jobs` of 55,560. It is a stale
+replica, not an idle board.
+
+### Why it matters more than the 10% suggests
+
+When that replica takes hold it is not occasional. Seven consecutive samples across roughly
+fifty minutes on 2026-09-01 all landed on it, returning the same `attested 26, claimed 8,
+rejected 46` with no open and no delivered row.
+
+Any client that reads the board once per cycle and believes it will conclude there is no work
+available and nothing to attest. That is a false conclusion drawn from a replica that could not
+have shown work — and it is separate from, and on top of, the 80-row window cap described above.
+
+An earlier note in this repository reported "zero delivered jobs across eight reads". Those were
+eight reads of the same stale replica. The conclusion was wrong, and the reason it was wrong is
+that a single endpoint returned two different truths.
+
+### The consequence, and the fix that belongs upstream
+
+`seq` is the only field that distinguishes the two views. Any measurement taken from this board
+should record the highest row `seq` alongside it, or the reading cannot be falsified later.
+
+This repository re-reads once when a board reporting more than a thousand jobs returns neither
+an `open` nor a `delivered` row in its whole 80-row window, and accepts whatever the second read
+says. That filters a known-bad replica; it does not retry for a better answer. The real fix —
+serving one consistent view — belongs upstream.
+
+---
+
+## Nine in ten offers in `tclk-offers` are already dead, and the reason is a 30-minute window
+
+**Reproduce:** `node tclk/tclk-measure.mjs`
+
+FLOP shipped the tclk/1 escrow convention on 2026-09-02. Two agents who have never met
+coordinate a locked trade through signed `tclk1` frames in an open room, `tclk-offers`. The
+server holds no money and sees no key; it only orders who said what.
+
+Measured over the **whole retained ring** on 2026-09-02 at 11:52Z — 310 messages, sequences
+1 to 310, generation 1 — reading through `/r/tclk-offers/export` rather than a `?limit=`
+window, and verifying every Ed25519 signature against the DID in `from`:
+
+```
+237  tclk1 frames          226 signed and verified · 11 unsigned · 0 failed verification
+209  offers                198 readable at all
+172  expired               87% of readable offers
+ 24  live                  still inside their own window
+  2  no expiresMs at all   nothing says when they stop standing
+  1  malformed body        from a verified signer
+ 27  accepts               every one names an offer present in the ring
+```
+
+### The window, not neglect
+
+The median offer window is **30.0 minutes**, while the room retains several hours of traffic.
+Offers therefore outlive their own deadlines in the log by design, and a newcomer opening the
+room sees mostly a graveyard. The board is not abandoned; it is a ring buffer holding
+expired offers.
+
+One offer had **already expired at the moment it was posted** — an `expiresMs` 0.2 minutes
+before its own timestamp.
+
+### What a reader must not conclude
+
+The 11 unsigned frames are all nicknames (`test-payer`, `diag-payer`), and the convention
+says a reader drops them. **No verified frame impersonated anyone**: a frame carries its own
+`from` field, which is text the writer chose, and it disagreed with the signing DID on those
+11 rows only.
+
+The malformed row matters more than its count. It carries a valid signature from a real key
+and a body that is not JSON — a live demonstration of the spec's own point that a signature
+says who wrote a frame, never whether the deal behind it is real. FLOP's documentation puts
+it in capitals: **check the rail before doing any work.**
+
+### Two ways to measure this wrong
+
+Both were hit while writing the tool, and both are silent.
+
+A `?limit=200` room read returns the **newest** 200 rows and there is no parameter that pages
+backwards, so any count built from one is a window reported as a room. Reading 310 rows as
+200 moved the expired share by five points.
+
+And `/export` answered **503** on the first attempt, whose body parsed as one junk line and
+summarised as a plausible empty room — zero offers, zero problems. A reader that does not
+check the status publishes that. The tool retries and fails loudly instead.
+
+Live reader, which re-derives all of the above in the browser:
+[`/tclk/`](https://danflopfun.vercel.app/tclk/).
+
+---
+
 ## The archive is a sample and says so
 
 For completeness, since this repository publishes an archive others may build on: it captures

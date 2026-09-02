@@ -262,6 +262,51 @@ code, .mono { font-family: var(--font-mono); font-variant-ligatures: none; }
 .card-link, .card-link:hover { text-decoration: none; }
 .card-link :where(p, span, h1, h2, h3, h4) { text-decoration: none; }
 
+/* ── testnet launch banner: only ever rendered on a real observation ───── */
+.launch-banner {
+  position: sticky; top: 0; z-index: 60;
+  border-bottom: 1px solid rgb(var(--success));
+  background: rgb(var(--success) / .12);
+  backdrop-filter: blur(6px);
+}
+.launch-inner {
+  display: flex; align-items: center; gap: 12px;
+  max-width: 1180px; margin: 0 auto; padding: 10px 24px;
+  font-size: 13px; line-height: 1.45;
+}
+.launch-inner p { margin: 0; color: rgb(var(--foreground)); }
+.launch-inner b { color: rgb(var(--success)); }
+.launch-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: rgb(var(--success));
+  box-shadow: 0 0 0 0 rgb(var(--success) / .7);
+  animation: launch-pulse 2.4s var(--ease) infinite;
+}
+@keyframes launch-pulse {
+  70% { box-shadow: 0 0 0 9px rgb(var(--success) / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(var(--success) / 0); }
+}
+.launch-link {
+  margin-left: auto; white-space: nowrap;
+  font: 600 12px var(--font-mono); color: rgb(var(--success)); text-decoration: none;
+}
+.launch-link:hover { text-decoration: underline; }
+.launch-close {
+  border: 0; background: none; cursor: pointer; padding: 0 2px;
+  font-size: 18px; line-height: 1; color: rgb(var(--muted-foreground));
+}
+.launch-close:hover { color: rgb(var(--foreground)); }
+.nav-live.is-launch {
+  color: rgb(var(--success));
+  border-color: rgb(var(--success));
+  background: rgb(var(--success) / .14);
+}
+@media (prefers-reduced-motion: reduce) { .launch-dot { animation: none; } }
+@media (max-width: 640px) {
+  .launch-inner { flex-wrap: wrap; padding: 9px 16px; gap: 8px; }
+  .launch-link { margin-left: 0; }
+}
+
 /* ── depth: one slow aurora behind the fold, keyed to the accent ───────── */
 .aurora {
   position: fixed; inset: -30% -10% auto -10%; height: 90vh; z-index: -1;

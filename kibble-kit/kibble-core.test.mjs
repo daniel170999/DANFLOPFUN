@@ -5,6 +5,9 @@ import {
   buildLine, evaluateAttestation, isJobId, nextNonce, parseLine,
   boardWorkStatus, postingBudget, quotesSuccessCondition, selectAttestTargets,
   spendPacing, sweep,
+  isRepeatReply,
+  replyFingerprint,
+  sanitizeRoomPost,
 } from "./kibble-core.mjs";
 
 const JOB = "k377f334071";
@@ -112,4 +115,33 @@ test("board work is settled only after the board binds it to this DID", () => {
   assert.equal(boardWorkStatus({ jobs: [job({ status: "open", worker_did: "" })] }, JOB, ME, "claim").settled, false);
   assert.equal(boardWorkStatus({ jobs: [job({ status: "claimed", worker_did: ME, result: "", result_hash: "" })] }, JOB, ME, "claim").settled, true);
   assert.equal(boardWorkStatus({ jobs: [job({ worker_did: ME, result: expected, result_hash: "0123456789abcdef" })] }, JOB, ME, "result", expected).settled, true);
+});
+
+test("one answer goes to one room, and the guard is published so it can be checked", () => {
+  // This agent runs under a slashing regime where manufactured activity is a
+  // banning offence, so the restraint has to be verifiable by someone who does
+  // not trust us. That is why this guard lives in the public kit and not only
+  // in the private worker: read it here, then check the receipts against it.
+  const answer = "the nonce must increase for the same DID in the same room; captured-write single-use protection lasts only while that key's last nonce remains in the newest 1 MiB scan tail.";
+  const sent = [replyFingerprint(answer)];
+
+  assert.equal(sanitizeRoomPost(answer, { recentReplies: sent }).ok, false, "a repeat is refused");
+  assert.equal(sanitizeRoomPost(answer, { recentReplies: sent }).reason, "duplicate_reply");
+  assert.equal(sanitizeRoomPost(answer.toUpperCase(), { recentReplies: sent }).ok, false, "case is not a real difference");
+  assert.equal(sanitizeRoomPost(`  ${answer}  `, { recentReplies: sent }).ok, false, "whitespace is not a real difference");
+  assert.equal(sanitizeRoomPost(answer.replace(/[;.,]/gu, ""), { recentReplies: sent }).ok, false, "punctuation is not a real difference");
+
+  const different = "ordinary notes are world-writable, last-write-wins, and limited to 8192 characters.";
+  assert.equal(sanitizeRoomPost(different, { recentReplies: sent }).ok, true, "a genuinely different answer still goes out");
+
+  // With no history supplied the gate is inert, so existing callers are unaffected.
+  assert.equal(sanitizeRoomPost(answer).ok, true);
+
+  // Too short to fingerprint safely is never treated as a repeat.
+  assert.equal(replyFingerprint("yes"), null);
+  assert.equal(isRepeatReply("yes", sent), false);
+
+  // The window is bounded: an answer becomes sayable again once it ages out.
+  const aged = [replyFingerprint(answer), ...Array.from({ length: 40 }, (_, i) => `pad.${i}`)];
+  assert.equal(isRepeatReply(answer, aged, 40), false);
 });

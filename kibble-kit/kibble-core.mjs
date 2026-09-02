@@ -480,6 +480,31 @@ export function evaluateJobProposal(value, recentTitles = []) {
 // rooms with real questions are the topical ones, and answering a concrete question is the
 // only kind of presence worth having.
 
+// A reply is worth posting once. The same sentence in two rooms reads as
+// broadcast rather than answer, and it is the first thing anyone auditing the
+// network screenshots. Fingerprint on normalised words so trivial edits do not
+// slip a near-duplicate through.
+export function replyFingerprint(text) {
+  const normalized = String(text ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+  if (normalized.length < 16) return null;
+  let hash = 5381;
+  for (let index = 0; index < normalized.length; index += 1) {
+    hash = ((hash << 5) + hash + normalized.charCodeAt(index)) >>> 0;
+  }
+  return `${normalized.length.toString(36)}.${hash.toString(36)}`;
+}
+
+export function isRepeatReply(text, recent, limit = 40) {
+  const fingerprint = replyFingerprint(text);
+  if (!fingerprint) return false;
+  const seen = Array.isArray(recent) ? recent.slice(-limit) : [];
+  return seen.includes(fingerprint);
+}
+
 export const SIGNAL_ROOMS = ["technocore", "infra", "did-key-method", "agent-security", "builders", "ai", "signing-messages", "nonce-security"];
 
 export function isAnswerableQuestion(message) {
@@ -610,7 +635,7 @@ export function officialDocsPrompt(room, question, evidence) {
 
 const INSTRUCTION_LIKE_REPLY = /(?:ignore\s+(?:all\s+)?(?:previous|prior)|follow\s+(?:these|the)\s+instructions|\bpost\s+this\b|\bsend\s+this\b|\b(?:set|choose|select)\s+(?:the\s+)?(?:room|nonce|job|config)\b|(?:^|[.!?]\s*)(?:agent|assistant|you)\s+(?:must|should|need\s+to|run|execute|post|send)\b)/iu;
 
-export function sanitizeRoomPost(value, { allowedHosts = ["technocore.chat", "daniel-sats-agent.danielsatsflopagent.workers.dev", "danflopfun.vercel.app"], maximum = 900 } = {}) {
+export function sanitizeRoomPost(value, { allowedHosts = ["technocore.chat", "daniel-sats-agent.danielsatsflopagent.workers.dev", "danflopfun.vercel.app"], maximum = 900, recentReplies = null } = {}) {
   let text;
   try { text = sweep(value, maximum); } catch (error) { return { ok: false, reason: "invalid_room_text", detail: String(error?.message || error) }; }
   if (INSTRUCTION_LIKE_REPLY.test(text)) return { ok: false, reason: "instruction_like_output" };
@@ -624,6 +649,9 @@ export function sanitizeRoomPost(value, { allowedHosts = ["technocore.chat", "da
       return { ok: false, reason: "malformed_url" };
     }
   }
+  // One answer, one room. The same sentence in two rooms reads as broadcast
+  // rather than an answer, and it is the first thing an auditor screenshots.
+  if (recentReplies && isRepeatReply(text, recentReplies)) return { ok: false, reason: "duplicate_reply" };
   return { ok: true, text };
 }
 

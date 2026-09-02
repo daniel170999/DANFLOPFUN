@@ -36,6 +36,7 @@ const pages = [
   { file: "relay-field/index.html", route: "/relay-field/" },
   { file: "relay/index.html", route: "/relay/" },
   { file: "technocore/index.html", route: "/technocore/" },
+  { file: "tclk/index.html", route: "/tclk/" },
 ];
 
 const report = [];

@@ -58,6 +58,20 @@
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:var(--sp-5)">
+        <p class="eyebrow" style="margin-bottom:var(--sp-3)">What the AMA said the path is</p>
+        <p>At the tokenomics AMA on 2 September 2026, Arthur Hayes was asked directly whether verifiable Technocore contribution counts toward the agent allocation, or whether it is purely inference spend. The answer, from
+          <a href="https://x.com/i/spaces/1qJDzWVbLovKV" target="_blank" rel="noreferrer">FLOP Labs&rsquo; own replay</a> at <b>30:58</b>, is a loop:</p>
+        <ol class="tn-path">
+          <li>Create a <code>did:key</code>. They are free and uncapped &mdash; &ldquo;you can create as many as you want&rdquo; (20:34).</li>
+          <li>When testnet opens, claim testnet FLOP from a faucet each period.</li>
+          <li><b>Spend it in the network.</b> That spendable balance is what converts into mainnet FLOP. &ldquo;If you don&rsquo;t use it, you lose it.&rdquo;</li>
+          <li>Then spend again on mainnet: testnet allocations &ldquo;have to be unlocked by doing work in main net&rdquo; (18:58).</li>
+        </ol>
+        <p>On building tools rather than spending, he said FLOP wants to reward people who build connectors, but &ldquo;we haven&rsquo;t really decided how exactly we&rsquo;re going to reward that&rdquo; &mdash; there are discretionary buckets, and no stated rule.</p>
+        <p class="meta" style="margin-bottom:0">Transcribed here from the published replay; the timestamps are so you can check any of it yourself. It was said aloud, not written down by FLOP Labs, and this page does not treat it as more settled than that.</p>
+      </div>
+
     <div class="card tn-status" id="tn-status">
       <div class="panel-bar"><span class="live-dot" aria-hidden="true"></span><span class="meta">Polled by the agent, read live</span></div>
       <div class="tn-rows">
@@ -94,7 +108,7 @@
   <div class="shell footer-inner">
     <span class="meta" style="text-transform:none;letter-spacing:.04em">Built by <a href="https://x.com/daniel_sats" target="_blank" rel="noreferrer">@daniel_sats</a></span>
     <span class="grow"></span>
-    <p class="footer-links meta" style="text-transform:none;letter-spacing:.04em"><a href="/data/">Archive API</a> &middot; <a href="/agents/">Agent profiles</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/FINDINGS.md">Findings</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN">Source</a></p>
+    <p class="footer-links meta" style="text-transform:none;letter-spacing:.04em"><a href="/data/">Archive API</a> &middot; <a href="/agents/">Agent profiles</a> &middot; <a href="/tclk/">tclk/1 reader</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN/blob/main/FINDINGS.md">Findings</a> &middot; <a href="https://github.com/daniel170999/DANFLOPFUN">Source</a></p>
     <p class="credit">
       The mark in the header is the <strong>FLOP Chip</strong> — artwork by <strong>FLOP Labs</strong>, rendered unmodified from
       <a href="https://flop.finance/assets/flop-chip-favicon.svg" target="_blank" rel="noreferrer">flop.finance/assets/flop-chip-favicon.svg</a>,
@@ -110,6 +124,8 @@
   .tn-copy { display: flex; flex-direction: column; gap: var(--sp-5); animation: rise .62s var(--ease) both; }
   .tn-copy .accent { color: rgb(var(--primary)); }
   .hero-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .tn-path { margin: 0 0 var(--sp-4); padding-left: 20px; display: grid; gap: 6px; color: rgb(var(--muted-foreground)); font-size: 14px; line-height: 1.55; }
+  .tn-path b { color: rgb(var(--foreground)); }
   .tn-status { padding: 0; gap: 0; animation: rise .62s .12s var(--ease) both; }
   .panel-bar { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid rgb(var(--border)); }
   .tn-rows { display: grid; }

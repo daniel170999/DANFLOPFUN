@@ -26,6 +26,9 @@ const relayFieldHtml = await readFile(join(root, "relay-field", "index.html"), "
 const relayFieldCss = await readFile(join(root, "relay-field", "relay-field.css"), "utf8");
 const relayFieldJs = await readFile(join(root, "relay-field", "relay-field.js"), "utf8");
 const technocoreHtml = await readFile(join(root, "technocore", "index.html"), "utf8");
+const tclkHtml = await readFile(join(root, "tclk", "index.html"), "utf8");
+const tclkJs = await readFile(join(root, "tclk", "tclk.js"), "utf8");
+const tclkTool = await readFile(join(root, "tclk", "tclk-measure.mjs"), "utf8");
 const workflow = await readFile(join(root, ".github", "workflows", "agent-pulse.yml"), "utf8");
 const receiptWorkflow = await readFile(join(root, ".github", "workflows", "proof-receipts.yml"), "utf8");
 const receipts = await readFile(join(root, "proof", "receipts.jsonl"), "utf8");
@@ -277,6 +280,9 @@ const SHELL_PAGES = [
 const SECONDARY_PAGES = [
   ["/data/", apiHtml],
   ["/agents/", agentsHtml],
+  // The tclk/1 reader is a tool rather than a claim about this agent, so it is
+  // reached from the footer like the others and the navigation stays at five.
+  ["/tclk/", tclkHtml],
 ];
 const shellOf = (source) => {
   const match = source.match(/<header class="nav">[\s\S]*?<\/header>/u);
@@ -319,6 +325,7 @@ for (const [route, source] of SECONDARY_PAGES) {
 for (const [, source] of [...SHELL_PAGES, ...SECONDARY_PAGES]) {
   assert(source.includes('href="/data/"'), "every page must link the Archive API");
   assert(source.includes('href="/agents/"'), "every page must link agent profiles");
+  assert(source.includes('href="/tclk/"'), "every page must link the tclk/1 reader");
 }
 // The profile page reads the documented public endpoint, never a private one.
 assert(agentsJs.includes('const API = "/api/agent/graph"'), "agent profiles must read the public graph endpoint");
@@ -343,6 +350,28 @@ for (const path of ["say-signed", "/say/", "/set/"]) {
   assert(!exposureCode.includes(path), `the reproduction must not construct a write path (${path})`);
 }
 assert(exposureCode.includes("format=json"), "the reproduction must read rooms through the public read endpoint");
+const codeOnly = (text) => text
+  .replace(/\/\*[\s\S]*?\*\//gu, "")
+  .split("\n")
+  .filter((line) => !line.trim().startsWith("*") && !line.trim().startsWith("//"))
+  .join("\n");
+for (const [label, text] of [["the tclk reader", tclkJs], ["the tclk measurement tool", tclkTool]]) {
+  const code = codeOnly(text);
+  assert(!code.includes("method:"), `${label} must issue no non-GET request`);
+  for (const writePath of ["say-signed", "/say/", "/set/"]) {
+    assert(!code.includes(writePath), `${label} must not construct a write path (${writePath})`);
+  }
+}
+// The reader must show the spec's own warning, not quietly imply it validated a deal.
+assert(tclkHtml.includes("check the rail before doing any work"), "the tclk reader must carry the spec's rail warning");
+assert(tclkHtml.includes("ring buffer"), "the tclk reader must state that its counts describe only the retained room");
+// Unsigned frames are the ones the convention tells a reader to drop. Naming that
+// is the point of the page, so the filter that surfaces them is part of the contract.
+assert(tclkJs.includes("readers drop this"), "the tclk reader must say why an unsigned frame is unusable");
+assert(tclkJs.includes('`${ROOM}|${row.nonce}|${row.text}`'), "the tclk reader must sign-check the canonical room|nonce|text string");
+assert(tclkJs.includes('"nonce":"$1"'), "the tclk reader must keep long nonces exact, or good signatures fail");
+assert(!/#[0-9a-fA-F]{3,6}/u.test(tclkJs), "tclk reader code must carry no colour literals");
+new Script(tclkJs, { filename: "tclk.js" });
 assert(testnetHtml.includes("/api/agent/watch"), "the testnet page must read the live watcher, not a hardcoded status");
 // The markup must ship no open state; the stylesheet is allowed to describe what one
 // looks like, so the style block comes out before this is checked.

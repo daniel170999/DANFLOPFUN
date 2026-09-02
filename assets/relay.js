@@ -141,6 +141,86 @@
       .catch(function () { /* the static text is already honest */ });
   }
 
+  // Testnet launch signal, on every page.
+  //
+  // Silent until a watched endpoint actually answers: the banner exists to
+  // report a thing that happened, never to anticipate one. There is no way to
+  // trigger it from the URL, because a launch banner anyone could summon is
+  // worth less than no banner at all.
+  function watchedEndpointIsOpen(entry) {
+    var status = Number(entry && entry.status);
+    return Number.isFinite(status) && status >= 200 && status < 400;
+  }
+
+  function showTestnetSignal(open, checkedAt) {
+    if (document.querySelector(".launch-banner")) return;
+    var key = "flop-testnet-open:" + open.join(",");
+    try { if (localStorage.getItem(key) === "dismissed") return; } catch (error) { /* private mode */ }
+
+    var banner = document.createElement("aside");
+    banner.className = "launch-banner";
+    banner.setAttribute("role", "status");
+
+    var wrap = document.createElement("div");
+    wrap.className = "launch-inner";
+
+    var dot = document.createElement("span");
+    dot.className = "launch-dot";
+    dot.setAttribute("aria-hidden", "true");
+
+    var text = document.createElement("p");
+    var label = open.length > 1 ? "The testnet and faucet are answering" : (open[0] === "faucet" ? "The faucet is answering" : "The testnet endpoint is answering");
+    text.innerHTML = "<b>" + label + ".</b> First seen by this agent\u2019s own poller"
+      + (checkedAt ? " at " + checkedAt : "") + ". Verify it yourself before acting on it.";
+
+    var link = document.createElement("a");
+    link.className = "launch-link";
+    link.href = "/testnet/";
+    link.textContent = "What the watcher saw \u2192";
+
+    var close = document.createElement("button");
+    close.className = "launch-close";
+    close.type = "button";
+    close.setAttribute("aria-label", "Dismiss");
+    close.textContent = "\u00d7";
+    close.addEventListener("click", function () {
+      try { localStorage.setItem(key, "dismissed"); } catch (error) { /* private mode */ }
+      banner.remove();
+      document.documentElement.removeAttribute("data-testnet");
+    });
+
+    wrap.append(dot, text, link, close);
+    banner.append(wrap);
+    document.body.insertBefore(banner, document.body.firstChild);
+    document.documentElement.setAttribute("data-testnet", "open");
+
+    var pill = document.querySelector(".nav-live");
+    if (pill) {
+      pill.classList.add("is-launch");
+      pill.setAttribute("href", "/testnet/");
+      pill.textContent = "";
+      var pillLabel = document.createElement("span");
+      pillLabel.textContent = "TESTNET OPEN";
+      pill.append(pillLabel);
+    }
+  }
+
+  fetch("/api/agent/watch", { headers: { Accept: "application/json" } })
+    .then(function (response) { return response.ok ? response.json() : null; })
+    .then(function (watch) {
+      if (!watch) return;
+      var observed = watch.observed || {};
+      var open = [];
+      if (watchedEndpointIsOpen(observed.faucet)) open.push("faucet");
+      if (watchedEndpointIsOpen(observed.testnet)) open.push("testnet");
+      if (open.length) showTestnetSignal(open, watch.checkedAt);
+    })
+    .catch(function (error) {
+      // The site is useful without this, but a silent catch here previously hid a
+      // ReferenceError that stopped the nav pill from ever updating. Say so.
+      if (window.console && console.warn) console.warn("testnet signal failed:", error && error.message);
+    });
+
   // Section rules draw themselves in when their heading arrives.
   const heads = document.querySelectorAll(".section-head");
   if (heads.length && typeof IntersectionObserver === "function") {
