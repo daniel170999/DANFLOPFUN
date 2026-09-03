@@ -297,11 +297,18 @@ function renderBasis() {
   if (!basis) return;
   // Print the basis of every count above. A number whose basis is not stated
   // cannot be checked later by anyone, including whoever published it.
+  // The cached route serves only tclk1 frames — ordinary room chatter is dropped
+  // upstream to keep the download down. So this reads every FRAME in the ring, not
+  // every message in it, and the seq range spans rows that were filtered out. Say
+  // that, rather than reporting a message count the page never actually received.
+  const filtered = !basis.partial && basis.rows.length === frames.length;
   const parts = [
     `read ${basis.readAt.toISOString().replace(/\.\d+Z$/u, "Z")}`,
     basis.firstSeq === null ? "empty room" : `seq ${basis.firstSeq}–${basis.lastSeq}`,
-    basis.partial ? "newest window only" : "whole retained ring",
-    `${basis.rows.length} messages`,
+    basis.partial ? "newest window only"
+      : filtered ? "every tclk1 frame in the retained ring"
+      : "whole retained ring",
+    filtered ? null : `${basis.rows.length} messages`,
     `${frames.length} frames`,
     basis.generation === null || basis.generation === undefined ? null : `generation ${basis.generation}`,
   ].filter(Boolean);
