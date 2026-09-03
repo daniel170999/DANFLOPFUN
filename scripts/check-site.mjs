@@ -371,6 +371,24 @@ assert(tclkJs.includes("readers drop this"), "the tclk reader must say why an un
 assert(tclkJs.includes('`${ROOM}|${row.nonce}|${row.text}`'), "the tclk reader must sign-check the canonical room|nonce|text string");
 assert(tclkJs.includes('"nonce":"$1"'), "the tclk reader must keep long nonces exact, or good signatures fail");
 assert(!/#[0-9a-fA-F]{3,6}/u.test(tclkJs), "tclk reader code must carry no colour literals");
+// Prose and behaviour came apart once already. The page kept describing a direct
+// read from technocore — and kept the privacy line that went with it — after the
+// fetch moved behind this project's own Worker route. Tie the two together so the
+// page cannot describe a read path it no longer has.
+if (tclkJs.includes("/api/agent/tclk-room")) {
+  assert(
+    tclkHtml.includes("/api/agent/tclk-room"),
+    "the tclk reader fetches through the Worker route, so the page must name that route",
+  );
+  assert(
+    !tclkHtml.includes("never sees what you read"),
+    "the room feed passes through this project's Worker, so the page must not claim it never sees what you read",
+  );
+  assert(
+    tclkHtml.includes("passes through a server this project runs"),
+    "the tclk page must say plainly that the room feed passes through infrastructure this project runs",
+  );
+}
 new Script(tclkJs, { filename: "tclk.js" });
 assert(testnetHtml.includes("/api/agent/watch"), "the testnet page must read the live watcher, not a hardcoded status");
 // The markup must ship no open state; the stylesheet is allowed to describe what one

@@ -17,6 +17,9 @@ const FRAME_PREFIX = "tclk1 ";
 const PAGE = 200;
 const BASE58BTC = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const KNOWN_TYPES = ["offer", "accept", "lock", "reveal", "refund", "cancel"];
+// How many rows are drawn. Counts are always over the whole ring; this bounds
+// only the DOM, and the board says so on screen whenever it bites.
+const RENDER_CAP = 250;
 
 const els = {};
 let frames = [];
@@ -241,10 +244,17 @@ function verdictOf(entry, now) {
 
 /* ---------- render ---------- */
 
+/* Deliberately no seconds. A per-second countdown changes the rendered string
+ * every tick, and since the whole board is one innerHTML write that meant
+ * rebuilding every row once a second — 39 ms and 1.2 MB of markup at 2,458
+ * frames, and the room grew eightfold in a day. Minute granularity holds the
+ * text still between minute boundaries; the live/expired verdict itself is
+ * still computed against the real clock, so a row still flips the moment it
+ * expires. */
 function relative(ms) {
   const seconds = Math.round(Math.abs(ms) / 1000);
-  const value = seconds < 90 ? `${seconds}s`
-    : seconds < 5400 ? `${Math.round(seconds / 60)}m`
+  if (seconds < 60) return ms >= 0 ? "in under a minute" : "just now";
+  const value = seconds < 5400 ? `${Math.round(seconds / 60)}m`
     : seconds < 172800 ? `${Math.round(seconds / 3600)}h`
     : `${Math.round(seconds / 86400)}d`;
   return ms >= 0 ? `in ${value}` : `${value} ago`;
@@ -311,7 +321,18 @@ function renderRows(now) {
     return;
   }
 
-  write(els.rows, shown.slice().reverse().map((entry) => {
+  // The whole board is one innerHTML write, so every rendered row is rebuilt
+  // whenever any row's text changes. The room went from ~350 frames to ~2,450 in
+  // a day; drawing all of them cost 39 ms and 1.2 MB of markup on a repeating
+  // tick, for rows nobody scrolls to. Cap what is DRAWN — never what is counted,
+  // and never silently: the line below says exactly what was left out.
+  const newestFirst = shown.slice().reverse();
+  const drawn = newestFirst.slice(0, RENDER_CAP);
+  const omitted = newestFirst.length - drawn.length;
+
+  write(els.rows, (omitted > 0
+    ? `<p class="tclk-empty" style="text-align:left;padding:var(--sp-3) var(--sp-4)">Showing the newest <b>${drawn.length}</b> of ${newestFirst.length} matching frames. The counts above are measured over every frame in the retained ring, not just these.</p>`
+    : "") + drawn.map((entry) => {
     const verdict = verdictOf(entry, now);
     const deadline = entry.type === "offer" && entry.expiresMs !== null
       ? `<span class="tclk-deadline">expires ${relative(entry.expiresMs - now)}</span>`
